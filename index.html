@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Jauge">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&family=VT323&family=Caveat:wght@600&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#F1EFE8;--card:#F8F6F0;--soft:#E6E3D8;--track:#D9D6CB;
@@ -44,7 +44,7 @@ header{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;alig
 .mlabel{flex:1;text-align:center;font-family:var(--mono);font-weight:500;letter-spacing:2px;font-size:13px}
 .mlabel small{display:block;font-size:10px;letter-spacing:1.5px;color:var(--ink3);font-weight:400}
 .ibtn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;position:relative}
-.hniv{position:absolute;bottom:1px;right:0;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9.5px;font-weight:700;line-height:16px;text-align:center}.hniv:empty{display:none}
+.hniv{position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--bad);display:none;box-shadow:0 0 0 2px var(--paper)}.hniv.on{display:block;animation:pulse 1.6s infinite}
 .dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:transparent}
 .dot.sync{background:var(--warn)}.dot.off{background:var(--bad)}
 svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -224,6 +224,275 @@ body.discret .pbh b{filter:blur(7px)}
 .sbar .b{flex:1;height:8px;background:var(--track);border-radius:4px;overflow:hidden}
 .sbar .b i{display:block;height:100%;background:var(--ink2)}
 .sbar .v{width:64px;text-align:right}
+
+/* ===== 6.0 : thèmes complets ===== */
+:root[data-cth=kraft]{--paper:#E8DCC4;--card:#F1E7D2;--soft:#DCCDB0;--track:#CDBB98;--ink:#3B2F1E;--ink2:#5E4C33;--ink3:#8A7658;--rule:#B39F7C;--nav:#3B2F1E;--navInk:#BBA785;--navOn:#F1E7D2;--ok:#4E7D3A;--okInk:#3A5E2B;--warn:#B5651D;--warnInk:#7E4612;--bad:#B8432B;--badInk:#8A2F1C;--acc:#B5651D}
+:root[data-cth=poudre]{--paper:#F8E9EC;--card:#FDF3F5;--soft:#F0D8DE;--track:#E6C6CE;--ink:#4A2731;--ink2:#6E4652;--ink3:#9A7480;--rule:#D6AEB9;--nav:#4A2731;--navInk:#D6AEB9;--navOn:#FDF3F5;--ok:#2E9C7A;--okInk:#1D6E55;--warn:#C27A1C;--warnInk:#8A5612;--bad:#D6457E;--badInk:#A3285A;--acc:#D6457E}
+:root[data-cth=nuit]{--paper:#0F1A2B;--card:#16233A;--soft:#1D2D47;--track:#263A59;--ink:#E8EEF8;--ink2:#B8C6DC;--ink3:#7F92B0;--rule:#34496B;--nav:#0A1220;--navInk:#7F92B0;--navOn:#E8EEF8;--ok:#4FD1A5;--okInk:#4FD1A5;--warn:#F2B84B;--warnInk:#F7CF7E;--bad:#FF7A85;--badInk:#FF9AA3;--veil:rgba(0,0,0,.6);--acc:#4FA3FF}
+:root[data-cth=terminal]{--paper:#0A0F0A;--card:#0F170F;--soft:#152015;--track:#1D2B1D;--ink:#9BE564;--ink2:#7FC24F;--ink3:#58873A;--rule:#2C4422;--nav:#050805;--navInk:#58873A;--navOn:#9BE564;--ok:#9BE564;--okInk:#9BE564;--warn:#E5D564;--warnInk:#E5D564;--bad:#FF6B5B;--badInk:#FF6B5B;--veil:rgba(0,0,0,.7);--sans:'IBM Plex Mono',monospace;--acc:#9BE564}
+:root[data-cth=noiror]{--paper:#0E0D0B;--card:#191714;--soft:#221F1A;--track:#2E2A22;--ink:#F3E6C4;--ink2:#D3C29A;--ink3:#9C8C66;--rule:#4A4130;--nav:#000;--navInk:#9C8C66;--navOn:#E2B84F;--ok:#E2B84F;--okInk:#E2B84F;--warn:#E8A33A;--warnInk:#F0C070;--bad:#E0664A;--badInk:#F08A70;--veil:rgba(0,0,0,.7);--acc:#E2B84F}
+:root[data-cth=noiror] .niv,:root[data-cth=noiror] .ticket{box-shadow:0 0 0 1px #6B5A2E inset}
+/* tampons */
+[data-tampon=neon] .stamp{border-radius:5px;transform:rotate(-2deg);text-shadow:0 0 6px currentColor;box-shadow:0 0 8px currentColor,inset 0 0 6px currentColor}
+[data-tampon=pixel] .stamp{border-radius:0;transform:none;border-width:2px;border-style:solid;font-family:'VT323',var(--mono);font-size:14px;letter-spacing:1px;padding:0 6px;box-shadow:2px 2px 0 currentColor}
+[data-tampon=cire] .stamp{border:0;border-radius:50% 46% 52% 44%;padding:3px 8px;color:#FFF3E8!important;background:radial-gradient(circle at 35% 30%,#D2513F,#8E1F17);box-shadow:0 1px 0 #5E120C,inset 0 0 0 2px rgba(255,255,255,.15);transform:rotate(-6deg)}
+/* chiffres */
+[data-police=ticket] .big,[data-police=ticket] .ticket{font-family:'Courier Prime',var(--mono)}
+[data-police=lcd] .big{font-family:'VT323',var(--mono);font-size:54px;letter-spacing:1px;text-shadow:0 0 10px color-mix(in srgb,currentColor 40%,transparent)}
+[data-police=manu] .big{font-family:'Caveat',cursive;font-size:50px;letter-spacing:0}
+/* tickets */
+[data-ticket=carnet] .ticket{background:repeating-linear-gradient(var(--card) 0 21px,color-mix(in srgb,#4FA3FF 22%,transparent) 21px 22px);border-left:3px double var(--bad);border-radius:2px}
+[data-ticket=carnet] .ticket:after{display:none}
+[data-ticket=dore] .ticket{background:linear-gradient(135deg,#F7E7B4,#E2C26A 45%,#F5DFA0 70%,#C9A443);color:#3A2C08}
+[data-ticket=dore] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#D8B95E 5.5px) 0 0/12px 6px repeat-x}
+.tprev,.pprev,.kprev,.fprev{height:56px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pprev .big{font-size:24px;margin:0}[data-police] .pprev[data-police=mono] .big{font-family:var(--mono);font-size:24px;text-shadow:none}
+.pprev[data-police=ticket] .big{font-family:'Courier Prime',monospace}.pprev[data-police=lcd] .big{font-family:'VT323',monospace;font-size:32px}.pprev[data-police=manu] .big{font-family:'Caveat',cursive;font-size:30px}
+.kprev .ticket{font-size:10px;padding:6px 8px;width:86%}.kprev[data-ticket=carnet] .ticket{background:repeating-linear-gradient(var(--card) 0 11px,rgba(79,163,255,.25) 11px 12px);border-left:3px double var(--bad)}.kprev[data-ticket=carnet] .ticket:after{display:none}.kprev[data-ticket=dore] .ticket{background:linear-gradient(135deg,#F7E7B4,#E2C26A 45%,#C9A443);color:#3A2C08}
+.tprev[data-tampon=neon] .stamp{border-radius:5px;text-shadow:0 0 6px currentColor;box-shadow:0 0 8px currentColor}.tprev[data-tampon=pixel] .stamp{border-radius:0;transform:none;font-family:'VT323',monospace;font-size:14px;box-shadow:2px 2px 0 currentColor}.tprev[data-tampon=cire] .stamp{border:0;border-radius:50%;padding:3px 8px;color:#FFF3E8;background:radial-gradient(circle at 35% 30%,#D2513F,#8E1F17)}
+.tprev[data-tampon=encre] .stamp{border:1.5px solid;border-radius:2px;background:none;box-shadow:none;text-shadow:none;font-family:var(--mono);font-size:10px;color:var(--okInk)}
+.fprev{font-size:30px}
+/* collection : onglets, badges */
+.ctabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px 4px;scrollbar-width:none}.ctabs::-webkit-scrollbar{display:none}
+.ctabs button{flex:none;font-family:var(--mono);font-size:11px;letter-spacing:1px;border:1.5px solid var(--rule);border-radius:14px;padding:5px 10px;position:relative}
+.ctabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ctabs button i{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--paper)}
+.cit{position:relative}.nbadge{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-style:normal;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:1px;background:var(--bad);color:#fff;border-radius:6px;padding:1px 5px;animation:nb 1.8s ease-in-out infinite;z-index:1}
+@keyframes nb{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.1)}}
+.nouv{color:var(--badInk);font-weight:700}
+.cit.proche{border-style:dashed;border-color:var(--ink2);opacity:.75;animation:glow 2.4s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 35%,transparent)}}
+.cit:active{transform:scale(.96)}.cit.on .cprev{animation:pop2 .35s ease-out}@keyframes pop2{from{transform:scale(.85)}to{transform:none}}
+/* escalier */
+.lnk{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--ink2);text-decoration:underline;text-underline-offset:3px}
+.esc{border:1.5px solid var(--rule);border-radius:12px;padding:12px;background:var(--card)}
+.eschd{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}.eschd>b{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:.5px}.eschd span{font-size:13px;color:var(--ink2)}
+.stairs{display:flex;align-items:flex-end;gap:6px;height:100px;margin:12px 0 4px}
+.stairs>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.stairs i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--track);transform-origin:bottom;animation:rise .7s cubic-bezier(.3,1.3,.5,1) both}
+.stairs>div:nth-child(2) i{animation-delay:.06s}.stairs>div:nth-child(3) i{animation-delay:.12s}.stairs>div:nth-child(4) i{animation-delay:.18s}.stairs>div:nth-child(5) i{animation-delay:.24s}.stairs>div:nth-child(6) i{animation-delay:.3s}
+.stairs i.ok{background:var(--ok)}.stairs i.ko{background:var(--bad);opacity:.55}.stairs i.cur{background:repeating-linear-gradient(-45deg,var(--ink) 0 4px,transparent 4px 8px);border:1.5px solid var(--ink)}
+.stairs small{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-top:3px;text-transform:uppercase}
+@keyframes rise{from{transform:scaleY(0)}}
+/* tirelires */
+.tir{border:1.5px solid var(--rule);border-radius:12px;padding:12px;background:var(--card);margin-bottom:10px}
+.tir.win{border-color:var(--ok);box-shadow:0 0 0 1.5px var(--ok) inset}
+.tirh{display:flex;align-items:center;gap:10px}.tirh>div{flex:1;min-width:0}.tirh b{display:block;font-size:15px}.tirh small{display:block;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.tem{width:40px;height:40px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.tir.win .tem{animation:wob 1.6s ease-in-out infinite}@keyframes wob{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.tirh button{width:34px;height:34px;border-radius:50%;flex:none;color:var(--ink2)}
+/* saison, avent */
+.saison{border:1.5px solid var(--rule);border-radius:12px;padding:12px;background:var(--card)}
+.avent{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.avent div{aspect-ratio:1;border-radius:7px;border:1.5px dashed var(--rule);display:flex;align-items:center;justify-content:center;font-size:18px}
+.avent div small{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.avent div.ouv{border:1.5px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent);animation:pop2 .4s ease-out}
+.avent div.rat{opacity:.35}
+/* alertes */
+.alerts{border:1.5px solid var(--warn);border-radius:12px;padding:10px 12px;margin-top:12px;background:color-mix(in srgb,var(--warn) 8%,var(--card))}
+.ah{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--warnInk);margin-bottom:4px}
+.al{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--rule)}.al:first-of-type{border-top:0}
+.al>span{font-size:17px;line-height:1.3}.al p{flex:1;margin:0;font-size:13px}.al button{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--ink3);border:1px solid var(--rule);border-radius:10px;padding:3px 8px;flex:none}
+/* voyage */
+.voy{border:1.5px solid var(--ink);border-radius:12px;padding:10px 12px;margin-top:12px;background:var(--card);position:relative;overflow:hidden}
+.voy:before{content:"✈";position:absolute;right:-6px;top:-10px;font-size:60px;opacity:.06;transform:rotate(-15deg)}
+/* prochainement */
+.soon{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--rule)}
+.soon>span{font-size:16px;opacity:.6}.soon>div{flex:1}.soon b{display:block;font-size:14px}.soon small{display:block;font-size:12px;color:var(--ink2)}
+.soon em{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--ink3);text-transform:uppercase;border:1px dashed var(--rule);border-radius:10px;padding:2px 7px;white-space:nowrap}
+/* mascotte */
+.masc{position:absolute;right:0;top:0;display:flex;flex-direction:column;align-items:center;z-index:2}
+.masc span{font-size:30px;animation:bob 3s ease-in-out infinite;display:block}.masc small{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px) rotate(-4deg)}}
+.gauge{position:relative}
+.niv{position:relative}.mascn{position:absolute;right:10px;top:-16px;font-size:26px;animation:bob 3s ease-in-out infinite}
+/* montée de niveau */
+.lvlup{position:fixed;inset:0;z-index:95;background:radial-gradient(circle at 50% 35%,#2B2A27,#0D0D0C);color:#F1EFE8;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadein .3s ease-out}
+@keyframes fadein{from{opacity:0}}
+.lvin{text-align:center;max-width:360px;width:100%}.lvin>small{font-family:var(--mono);letter-spacing:4px;font-size:12px;opacity:.7}
+.lvn{font-family:var(--mono);font-weight:700;font-size:120px;line-height:1;margin:8px 0;background:linear-gradient(180deg,#FFE29A,#E2A93A);-webkit-background-clip:text;background-clip:text;color:transparent;animation:zoom .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes zoom{from{transform:scale(.2) rotate(-12deg);opacity:0}}
+.lvt{font-family:var(--mono);letter-spacing:3px;font-size:14px;animation:fadein .6s .3s both}
+.lvc{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px;perspective:600px}
+.flip{width:96px;background:#F1EFE8;color:#2C2C2A;border-radius:10px;padding:6px;animation:flip .6s cubic-bezier(.3,1.3,.5,1) both}
+.flip b{display:block;font-size:11px;margin-top:3px}
+@keyframes flip{from{transform:rotateY(180deg) scale(.6);opacity:0}}
+.lvin p{font-size:13px;opacity:.8;margin:12px 0 0}
+.lvin .go{background:#F1EFE8;color:#2C2C2A}
+.xpf{position:fixed;z-index:96;transform:translateX(-50%);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--okInk);background:var(--card);border:1.5px solid var(--ok);border-radius:10px;padding:2px 8px;pointer-events:none;animation:xpup 1.7s ease-out forwards}
+@keyframes xpup{0%{opacity:0;transform:translate(-50%,6px)}15%{opacity:1;transform:translate(-50%,0)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-26px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+/* animations des jauges et barres existantes */
+.gauge .aig{animation:sweep 1s cubic-bezier(.34,1.45,.55,1)}@keyframes sweep{from{transform:rotate(-70deg)}}
+.gauge .pulse{animation:npulse 2.4s ease-in-out infinite}@keyframes npulse{50%{opacity:.6}}
+.gauge .charge{animation:chg 1.1s ease-out;transform-origin:58px 50%}@keyframes chg{from{transform:scaleX(0)}}
+.gauge .flick{animation:flk 4s steps(1) infinite}@keyframes flk{0%,96%,100%{opacity:1}97%{opacity:.4}98%{opacity:1}99%{opacity:.6}}
+.nivbar i,.bar i{animation:grow .8s cubic-bezier(.3,1,.5,1)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+.bilban{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:8px 0 2px;padding:11px 14px;border-radius:12px;color:#fff;background:linear-gradient(90deg,#1D9E75,#2B7FD8,#7B5BD6,#D85A30);background-size:200% 100%;animation:bshift 6s ease-in-out infinite alternate}
+.bilban>span:nth-child(2){flex:1;min-width:0}.bilban b{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:1.2px}.bilban small{display:block;font-size:12px;opacity:.9}
+.bilban .bbp{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:12px;flex:none}.bilban>span:last-child{font-size:22px;opacity:.85}
+@keyframes bshift{to{background-position:100% 0}}
+.soon{width:100%;text-align:left}.soon:active{background:var(--soft)}
+.soonh{text-align:center;margin:14px 0 6px}.soonh span{font-size:36px;display:block}.soonh b{display:block;font-size:19px;margin-top:4px}.soonh small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--ink3);margin-top:2px;text-transform:uppercase}
+.soonp{font-size:14.5px;line-height:1.5;color:var(--ink2);margin:10px 0 16px}
+.obj{border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px 12px;background:var(--card);text-align:center}.obj.win{border-color:var(--ok);box-shadow:0 0 0 1.5px var(--ok) inset}
+.objg{width:100%;max-width:240px;display:block;margin:0 auto}.objarc{stroke-dasharray:400;animation:objd 1.2s cubic-bezier(.3,1,.5,1)}@keyframes objd{from{stroke-dashoffset:400}}
+.objn{font-family:var(--mono);margin-top:-6px}.objn b{font-size:22px}.objn span{font-size:12px;color:var(--ink3);margin-left:6px}
+.bilban.sem{background:linear-gradient(90deg,#1E2A44,#3A2E5C,#5B3A6E)}
+.tcfile{display:flex;align-items:center;justify-content:center;margin-top:12px;position:relative;overflow:hidden}.tcfile input{position:absolute;inset:0;opacity:0}
+textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12px;resize:vertical}
+.tcc{max-height:96px;overflow-y:auto}
+.tcl{border-top:1px dashed var(--rule)}.tcr{display:flex;width:100%;gap:10px;align-items:center;text-align:left;padding:8px 2px;border-bottom:1px dashed var(--rule);opacity:.45}.tcr.on{opacity:1}
+.tcr i{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--rule);font-style:normal;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}.tcr.on i{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tcr span{flex:1;min-width:0}.tcr b{display:block;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tcr small{font-family:var(--mono);font-size:10.5px;color:var(--ink3)}.tcr em{font-style:normal;font-family:var(--mono);font-size:13px}
+/* ===== 6.1 : sous-onglets Progrès ===== */
+.nivmini{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding:8px 10px;border:1.5px solid var(--rule);border-radius:10px;background:var(--card);font-family:var(--mono);text-align:left}
+.nivmini b{font-size:13px}.nivmini span{font-size:10.5px;letter-spacing:1px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34%}
+.nivmini i{flex:1;height:6px;border-radius:3px;background:var(--track);overflow:hidden}.nivmini u{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#E8A33A);text-decoration:none;animation:grow .8s ease-out}
+.nivmini small{font-size:10.5px;color:var(--ink3)}
+.ptabs{display:flex;gap:4px;margin:10px 0 2px;position:sticky;top:58px;z-index:4;background:var(--paper);padding:4px 0}
+.ptabs button{flex:1;font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;padding:8px 0;border-radius:8px;border:1.5px solid var(--rule);color:var(--ink2)}
+.ptabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pcont{animation:fade .25s ease-out}
+/* collection plus compacte */
+.coll{grid-template-columns:repeat(4,1fr);gap:6px}.coll.c3{grid-template-columns:repeat(4,1fr)}
+.cit{padding:4px 3px 5px;border-radius:8px;min-width:0;overflow:hidden}.uiprev{overflow:hidden}.cit b{font-size:10.5px;line-height:1.2;margin-top:1px}.cit small{font-size:8px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tprev,.pprev,.kprev,.fprev{height:40px}.fprev{font-size:24px}.pprev .big{font-size:18px}
+.cit .nbadge{font-size:7.5px;top:-6px}
+.uiprev{height:40px;display:flex;align-items:center;justify-content:center;gap:5px}
+.uiprev span{display:inline-flex;align-items:center;justify-content:center;width:36px;height:28px;color:var(--ink)}
+.uiprev i{display:block;width:14px;height:28px;background:var(--ink);opacity:.85}
+.uiprev b{color:var(--ink);font-weight:600;line-height:1}.uiprev small{display:block;font-size:10px;color:var(--ink2);margin-left:4px}
+
+/* ================= STYLES D'INTERFACE ================= */
+/* sélecteurs communs */
+/* — Bulle — */
+[data-ui=bulle]{--sans:'Nunito',system-ui,sans-serif}
+[data-ui=bulle] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.brow[style]){border:0!important;border-radius:20px!important;box-shadow:0 6px 18px rgba(0,0,0,.08);background:var(--card)}
+[data-ui=bulle] .ticket:after{display:none}
+[data-ui=bulle] .go{border-radius:26px}[data-ui=bulle] .chip,[data-ui=bulle] .ptabs button,[data-ui=bulle] .ctabs button{border:0;background:var(--soft);border-radius:20px}
+[data-ui=bulle] .chip.on,[data-ui=bulle] .ptabs button.on,[data-ui=bulle] .ctabs button.on{background:var(--ink)}
+[data-ui=bulle] .seg{border-radius:22px}[data-ui=bulle] .seg button{border-radius:18px}[data-ui=bulle] .libin{border-radius:16px}
+[data-ui=bulle] .sheet{border-radius:30px 30px 0 0}[data-ui=bulle] nav{border-radius:26px 26px 0 0}
+[data-ui=bulle] :is(.jl,.brow,.bil,.suc,.soon,.tl){border-bottom-style:solid;border-bottom-color:var(--soft)}
+[data-ui=bulle] .sec{font-family:var(--sans);font-weight:800;font-size:13px;letter-spacing:.3px}
+/* — Brutal — */
+[data-ui=brutal]{--sans:'Space Grotesk',system-ui,sans-serif}
+[data-ui=brutal] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:2.5px solid var(--ink)!important;border-radius:4px!important;box-shadow:4px 4px 0 var(--ink)}
+[data-ui=brutal] .ticket:after{display:none}
+[data-ui=brutal] .go{border-radius:4px;box-shadow:4px 4px 0 var(--bad);font-family:'Space Grotesk';font-weight:700}[data-ui=brutal] .go:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--bad)}
+[data-ui=brutal] :is(.chip,.ptabs button,.ctabs button){border:2px solid var(--ink);border-radius:4px;font-family:'Space Grotesk';font-weight:600}
+[data-ui=brutal] :is(.chip.on,.ptabs button.on,.ctabs button.on){box-shadow:3px 3px 0 var(--bad)}
+[data-ui=brutal] .seg{border:2.5px solid var(--ink);border-radius:4px;background:var(--card)}[data-ui=brutal] .seg button{border-radius:2px;font-family:'Space Grotesk';font-weight:700}[data-ui=brutal] .seg button.on{background:var(--ink);color:var(--paper)}
+[data-ui=brutal] .sec{color:var(--ink);font-family:'Space Grotesk';font-weight:700;letter-spacing:1px}[data-ui=brutal] .sec>span:first-child{background:#FFD84D;color:#111;padding:1px 6px;border:2px solid var(--ink)}
+[data-ui=brutal] :is(.jl,.brow,.bil,.suc,.soon){border-bottom:2px solid var(--ink)}
+[data-ui=brutal] .sheet{border-top:3px solid var(--ink);border-radius:6px 6px 0 0}[data-ui=brutal] .fab{border-radius:12px}[data-ui=brutal] .libin{border:2.5px solid var(--ink);border-radius:4px}
+[data-ui=brutal] .big{font-family:'Space Grotesk';font-weight:700;letter-spacing:-2px}
+/* — Carnet — */
+[data-ui=carnet]{--sans:'Patrick Hand',cursive}
+[data-ui=carnet] body{background-image:radial-gradient(var(--rule) 1px,transparent 1.3px);background-size:18px 18px}
+[data-ui=carnet] header,[data-ui=carnet] .ptabs{background:transparent}
+[data-ui=carnet] body{font-size:16.5px}
+[data-ui=carnet] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.pill,.ser,.nivmini){border:1.5px solid var(--ink2)!important;border-radius:3px 14px 5px 12px/12px 4px 14px 3px!important;box-shadow:2px 3px 0 color-mix(in srgb,var(--ink) 15%,transparent)}
+[data-ui=carnet] .ticket{transform:rotate(-.5deg)}[data-ui=carnet] .niv,[data-ui=carnet] .obj{transform:rotate(.4deg)}
+[data-ui=carnet] .ticket:after{display:none}
+[data-ui=carnet] .sec{font-family:'Caveat',cursive;font-size:22px;letter-spacing:0;color:var(--ink);text-decoration:underline wavy var(--ok) 1.5px;text-underline-offset:5px}
+[data-ui=carnet] .go{font-family:'Caveat',cursive;font-size:22px;letter-spacing:1px;border-radius:4px 16px 6px 14px/14px 5px 16px 4px}
+[data-ui=carnet] :is(.chip,.ptabs button,.ctabs button){font-family:'Patrick Hand';font-size:14px;border-radius:12px 4px 14px 5px/5px 14px 4px 12px}
+[data-ui=carnet] .big{font-family:'Caveat',cursive;font-size:54px;letter-spacing:0}
+[data-ui=carnet] .nivh b,[data-ui=carnet] .eschd>b{font-family:'Caveat';font-size:26px}
+/* — Console — */
+[data-ui=console]{--sans:'IBM Plex Mono',monospace}
+[data-ui=console] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:1px solid var(--ink3)!important;border-radius:0!important;box-shadow:none;background:transparent}
+[data-ui=console] .ticket:after{display:none}
+[data-ui=console] .sec>span:first-child:before{content:'> ';color:var(--ok)}
+[data-ui=console] .go{border-radius:0;background:transparent;color:var(--ink);border:1.5px solid var(--ink)}[data-ui=console] .go:before{content:'[ '}[data-ui=console] .go:after{content:' ]'}
+[data-ui=console] :is(.chip,.ptabs button,.ctabs button,.seg,.seg button,.libin,.fab,.ibtn,.mbtn){border-radius:0}
+[data-ui=console] .seg{background:none;border:1px solid var(--ink3)}[data-ui=console] .seg button.on{background:var(--ink);color:var(--paper)}
+[data-ui=console] :is(.jl,.brow,.bil,.suc,.soon,.tl){border-bottom:1px dotted var(--ink3)}
+[data-ui=console] .sheet{border-radius:0;border-top:1px solid var(--ink3)}
+[data-ui=console] .big:after{content:'_';animation:blink 1s steps(1) infinite;margin-left:2px}@keyframes blink{50%{opacity:0}}
+/* — Magazine — */
+[data-ui=magazine]{--sans:'Inter',system-ui,sans-serif}
+[data-ui=magazine] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.nivmini,.alerts,.brow[style]){border:0!important;border-top:2px solid var(--ink)!important;border-bottom:1px solid var(--ink)!important;border-radius:0!important;background:transparent;box-shadow:none}
+[data-ui=magazine] :is(.wt,.cit,.pill,.ser){border:1px solid var(--ink)!important;border-radius:0!important}
+[data-ui=magazine] .ticket:after{display:none}
+[data-ui=magazine] .sec{font-family:'Fraunces',serif;font-style:italic;font-size:19px;letter-spacing:0;color:var(--ink);border-top:3px double var(--ink);padding-top:6px}
+[data-ui=magazine] .big,[data-ui=magazine] .nivh b,[data-ui=magazine] .eschd>b,[data-ui=magazine] .whero b,[data-ui=magazine] .wt b{font-family:'Fraunces',serif;font-weight:800;letter-spacing:-1px}
+[data-ui=magazine] .go{border-radius:0;font-family:'Inter';font-weight:800;letter-spacing:4px}
+[data-ui=magazine] :is(.chip,.ptabs button,.ctabs button){border-radius:0;border-width:1px;font-family:'Inter';font-weight:600}
+[data-ui=magazine] .seg{background:none;border-radius:0;border-bottom:1px solid var(--ink)}[data-ui=magazine] .seg button{border-radius:0;font-family:'Inter';font-weight:700}[data-ui=magazine] .seg button.on{background:none;box-shadow:inset 0 -3px 0 var(--ink)}
+[data-ui=magazine] :is(.jl,.brow,.bil,.suc,.soon,.tl){border-bottom:1px solid color-mix(in srgb,var(--ink) 25%,transparent)}
+/* — Verre — */
+[data-ui=verre]{--sans:'Nunito',system-ui,sans-serif}
+[data-ui=verre] body{background:radial-gradient(circle at 8% 2%,color-mix(in srgb,var(--ok) 38%,transparent),transparent 42%),radial-gradient(circle at 100% 35%,color-mix(in srgb,#7B5BD6 34%,transparent),transparent 45%),radial-gradient(circle at 0 92%,color-mix(in srgb,#2B7FD8 32%,transparent),transparent 45%),var(--paper);background-attachment:fixed}
+[data-ui=verre] header,[data-ui=verre] .ptabs{background:color-mix(in srgb,var(--paper) 55%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+[data-ui=verre] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){background:color-mix(in srgb,var(--card) 50%,transparent)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid color-mix(in srgb,#fff 45%,transparent)!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+[data-ui=verre] .ticket:after{display:none}
+[data-ui=verre] nav{left:10px;right:10px;bottom:8px;border-radius:24px;background:color-mix(in srgb,var(--nav) 72%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+[data-ui=verre] .go{border-radius:16px;background:linear-gradient(135deg,var(--ink),color-mix(in srgb,var(--ink) 65%,#7B5BD6))}
+[data-ui=verre] :is(.chip,.ptabs button,.ctabs button){border-radius:16px;background:color-mix(in srgb,var(--card) 45%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+[data-ui=verre] :is(.chip.on,.ptabs button.on,.ctabs button.on){background:var(--ink)}
+[data-ui=verre] .sheet{background:color-mix(in srgb,var(--paper) 78%,transparent);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border-radius:26px 26px 0 0}
+[data-ui=verre] .seg{border-radius:14px;background:color-mix(in srgb,var(--soft) 55%,transparent)}[data-ui=verre] .seg button{border-radius:11px}
+/* — Suisse — */
+[data-ui=suisse]{--sans:'Inter',system-ui,sans-serif}
+[data-ui=suisse] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.nivmini,.alerts,.brow[style]){border:0!important;border-left:6px solid #E2412E!important;border-radius:0!important;box-shadow:none}
+[data-ui=suisse] :is(.wt,.cit,.pill,.ser){border:0!important;border-top:3px solid var(--ink)!important;border-radius:0!important;background:var(--card)}
+[data-ui=suisse] .ticket:after{display:none}
+[data-ui=suisse] .sec{font-family:'Inter';font-weight:800;color:var(--ink);font-size:13px;letter-spacing:0;border-bottom:3px solid var(--ink);padding-bottom:4px}
+[data-ui=suisse] .big{font-family:'Inter';font-weight:800;letter-spacing:-3px;font-size:48px}
+[data-ui=suisse] .go{border-radius:0;background:#E2412E;color:#fff;font-family:'Inter';font-weight:800;letter-spacing:.5px}
+[data-ui=suisse] :is(.chip,.ptabs button,.ctabs button,.seg,.seg button,.libin,.fab){border-radius:0;font-family:'Inter';font-weight:700;letter-spacing:0}
+[data-ui=suisse] :is(.jl,.brow,.bil,.suc,.soon,.tl){border-bottom:1px solid var(--ink)}
+[data-ui=suisse] .tab{font-family:'Inter';font-weight:700;letter-spacing:0}
+/* — Arcade — */
+[data-ui=arcade]{--sans:'VT323',monospace;--mono:'VT323',monospace}
+[data-ui=arcade] body{font-size:19px;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.035) 0 1px,transparent 1px 3px)}
+[data-ui=arcade] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:0!important;border-radius:0!important;box-shadow:0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink)!important;margin-left:3px;margin-right:3px}
+[data-ui=arcade] .ticket:after{display:none}
+[data-ui=arcade] .sec{font-size:18px;letter-spacing:1px;color:var(--ink)}[data-ui=arcade] .sec>span:first-child:before{content:'★ ';color:var(--warn)}
+[data-ui=arcade] .tab{font-size:14px}[data-ui=arcade] :is(.chip,.ptabs button,.ctabs button,.seg button,.bhead,.tl,.note,.bil,.lnk,.stamp,.wt small,.cit small,.cit b){font-size:16px}
+[data-ui=arcade] .go{border-radius:0;font-size:22px;box-shadow:0 -3px 0 var(--bad),0 3px 0 var(--bad),-3px 0 0 var(--bad),3px 0 0 var(--bad)}
+[data-ui=arcade] :is(.chip,.ptabs button,.ctabs button,.seg,.seg button,.libin,.fab,.sheet){border-radius:0}
+[data-ui=arcade] .big{font-size:64px;letter-spacing:2px}
+/* — Zen — */
+[data-ui=zen]{--sans:'Lexend',system-ui,sans-serif}
+[data-ui=zen] body{font-weight:300}
+[data-ui=zen] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:0!important;border-radius:16px!important;background:var(--soft)!important;box-shadow:none}
+[data-ui=zen] .ticket:after{display:none}
+[data-ui=zen] .sec{font-family:'Lexend';font-weight:400;letter-spacing:.5px;font-size:12px;margin-top:30px}
+[data-ui=zen] .go{border-radius:30px;font-family:'Lexend';font-weight:400;letter-spacing:1px;background:var(--ink2)}
+[data-ui=zen] :is(.chip,.ptabs button,.ctabs button){border:0;background:var(--soft);border-radius:20px;font-family:'Lexend'}
+[data-ui=zen] :is(.chip.on,.ptabs button.on,.ctabs button.on){background:var(--ink2);color:var(--paper)}
+[data-ui=zen] :is(.jl,.brow,.bil,.suc,.soon,.tl){border-bottom:0}
+[data-ui=zen] .seg{border-radius:20px}[data-ui=zen] .seg button{border-radius:16px;font-family:'Lexend'}
+[data-ui=zen] .big{font-family:'Lexend';font-weight:300;letter-spacing:-1px}
+/* — Prestige — */
+[data-ui=prestige]{--sans:'EB Garamond',Georgia,serif;--or:#C9A443}
+[data-ui=prestige] body{font-size:16.5px}
+[data-ui=prestige] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.nivmini,.alerts){border:1px solid var(--or)!important;outline:1px solid var(--or);outline-offset:3px;border-radius:1px!important;margin-left:4px;margin-right:4px}
+[data-ui=prestige] :is(.wt,.cit,.pill,.ser){border:1px solid var(--or)!important;border-radius:1px!important}
+[data-ui=prestige] .ticket:after{display:none}
+[data-ui=prestige] .sec{font-family:'Cinzel',serif;letter-spacing:3px;color:var(--or);font-size:12px}[data-ui=prestige] .sec>span:first-child:before{content:'❦ '}
+[data-ui=prestige] .go{background:linear-gradient(135deg,#8E6A0E,#E2C26A 50%,#B8860B);color:#1A1406;border-radius:1px;font-family:'Cinzel',serif;font-weight:700}
+[data-ui=prestige] :is(.chip.on,.ptabs button.on,.ctabs button.on){background:var(--or);border-color:var(--or);color:#1A1406}
+[data-ui=prestige] :is(.chip,.ptabs button,.ctabs button){border-radius:1px;border-color:var(--or)}
+[data-ui=prestige] .big,[data-ui=prestige] .nivh b{font-family:'Cinzel',serif;letter-spacing:0}
+[data-ui=prestige] :is(.jl,.brow,.bil,.suc,.soon){border-bottom:1px solid color-mix(in srgb,var(--or) 45%,transparent)}
+/* ================= POLICE DU TEXTE (prioritaire sur le style) ================= */
+:root[data-texte=plex]{--sans:'IBM Plex Sans',system-ui,sans-serif}
+:root[data-texte=lisible]{--sans:'Atkinson Hyperlegible',system-ui,sans-serif}
+:root[data-texte=inter]{--sans:'Inter',system-ui,sans-serif}
+:root[data-texte=nunito]{--sans:'Nunito',system-ui,sans-serif}
+:root[data-texte=grotesk]{--sans:'Space Grotesk',system-ui,sans-serif}
+:root[data-texte=lexend]{--sans:'Lexend',system-ui,sans-serif}
+:root[data-texte=serif]{--sans:'EB Garamond',Georgia,serif}
+:root[data-texte=mono]{--sans:'IBM Plex Mono',monospace}
+:root[data-texte=manu]{--sans:'Patrick Hand',cursive}
+:root[data-texte=pixel]{--sans:'VT323',monospace}
+:root[data-texte=pixel] body{font-size:19px}
 </style>
 </head>
 <body>
@@ -254,7 +523,7 @@ body.discret .pbh b{filter:blur(7px)}
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '5.2';
+const VERSION = '6.1';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -264,11 +533,19 @@ const FONCS = [
   ['defi', 'Défi du mois', ''],
   ['series', 'Séries', 'jours sans dépense, mois dans le vert, budgets tenus'],
   ['bilan', 'Bilans mensuels', 'récap du 1er au 5 et historique'],
-  ['jeu', 'Niveaux, succès et collection', 'XP, skins de jauge et couleurs à débloquer']];
+  ['jeu', 'Niveaux, succès et collection', 'XP, jauges, thèmes et cosmétiques à débloquer'],
+  ['saison', 'Défis saisonniers', 'novembre sobre, calendrier de l\'avent…'],
+  ['semaine', 'Défi de la semaine', 'proposé chaque lundi'],
+  ['escalier', "Escalier de l'épargne", 'objectif d\'épargne qui monte'],
+  ['tirelires', 'Tirelires à projet', ''],
+  ['objectif', "Objectif d'épargne de l'année", ''],
+  ['resume', 'Résumé du dimanche', 'bandeau le dimanche soir'],
+  ['alertes', 'Alertes futées', 'sur l\'accueil'],
+  ['voyage', 'Mode voyage', '']];
 const on = k => !LS.get('off', []).includes(k);
-const progresVisible = () => on('defi') || on('series') || on('bilan') || on('jeu');
+const progresVisible = () => on('defi') || on('series') || on('bilan') || on('jeu') || ['saison', 'semaine', 'escalier', 'tirelires', 'voyage', 'objectif', 'resume'].some(k => ouvert(k)) || FEAT.some(f => !dispo(f[0]));
 // Optionnel : lien proposé par défaut au premier lancement. Laisser vide pour la version commune.
-const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbx2oZ96Dm3DbmBwSDs8m7uyHvXi09QwlFKwPq3Aa0fkMPDc8a5FBRVRZ2vSD0ThF8hyEw/exec';
+const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbzzk3u1n0cIpxIybvkhoX5p-ohuVVpZUn6Kng2SVcOqwySM_yNXa9wviC8gn5F-gEIn8A/exec';
 const API_ATTENDUE = '3.5'; // version minimale du script ; les versions plus récentes sont acceptées
 
 /* ================= OUTILS ================= */
@@ -324,7 +601,7 @@ function appliquerTheme() {
   const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.querySelector('meta[name=theme-color]').content = dark ? '#0F0F0E' : '#2C2C2A';
-  try { appliquerAccent(); } catch (e) { /* module jeu pas encore chargé au tout premier appel */ }
+  try { appliquerCosmetiques(); } catch (e) { /* modules pas encore chargés au tout premier appel */ }
 }
 appliquerTheme();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', appliquerTheme);
@@ -658,7 +935,7 @@ function rendre(silencieux) {
   const st = statut(S.y, S.m);
   $('#mlabel').innerHTML = esc(moisLabel(S.y, S.m).toUpperCase()) + '<small>' + (st === 'cours' ? 'EN COURS' : st === 'passe' ? 'TERMINÉ' : 'PRÉVISION') + '</small>';
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.act === 'tab:' + S.tab));
-  { const hp = $('#hprog'); if (hp) { hp.hidden = !(on('jeu') || on('defi') || on('series') || on('bilan')); const hn = $('#hniv'); if (hn) { try { hn.textContent = on('jeu') && S.data ? etatJeu().niv : ''; } catch (e) { hn.textContent = ''; } } } }
+  { const hp = $('#hprog'); if (hp) { hp.hidden = !(on('jeu') || on('defi') || on('series') || on('bilan')); try { majBadgeProgres(on('jeu') && S.data ? etatJeu() : null); } catch (e) {} } }
   document.body.classList.toggle('discret', !!LS.get('discret', false));
   const v = $('#view');
   if (!S.data) { v.innerHTML = '<div class="empty">Chargement de ton fichier…</div>'; return; }
@@ -691,7 +968,7 @@ function jaugeSVG(b) {
       return `<g aria-label="Repère du jour"><line x1="${150 + 106 * c}" y1="${150 - 106 * s2}" x2="${150 + 131 * c}" y2="${150 - 131 * s2}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
       <circle cx="${150 + 137 * c}" cy="${150 - 137 * s2}" r="3.2" fill="var(--ink)"/></g>`; })() : ''}
     <g class="needle" id="needle" style="transform:rotate(${S.lastFrac * 180}deg)">
-      <path d="M150 146 L44 150 L150 154 Z" fill="var(--bad)"/>
+      ${aiguilleClassique()}
     </g>
     <circle cx="150" cy="150" r="10" fill="var(--ink)"/><circle cx="150" cy="150" r="3.5" fill="var(--paper)"/>
     <text x="30" y="174" font-family="IBM Plex Mono,monospace" font-size="11" letter-spacing="1.5" fill="var(--ink3)">VIDE</text>
@@ -735,19 +1012,7 @@ function carteBilanMois() {
   const t = nowYM() - 1, y = Math.floor((t - 1) / 12), m = ((t - 1) % 12) + 1, cle = y + '-' + m;
   if (LS.get('bilanVu', '') === cle) return '';
   const c = calc(y, m); if (!c.rev && !c.dep) return '';
-  const bud = budgets(y, m), nbd = bud.filter(x => x.etat === 'bad' && !x.an).length;
-  const cm = catMap(), top = Object.keys(c.par).filter(n => cm[n].type === 'Dépense' && VAR.includes(cm[n].groupe)).map(n => ({ n, v: c.par[n].j + c.par[n].e })).sort((a, b) => b.v - a.v)[0];
-  const p = bilanMois(y, m).vsMoy;
-  return `<div class="ticket" style="margin:6px 0 4px">
-    <div class="tl" style="font-size:11px;letter-spacing:2px;color:var(--ink3)"><span>${esc(MOIS[m - 1].toUpperCase())} ${y} BOUCLÉ</span><span>✓</span></div>
-    <div class="tl tot"><span>RÉSULTAT</span><span class="${c.restant < 0 ? 'c-bad' : 'c-ok'}">${c.restant >= 0 ? '+' : ''}${e2(c.restant)}</span></div>
-    <div class="tl"><span>DÉP. COURANTES VS 6 MOIS</span><span class="${p > 0 ? 'c-bad' : 'c-ok'}">${p == null ? '—' : (p > 0 ? '+' : '') + p + ' %'}</span></div>
-    <div class="tl"><span>BUDGETS MENSUELS DÉPASSÉS</span><span>${nbd}</span></div>
-    ${top ? `<div class="tl"><span>PLUS GROS POSTE</span><span>${esc(top.n.toUpperCase())} · ${e0(top.v)}</span></div>` : ''}
-    ${(() => { const d = etatDefi(y, m); return d ? `<div class="tl"><span>DÉFI ${esc(d.cat.toUpperCase())}</span><span class="${d.ok ? 'c-ok' : 'c-bad'}">${d.ok ? 'RÉUSSI ✓' : 'RATÉ'}</span></div>` : ''; })()}
-    ${c.restant >= 10 ? `<button class="go" data-act="decote" data-y="${y}" data-m="${m}" data-v="${Math.floor(c.restant / 10) * 10}" style="margin-top:10px">METTRE ${e0(Math.floor(c.restant / 10) * 10)} DE CÔTÉ</button>` : ''}
-    <button class="play" data-act="story" data-k="m" data-y="${y}" data-m="${m}" style="margin-top:10px"><span>▶</span> REVIVRE ${esc(MOIS[m - 1].toUpperCase())} EN STORY</button>
-    <div style="display:flex;gap:8px;margin-top:10px"><button class="chip" data-act="sv:progres" style="flex:1">TOUS LES BILANS</button><button class="chip on" data-act="bilan-ok" data-key="${cle}" style="flex:1">C'EST NOTÉ</button></div></div>`;
+  return `<button class="bilban" data-act="bil-ban" data-key="${cle}" data-y="${y}" data-m="${m}"><span class="bbp">▶</span><span><b>TON BILAN ${esc(MOIS[m - 1].toUpperCase())} EST PRÊT</b><small>${c.restant >= 0 ? '+' : ''}${e0(c.restant)} · touche pour l'ouvrir</small></span><span>›</span></button>`;
 }
 // Solde prévu jour par jour, d'aujourd'hui à la fin du mois prochain :
 // prélèvements à leur date, achats prévus, et budgets restants étalés sur les jours.
@@ -801,8 +1066,8 @@ function vueAccueil() {
   const b = bilan(S.y, S.m), solde = S.jmode === 'solde';
   const sc = solde ? soldeCalcule(S.y, S.m) : null;
   const val = solde ? sc : b.restant;
-  let h = alerteVersion() + blocAnomalies() + carteBilanMois();
-  h += `<div class="gauge"><button data-act="jmode" style="display:block;width:100%" aria-label="Basculer argent restant / solde">${jaugeSVG(b)}
+  let h = carteBilanMois() + (b.st === 'cours' ? banniereResume() : '') + alerteVersion() + blocAnomalies() + (ouvert('alertes') && b.st === 'cours' ? blocAlertes() : '') + (ouvert('voyage') && b.st === 'cours' ? blocVoyageAccueil() : '');
+  h += `<div class="gauge">${b.st === 'cours' ? blocMascotte() : ''}<button data-act="jmode" style="display:block;width:100%" aria-label="Basculer argent restant / solde">${jaugeSVG(b)}
     <div class="big ${val != null && val < 0 ? 'c-bad' : ''}" id="big" data-v="${val == null ? 0 : val}">${val == null ? '—' : e0(val)}</div>
     <div class="lbl">${solde ? (sc == null ? 'SOLDE DE DÉPART NON SAISI' : 'SOLDE EN BANQUE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" : '')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span></div></button>
     ${b.st === 'cours' && !solde && on('pj') ? lignePJ() : ''}
@@ -930,7 +1195,7 @@ function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.rem
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
-  const R = { bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
+  const R = { soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, tricount: rendreTricount, esccfg: rendreEscCfg, tiredit: rendreTirEdit, voyedit: rendreVoyEdit, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
   if (R) return R();
   const fav = favoris(f.type), pins = LS.get('pins', []), futur = statut(f.y, f.m) === 'futur';
   if (f.cat && !fav.includes(f.cat) && typeDe(f.cat) === f.type) fav.unshift(f.cat);
@@ -950,6 +1215,7 @@ function rendreForm() {
     ${/^Écart/.test(f.lib || '') ? `<div class="mrow" style="margin-top:2px"><button class="chip" data-act="sgn">± CHANGER LE SIGNE</button></div>` : ''}
     ${futur && f.mode === 'add' ? `<div class="mrow" style="margin-top:2px"><button class="mbtn" data-act="fj:-1" aria-label="Jour précédent">‹</button><span>${f.jour ? 'LE ' + f.jour : 'JOUR NON PRÉCISÉ'}</span><button class="mbtn" data-act="fj:1" aria-label="Jour suivant">›</button></div>` : ''}
     <div class="hint" id="hint"></div>
+    ${f.type === 'Dépense' && f.mode === 'add' && !futur && ouvert('voyage') && voyageActif() ? `<div class="mrow" style="margin:-4px 0 6px"><button class="chip ${f.voy !== false ? 'on' : ''}" data-act="voy-tog">✈ ${esc(voyageActif().nom)}</button></div>` : ''}
     ${f.type === 'Dépense' && f.mode === 'add' && !futur && on('avances') ? `<div class="mrow" style="margin:-4px 0 6px"><button class="chip ${f.partage ? 'on' : ''}" data-act="partage">👥 PAYÉ POUR D'AUTRES AUSSI</button></div>${f.partage ? `<div class="part">
       <div class="chips" style="margin:0">${[...new Set([...nomsConnus(), ...(f.noms || [])])].map(n => `<button class="chip ${(f.noms || []).includes(n) ? 'on' : ''}" data-act="pnom" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
       <div style="display:flex;gap:6px"><input class="libin" id="pnouv" placeholder="Ajouter un prénom" autocomplete="off" maxlength="30" style="margin:8px 0"><button class="chip" data-act="pajout" style="margin:8px 0">+</button></div>
@@ -1020,9 +1286,10 @@ function enregistrer() {
   if (!f.cat) { $('#ferr').textContent = 'Choisis une catégorie'; return; }
   const mois = moisLabel(f.y, f.m), futur = statut(f.y, f.m) === 'futur';
   if (S.data.mois && S.data.mois.length && !S.data.mois.includes(mois)) { $('#ferr').textContent = mois + " n'existe pas dans ton fichier"; return; }
-  const lib = (f.lib || '').trim() || f.cat;
+  let lib = (f.lib || '').trim() || f.cat;
+  { const v = ouvert('voyage') && f.mode === 'add' && f.type === 'Dépense' && f.voy !== false ? voyageActif() : null; if (v && !lib.startsWith(v.nom + ' · ')) lib = v.nom + ' · ' + lib; }
   if (futur && f.mode === 'edit') { $('#ferr').textContent = 'Pour un mois à venir : supprime la ligne et crée un achat prévu'; return; }
-  vibrer();
+  vibrer(); sonCaisse();
   if (futur) {
     const a = { id: uid(), row: null, mois, lib, cat: f.cat, montant: n, jour: f.jour, y: f.y, m: f.m, fait: false, srv: null, pending: true };
     S.data.avenir = S.data.avenir || []; S.data.avenir.push(a);
@@ -1504,7 +1771,9 @@ function rendreReglages() {
     ${tg('vibre', LS.get('vibre', true), 'Vibrations', 'petit retour quand tu enregistres')}
     <div class="grp" style="margin-top:18px">FONCTIONNALITÉS AFFICHÉES</div>
     <div class="note" style="margin:2px 0 4px">Masquer ne supprime rien : tes données restent enregistrées et réapparaissent si tu réactives.</div>
-    ${FONCS.map(([k, l, d]) => tg('fonc:' + k, on(k), l, d)).join('')}
+    ${FONCS.filter(([k]) => dispo(k)).map(([k, l, d]) => tg('fonc:' + k, on(k), l, d)).join('')}
+    ${FEAT.filter(f => !dispo(f[0])).map(f => `<button class="soon" data-act="soon" data-k="${f[0]}"><span>🔒</span><div><b>${esc(f[1])}</b><small>disponible en ${esc(MOIS[f[4] - 1].toLowerCase())} · touche pour l'essayer dès maintenant</small></div></button>`).join('')}
+    ${ACCES_ANTICIPE ? tg('anticipe', anticipe(), 'Accès anticipé', 'débloque tout de suite les nouveautés prévues pour les prochains mois') : ''}
     <div class="grp" style="margin-top:18px">APPARENCE</div>
     <div class="seg">${[['auto', 'AUTO'], ['light', 'CLAIR'], ['dark', 'SOMBRE']].map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-act="theme" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="grp" style="margin-top:18px">DONNÉES</div>
@@ -1646,7 +1915,13 @@ function retirerDefi() {
 function vueProgres() {
   const y = now.getFullYear(), m = now.getMonth() + 1, d = etatDefi(y, m);
   const ej = on('jeu') ? etatJeu() : null;
-  let h = ej ? blocNiveau(ej) : '';
+  const resumeRow = () => { const k = resumeCle() || (() => { const l = lundi(now); l.setDate(l.getDate() - 7); return isoJ(l); })(), l = new Date(k + 'T00:00:00'), fi = new Date(l); fi.setDate(fi.getDate() + 6); return `<button class="bil" data-act="res-open" data-k="${k}" style="margin-top:6px"><div><b>☾ RÉSUMÉ DE LA SEMAINE</b><small>du ${l.getDate()} ${MC[l.getMonth()]} au ${fi.getDate()} ${MC[fi.getMonth()]}</small></div><span>›</span></button>`; };
+  const T = {};
+  // BILANS
+  { let h = ''; if (on('bilan')) h += blocBilans(); if (ouvert('resume')) h += `<div class="sec"><span>SEMAINE</span></div>` + resumeRow(); T.bilans = [h, ['resume', 'alertes']]; }
+  // DÉFIS
+  { let h = '';
+  if (ouvert('saison')) h += blocSaison();
   if (on('defi')) { h += `<div class="sec"><span>DÉFI ${deMois(m)}</span></div>`;
   if (d) {
     const w = d.montant > 0 ? Math.min(100, d.dep / d.montant * 100) : 100;
@@ -1655,6 +1930,8 @@ function vueProgres() {
       <div class="bar mk"><i style="width:${w}%;background:${d.ok ? 'var(--ok)' : 'var(--bad)'}"></i><b style="left:${now.getDate() / dim(y, m) * 100}%"></b></div>
       <div class="bsub">${e0(d.dep)} dépensés · ${d.ok ? 'encore ' + e0(d.reste) + ' possibles' : 'dépassé de ' + e0(-d.reste)} · touche pour modifier</div></button>`;
   } else h += `<div class="note" style="margin-top:0">Pas de défi ce mois-ci. Un plafond serré sur un seul budget, verdict à la fin du mois.</div><button class="go" data-act="defi-go" style="margin-top:10px">CHOISIR UN DÉFI</button>`; }
+  if (ouvert('semaine')) h += blocSemaine();
+  if (ouvert('escalier')) h += blocEscalier();
   // Séries
   if (on('series')) {
   const j = joursSansDepense(), rec = recordSans(), v = serieVert();
@@ -1664,8 +1941,21 @@ function vueProgres() {
     <div class="ser ${v >= 2 ? 'chaud' : ''}"><b>${v}</b><small>MOIS DANS LE VERT<br>${v ? "D'AFFILÉE" : 'À LANCER CE MOIS-CI'}</small></div></div>`;
   if (sb.length) h += `<div class="ticket" style="margin-top:8px">${sb.slice(0, S.allSeries ? 99 : 3).map(x => `<div class="tl"><span>${esc(x.n.toUpperCase())}</span><span class="c-ok">${x.s} MOIS TENU${x.s > 1 ? 'S' : ''}</span></div>`).join('')}</div>${sb.length > 3 ? `<button class="chip" style="margin-top:8px" data-act="allseries">${S.allSeries ? 'Moins ▴' : 'Voir plus (' + sb.length + ' budgets) ▾'}</button>` : ''}`;
   }
-  if (ej) h += blocSucces(ej) + blocCollection(ej);
-  if (on('bilan')) h += blocBilans();
+  T.defis = [h, ['saison', 'semaine', 'escalier']]; }
+  // PROJETS
+  { let h = ''; if (ouvert('objectif')) h += blocObjectif(); if (ouvert('tirelires')) h += blocTirelires(); if (ouvert('voyage')) h += blocVoyages(); T.projets = [h, ['objectif', 'tirelires', 'voyage']]; }
+  // SUCCÈS et STYLE
+  T.succes = [ej ? blocNiveau(ej) + blocSucces(ej) : '', []];
+  T.style = [ej ? blocCollection(ej) : '', ['cosmetiques']];
+  const NOMS = [['bilans', 'BILANS'], ['defis', 'DÉFIS'], ['projets', 'PROJETS'], ['succes', 'SUCCÈS'], ['style', 'STYLE']];
+  const vis = NOMS.filter(([k]) => T[k][0] || T[k][1].some(f => !dispo(f)));
+  if (!vis.length) return '';
+  let cur = S.progT || LS.get('progT', 'bilans'); if (!vis.some(([k]) => k === cur)) cur = vis[0][0];
+  let h = '';
+  if (ej) { const ti = LS.get('cos_titre', '') || ej.titre; h += `<button class="nivmini" data-act="ptab" data-t="succes"><b>NIV. ${ej.niv}</b><span>${esc(ti.toUpperCase())}</span><i><u style="width:${Math.round(ej.frac * 100)}%"></u></i><small>${ej.xp} XP</small></button>`; }
+  h += `<div class="ptabs">${vis.map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" data-act="ptab" data-t="${k}">${l}</button>`).join('')}</div>`;
+  const [c, fk] = T[cur];
+  h += `<div class="pcont">${c}${blocProchainement(fk)}</div>`;
   return h;
 }
 // ================= JEU : niveaux, succès, collection, bilans annuels =================
@@ -1703,10 +1993,10 @@ function joursJeu() { // [jour iso, sans dépense ?] du début du jeu à hier
   const moisVivants = new Set([...dep].map(k => k.slice(0, 7)));
   const der = LS.get('derDep', null); if (der) dep.add(der);
   const out = [], d = new Date(JEU_DEBUT.iso + 'T00:00:00'), fin = new Date(auj() + 'T00:00:00');
-  while (d < fin) { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); out.push([k, moisVivants.has(k.slice(0, 7)) && !dep.has(k)]); d.setDate(d.getDate() + 1); }
+  while (d < fin) { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); out.push([k, jourEnVoyage(k) ? null : moisVivants.has(k.slice(0, 7)) && !dep.has(k)]); d.setDate(d.getDate() + 1); }
   return out;
 }
-const maxSerie = arr => { let b = 0, c = 0; arr.forEach(v => { c = v ? c + 1 : 0; b = Math.max(b, c); }); return b; };
+const maxSerie = arr => { let b = 0, c = 0; arr.forEach(v => { c = v === null ? c : v ? c + 1 : 0; b = Math.max(b, c); }); return b; };
 function faitsJeu() {
   if (S._jeu && S._jeu.k === memo && S._jeu.q === S.journal.length) return S._jeu.v;
   const M = moisJeu().map(([y, m]) => {
@@ -1722,12 +2012,22 @@ function faitsJeu() {
   const budTenu3 = budgetsDefiables().some(c => maxSerie(M.map(x => { const b = x.bu.find(z => z.c.nom === c.nom); return !!b && b.reste >= -0.5; })) >= 3);
   const v = {
     M, J, cote, nCote: coteL.length, rembs, defisLances,
-    serieJours: maxSerie(J.map(x => x[1])), joursSans: J.filter(x => x[1]).length,
+    serieJours: maxSerie(J.map(x => x[1])), joursSans: J.filter(x => x[1] === true).length,
     vertSerie: maxSerie(M.map(x => x.vert)), nVert: M.filter(x => x.vert).length,
     zeroSerie: maxSerie(M.map(x => x.zero)), nZero: M.filter(x => x.zero).length,
     defisOk: M.filter(x => x.defiOk).length, taux10: M.filter(x => x.taux >= 0.10).length, taux25: M.filter(x => x.taux >= 0.25).length,
     budTenu3, skinChange: LS.get('skin', 'classique') !== 'classique' || LS.get('accent', 'foret') !== 'foret'
   };
+  try {
+    const es = escalier(); v.marche = ouvert('escalier') ? es.best : 0; v.escOk = ouvert('escalier') ? es.ok : 0;
+    v.semOk = ouvert('semaine') ? etatSemaines().reussis : 0;
+    v.tirOk = ouvert('tirelires') ? tirelires().filter(t => soldeTirelire(t).atteint).length : 0;
+    const jm = pre => J.filter(x => x[0].startsWith(pre) && x[1] === true).length;
+    v.novOk = 0; v.aventOk = 0; for (let yy = 2026; yy <= now.getFullYear(); yy++) { if (jm(yy + '-11') >= 10) v.novOk++; if (J.filter(x => x[0].startsWith(yy + '-12') && +x[0].slice(8) <= 24 && x[1] === true).length >= 15) v.aventOk++; }
+    if (!ouvert('saison')) { v.novOk = 0; v.aventOk = 0; }
+    v.objOk = ouvert('objectif') ? Object.keys(objectifs()).filter(y => +y >= 2026 && (etatObjectif(+y) || {}).atteint).length : 0;
+    v.voyOk = ouvert('voyage') ? voyages().filter(x => x.fin < auj() && x.budget > 0 && depVoyage(x) <= x.budget).length : 0;
+  } catch (e) { Object.assign(v, { objOk: 0, marche: 0, escOk: 0, semOk: 0, tirOk: 0, novOk: 0, aventOk: 0, voyOk: 0 }); }
   S._jeu = { k: memo, q: S.journal.length, v }; return v;
 }
 // --- Succès (une fois) ---
@@ -1755,7 +2055,17 @@ const SUCCES = [
   ['taux-25', 'extreme', 'Fourmi', 'Ne pas dépenser 25 % de tes revenus sur un mois', f => [f.taux25, 1]],
   ['zero-6', 'extreme', 'Perfection', '6 mois d\'affilée sans budget dépassé', f => [f.zeroSerie, 6]],
   ['cote-2000', 'extreme', 'Grand coffre', 'Mettre 2 000 € de côté au total', f => [Math.round(f.cote), 2000]],
-  ['defis-12', 'extreme', 'Défi ultime', 'Réussir 12 défis', f => [f.defisOk, 12]]
+  ['defis-12', 'extreme', 'Défi ultime', 'Réussir 12 défis', f => [f.defisOk, 12]],
+  ['semaine-1', 'facile', 'Semaine gagnée', 'Réussir un défi de la semaine', f => [f.semOk, 1]],
+  ['tirelire-1', 'moyen', 'Projet bouclé', 'Remplir une tirelire à projet', f => [f.tirOk, 1]],
+  ['nov', 'moyen', 'Novembre sobre', '10 jours sans dépense en novembre', f => [f.novOk, 1]],
+  ['voyage', 'moyen', 'Voyageur malin', 'Finir un voyage dans son budget', f => [f.voyOk, 1]],
+  ['marche-5', 'difficile', 'Cinquième marche', "Atteindre la marche 5 de l'escalier de l'épargne", f => [f.marche, 5]],
+  ['semaines-8', 'difficile', 'Régulier', 'Réussir 8 défis de la semaine', f => [f.semOk, 8]],
+  ['avent', 'difficile', 'Avent réussi', "Ouvrir 15 cases du calendrier de l'avent", f => [f.aventOk, 1]],
+  ['marche-10', 'extreme', 'Sommet', "Atteindre la marche 10 de l'escalier de l'épargne", f => [f.marche, 10]],
+  ['objectif-an', 'difficile', 'Objectif tenu', "Atteindre ton objectif d'épargne de l'année", f => [f.objOk, 1]],
+  ['tirelires-3', 'extreme', 'Bâtisseur', 'Remplir 3 tirelires à projet', f => [f.tirOk, 3]]
 ].map(([id, d, nom, txt, fn]) => ({ id, d, nom, txt, fn }));
 function etatJeu() {
   const f = faitsJeu();
@@ -1764,29 +2074,39 @@ function etatJeu() {
   const rec = [
     ['Jours sans dépense courante', 'facile', 5, f.joursSans], ['Mois bouclés', 'facile', 10, f.M.length], ['Mois dans le vert', 'moyen', 25, f.nVert],
     ['Défis réussis', 'moyen', 25, f.defisOk], ['Restes mis de côté', 'moyen', 25, f.nCote], ['Mois sans budget dépassé', 'difficile', 60, f.nZero],
-    ['Mois à 10 % non dépensés', 'difficile', 60, f.taux10], ['Mois à 25 % non dépensés', 'extreme', 150, f.taux25]];
+    ['Mois à 10 % non dépensés', 'difficile', 60, f.taux10], ['Mois à 25 % non dépensés', 'extreme', 150, f.taux25],
+    ["Marches d'épargne réussies", 'moyen', 40, f.escOk], ['Défis de la semaine réussis', 'moyen', 30, f.semOk], ['Tirelires remplies', 'difficile', 100, f.tirOk],
+    ['Novembre sobre', 'moyen', 150, f.novOk], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ['Voyages tenus', 'moyen', 80, f.voyOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
   let niv = 1; while (niv < 20 && xp >= xpNiveau(niv + 1)) niv++;
   const debut = xpNiveau(niv), fin = niv < 20 ? xpNiveau(niv + 1) : debut;
   return { f, succes, rec, xp, niv, titre: TITRES[niv - 1], frac: niv < 20 ? (xp - debut) / (fin - debut) : 1, reste: fin - xp };
 }
-const debloque = (o, niv) => niv >= o.niv;
+const debloque = (o, niv) => o.suc ? succesFait(o.suc) : niv >= o.niv;
 // Nouveautés : succès et cosmétiques débloqués depuis la dernière visite
 function nouveautes(e) {
-  const ids = e.succes.filter(s => s.ok).map(s => 's:' + s.id).concat(SKINS.concat(ACCENTS).filter(o => o.niv > 1 && debloque(o, e.niv)).map(o => 'c:' + o.id), ['n:' + e.niv]);
+  const ids = e.succes.filter(s => s.ok).map(s => 's:' + s.id);
   const vus = LS.get('jeuVus', null);
   if (!vus) { LS.set('jeuVus', ids); return []; }
   return ids.filter(i => !vus.includes(i));
 }
 function annoncerJeu() {
   if (!on('jeu') || !S.data) return;
-  const e = etatJeu(), n = nouveautes(e); if (!n.length) return;
-  LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
-  const s = n.find(i => i[0] === 's'), c = n.find(i => i[0] === 'c'), lv = n.find(i => i[0] === 'n');
-  const nomC = c && (SKINS.concat(ACCENTS).find(o => 'c:' + o.id === c) || {}).nom;
-  const msg = s ? '🏆 Succès : ' + SUCCES.find(x => 's:' + x.id === s).nom : lv ? '⬆ Niveau ' + e.niv + ' · ' + e.titre : '';
-  toast((msg ? msg : '') + (nomC ? (msg ? ' · ' : '') + '🎨 ' + nomC + ' débloqué' : ''), 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; rendre(); scrollTo(0, 0); });
-  confettis();
+  const e = etatJeu();
+  // première fois : on mémorise sans rien annoncer
+  if (LS.get('nivVu', null) == null) { LS.set('nivVu', e.niv); LS.set('xpVu', e.xp); LS.set('cosmVus', tousCosm().filter(o => debloque(o, e.niv)).map(o => o.t + ':' + o.id)); nouveautes(e); return; }
+  const dxp = e.xp - LS.get('xpVu', e.xp); if (dxp > 0) xpFlottante(dxp); LS.set('xpVu', e.xp);
+  const n = nouveautes(e); if (n.length) LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
+  const avant = LS.get('nivVu', e.niv);
+  if (e.niv > avant) { LS.set('nivVu', e.niv); ecranNiveau(avant, e); return; }
+  if (e.niv < avant) LS.set('nivVu', e.niv);
+  if (n.length) { const s0 = SUCCES.find(x => 's:' + x.id === n[0]); const dbq = tousCosm().filter(o => o.suc === s0.id); toast('🏆 Succès : ' + s0.nom + ' (+' + DIFF[s0.d].xp + ' XP)' + (dbq.length ? ' · débloque « ' + dbq.map(o => o.nom).join(' », « ') + ' »' : ''), 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = dbq.length ? 'style' : 'succes'; if (dbq.length) S.collT = dbq[0].t; rendre(); scrollTo(0, 0); }); celebrer(); }
+  majBadgeProgres(e);
+}
+function majBadgeProgres(e) {
+  const hn = $('#hniv'); if (!hn) return;
+  const vus = LS.get('cosmVus', []), nv = on('jeu') && e ? tousCosm().some(o => o.niv > 1 && debloque(o, e.niv) && !vus.includes(o.t + ':' + o.id)) : false;
+  hn.textContent = ''; hn.classList.remove('on'); void nv; // plus de pastille sur le trophée (demande de Théo)
 }
 function confettis() {
   const cv = document.createElement('canvas'), W = innerWidth, H = innerHeight;
@@ -1801,7 +2121,7 @@ function confettis() {
 function skinSVG(id, frac, col, rep) {
   const P = (cx, cy, r, a) => [cx + r * Math.cos(a), cy - r * Math.sin(a)];
   const ARC = (cx, cy, r, a0, a1) => { const [x0, y0] = P(cx, cy, r, a0), [x1, y1] = P(cx, cy, r, a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${Math.abs(a0 - a1) > Math.PI ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
-  const AIG = (cx, cy, len, a, w, c, q = 0) => { const [nx, ny] = P(cx, cy, len, a), [ax, ay] = P(cx, cy, w, a + Math.PI / 2), [bx, by] = P(cx, cy, w, a - Math.PI / 2), [tx, ty] = P(cx, cy, -q, a); return `<path d="M${ax.toFixed(1)} ${ay.toFixed(1)} L${nx.toFixed(1)} ${ny.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)} L${tx.toFixed(1)} ${ty.toFixed(1)} Z" fill="${c}"/>`; };
+  const AIG = (cx, cy, len, a, w, c, q = 0) => { const [nx, ny] = P(cx, cy, len, a), [ax, ay] = P(cx, cy, w, a + Math.PI / 2), [bx, by] = P(cx, cy, w, a - Math.PI / 2), [tx, ty] = P(cx, cy, -q, a); return `<g class="aig" style="transform-origin:${cx}px ${cy}px"><path d="M${ax.toFixed(1)} ${ay.toFixed(1)} L${nx.toFixed(1)} ${ny.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)} L${tx.toFixed(1)} ${ty.toFixed(1)} Z" fill="${c}"/></g>`; };
   const f = Math.max(0, Math.min(1, frac)), a = Math.PI * (1 - f), D = Math.PI / 180, pct = Math.round(f * 100);
   const repere = (cx, cy, r1, r2, c) => rep == null ? '' : (() => { const ar = Math.PI * (1 - rep), [x1, y1] = P(cx, cy, r1, ar), [x2, y2] = P(cx, cy, r2, ar); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`; })();
   const vb = (bg, inner) => `<svg viewBox="0 0 300 178" role="img" aria-label="Jauge du mois">${bg ? `<rect x="6" y="2" width="288" height="174" rx="18" fill="${bg}"/>` : ''}${inner}</svg>`;
@@ -1809,15 +2129,15 @@ function skinSVG(id, frac, col, rep) {
     case 'minimal': { const [dx, dy] = P(150, 150, 118, a); return vb('', `<path d="${ARC(150, 150, 118, Math.PI, 0)}" stroke="var(--track)" stroke-width="6" fill="none" stroke-linecap="round"/><path d="${ARC(150, 150, 118, Math.PI, a + 0.0001)}" stroke="${col}" stroke-width="6" fill="none" stroke-linecap="round"/>${repere(150, 150, 108, 128, 'var(--ink3)')}<circle cx="${dx}" cy="${dy}" r="11" fill="var(--paper)" stroke="${col}" stroke-width="5"/><text x="150" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="15" letter-spacing="3" fill="var(--ink3)">${pct} %</text>`); }
     case 'reservoir': { const a2 = (150 - 120 * f) * D; let t = ''; [150, 120, 90, 60, 30].forEach((g, i) => { const [x1, y1] = P(150, 158, 100, g * D), [x2, y2] = P(150, 158, 118, g * D); t += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${i === 0 ? '#D85A30' : '#F1EFE8'}" stroke-width="${i % 2 ? 3 : 6}"/>`; });
       return vb('#1B1B1A', `<path d="${ARC(150, 158, 110, 150 * D, 30 * D)}" stroke="#555" stroke-width="4" fill="none"/>${t}<text x="44" y="150" fill="#D85A30" font-family="Helvetica,Arial" font-weight="700" font-size="24">E</text><text x="238" y="150" fill="#F1EFE8" font-family="Helvetica,Arial" font-weight="700" font-size="24">F</text><text x="150" y="128" text-anchor="middle" font-size="22">⛽</text>${AIG(150, 158, 104, a2, 4, '#D85A30')}<circle cx="150" cy="158" r="12" fill="#F1EFE8"/>`); }
-    case 'batterie': return vb('', `<rect x="44" y="44" width="196" height="96" rx="20" fill="none" stroke="var(--ink)" stroke-width="9"/><rect x="246" y="74" width="16" height="36" rx="5" fill="var(--ink)"/><rect x="58" y="58" width="${Math.max(0, 168 * f).toFixed(1)}" height="68" rx="10" fill="${col}"/>${rep == null ? '' : `<line x1="${58 + 168 * rep}" y1="50" x2="${58 + 168 * rep}" y2="134" stroke="var(--ink)" stroke-width="3" stroke-dasharray="4 4"/>`}<text x="142" y="104" text-anchor="middle" font-family="Helvetica,Arial" font-weight="800" font-size="30" fill="var(--ink)">${pct} %</text>`);
+    case 'batterie': return vb('', `<rect x="44" y="44" width="196" height="96" rx="20" fill="none" stroke="var(--ink)" stroke-width="9"/><rect x="246" y="74" width="16" height="36" rx="5" fill="var(--ink)"/><rect class="charge" x="58" y="58" width="${Math.max(0, 168 * f).toFixed(1)}" height="68" rx="10" fill="${col}"/>${rep == null ? '' : `<line x1="${58 + 168 * rep}" y1="50" x2="${58 + 168 * rep}" y2="134" stroke="var(--ink)" stroke-width="3" stroke-dasharray="4 4"/>`}<text x="142" y="104" text-anchor="middle" font-family="Helvetica,Arial" font-weight="800" font-size="30" fill="var(--ink)">${pct} %</text>`);
     case 'tableau': return vb('#2C2C2A', `<path d="${ARC(150, 152, 112, Math.PI, 124 * D)}" stroke="#1D9E75" stroke-width="30" fill="none"/><path d="${ARC(150, 152, 112, 120 * D, 62 * D)}" stroke="#E8A33A" stroke-width="30" fill="none"/><path d="${ARC(150, 152, 112, 58 * D, 0)}" stroke="#D85A30" stroke-width="30" fill="none"/>${repere(150, 152, 90, 134, '#F1EFE8')}${AIG(150, 152, 98, a, 9, '#F1EFE8')}<circle cx="150" cy="152" r="15" fill="#F1EFE8"/><circle cx="150" cy="152" r="5" fill="#2C2C2A"/>`);
     case 'chrono': { let t = ''; for (let i = 0; i <= 20; i++) { const g = (225 - i * 13.5) * D, [x1, y1] = P(150, 92, 70, g), [x2, y2] = P(150, 92, i % 5 ? 62 : 54, g); t += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#3B3325" stroke-width="${i % 5 ? 2 : 4}"/>`; }
       return vb('#E9E1CF', `<circle cx="150" cy="92" r="80" fill="#FBF7EC" stroke="#8C7B5A" stroke-width="7"/>${t}${AIG(150, 92, 62, (225 - 270 * f) * D, 3, '#B22D1E', 12)}<circle cx="150" cy="92" r="7" fill="#3B3325"/><text x="150" y="136" text-anchor="middle" font-family="Georgia,serif" font-size="12" fill="#3B3325">${pct} %</text>`); }
-    case 'neon': return vb('#0E1116', `<defs><filter id="glo"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#1d2a33" stroke-width="10" fill="none"/><path filter="url(#glo)" d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="#3CF0C5" stroke-width="10" fill="none" stroke-linecap="round"/>${repere(150, 150, 98, 126, '#FFE66D')}<g filter="url(#glo)">${AIG(150, 150, 100, a, 3, '#FF4FA3')}</g><circle cx="150" cy="150" r="7" fill="#FF4FA3"/>`);
+    case 'neon': return vb('#0E1116', `<defs><filter id="glo"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#1d2a33" stroke-width="10" fill="none"/><path class="pulse" filter="url(#glo)" d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="#3CF0C5" stroke-width="10" fill="none" stroke-linecap="round"/>${repere(150, 150, 98, 126, '#FFE66D')}<g filter="url(#glo)">${AIG(150, 150, 100, a, 3, '#FF4FA3')}</g><circle cx="150" cy="150" r="7" fill="#FF4FA3"/>`);
     case 'pixel': { let t = ''; const n = 14; for (let i = 0; i < n; i++) { const g = Math.PI * (1 - (i + .5) / n), [cx, cy] = P(150, 150, 110, g), on = (i + .5) / n <= f; t += `<rect x="${(cx - 11).toFixed(1)}" y="${(cy - 11).toFixed(1)}" width="22" height="22" fill="${on ? col : 'var(--track)'}" ${rep != null && Math.abs((i + .5) / n - rep) < .5 / n ? 'stroke="var(--ink)" stroke-width="3"' : ''}/>`; }
       return vb('', t + `<text x="150" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="700" font-size="26" fill="var(--ink)">${'█'.repeat(Math.round(f * 5))}${'░'.repeat(5 - Math.round(f * 5))}</text>`); }
     case 'lcd': { let t = ''; for (let i = 0; i < 20; i++) t += `<rect x="${26 + i * 12.5}" y="112" width="9" height="34" rx="1" fill="${i < Math.round(f * 20) ? '#9BE564' : '#24331F'}"/>`;
-      return vb('#141A12', `<text x="150" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="54" font-weight="700" fill="#9BE564" letter-spacing="4">${String(pct).padStart(3, ' ')}%</text>${t}${rep == null ? '' : `<line x1="${24 + rep * 250}" y1="104" x2="${24 + rep * 250}" y2="154" stroke="#E8F5D0" stroke-width="2"/>`}`); }
+      return vb('#141A12', `<text class="flick" x="150" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="54" font-weight="700" fill="#9BE564" letter-spacing="4">${String(pct).padStart(3, ' ')}%</text>${t}${rep == null ? '' : `<line x1="${24 + rep * 250}" y1="104" x2="${24 + rep * 250}" y2="154" stroke="#E8F5D0" stroke-width="2"/>`}`); }
     case 'or': return vb('#15120A', `<defs><linearGradient id="gold" x1="0" x2="1"><stop offset="0" stop-color="#8E6A0E"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#B8860B"/></linearGradient></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#3A2F12" stroke-width="22" fill="none"/><path d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="url(#gold)" stroke-width="22" fill="none"/>${repere(150, 150, 96, 128, '#F3D27A')}${AIG(150, 150, 100, a, 6, '#F3D27A')}<circle cx="150" cy="150" r="13" fill="url(#gold)"/>`);
   }
   return null;
@@ -1825,7 +2145,8 @@ function skinSVG(id, frac, col, rep) {
 // --- Écran Progrès : niveau, succès, collection ---
 function blocNiveau(e) {
   const prochain = SKINS.concat(ACCENTS).filter(o => o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
-  return `<div class="niv"><div class="nivh"><b>NIV. ${e.niv}</b><span>${esc(e.titre.toUpperCase())}</span><small>${e.xp} XP</small></div>
+  const ti = LS.get('cos_titre', '') || e.titre, M = dispo('cosmetiques') && cos('mascotte') === 'on' ? mascotte() : null;
+  return `<div class="niv">${M ? `<button class="mascn" data-act="masc">${M.s[1]}</button>` : ''}<div class="nivh"><b>NIV. ${e.niv}</b><span>${esc(ti.toUpperCase())}</span><small>${e.xp} XP</small></div>
     <div class="nivbar"><i style="width:${Math.round(e.frac * 100)}%"></i></div>
     <div class="note" style="margin-top:6px;display:block">${e.niv < 20 ? `Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}` : 'Niveau maximum atteint'}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
 }
@@ -1845,15 +2166,6 @@ function blocSucces(e) {
   if (L.length > 3) h += `<button class="chip" style="margin-top:8px" data-act="allsucces">${S.allSucces ? 'Moins ▴' : 'Voir les ' + L.length + ' succès ▾'}</button>`;
   h += `<details class="note" style="display:block;margin-top:10px"><summary>Comment gagner de l'XP</summary>${e.rec.map(r => `${esc(r[0])} : +${r[2]} XP (${DIFF[r[1]].l.toLowerCase()}) · ${r[3]} fois`).join('<br>')}<br>Chaque succès rapporte aussi son bonus. Tout est compté depuis le 1er novembre 2026.</details>`;
   return h;
-}
-function blocCollection(e) {
-  const sk = LS.get('skin', 'classique'), ac = LS.get('accent', 'foret');
-  const n = SKINS.concat(ACCENTS).filter(o => debloque(o, e.niv)).length, tot = SKINS.length + ACCENTS.length;
-  let h = `<div class="sec"><span>COLLECTION</span><span>${n}/${tot}</span></div><div class="grp" style="margin:0 0 6px">JAUGES</div><div class="coll">`;
-  SKINS.forEach(o => { const u = debloque(o, e.niv); h += `<button class="cit ${sk === o.id ? 'on' : ''} ${u ? '' : 'verr'}" data-act="${u ? 'skin' : 'lock'}" data-id="${o.id}" data-niv="${o.niv}"><span class="cprev">${o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null)}</span><b>${esc(o.nom)}</b><small>${u ? (sk === o.id ? 'ACTIVE' : 'CHOISIR') : '🔒 NIV. ' + o.niv}</small></button>`; });
-  h += `</div><div class="grp" style="margin:12px 0 2px">THÈME DE COULEUR</div><div class="note" style="margin:0 0 6px;display:block">Change le bouton +, l'onglet actif et tout ce qui est vert (jauge, budgets tenus, barres).</div><div class="chips">`;
-  ACCENTS.forEach(o => { const u = debloque(o, e.niv); h += `<button class="chip ${ac === o.id ? 'on' : ''}" data-act="${u ? 'accent' : 'lock'}" data-id="${o.id}" data-niv="${o.niv}" style="${u ? '' : 'opacity:.45'}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${o.c ? o.c[0] : '#1D9E75'};margin-right:6px"></span>${esc(o.nom)}${u ? '' : ' · niv. ' + o.niv}</button>`; });
-  return h + '</div>';
 }
 function skinClassiqueMini(f) {
   const R = 118, L = Math.PI * R;
@@ -1919,6 +2231,614 @@ function rendreWrapped() {
 }
 
 appliquerAccent();
+// ================= FONCTIONS 6.0 : préférences, accès anticipé, escalier, tirelires, semaine, saisons, alertes, voyage =================
+// Préférences gardées dans le script (Code.gs 3.7+), avec repli sur le téléphone si le script est plus ancien.
+const prefsServeur = () => !!(S.data && S.data.prefs && parseFloat(S.data.apiVersion) >= 3.7);
+function getPref(k, d) { if (prefsServeur() && k in S.data.prefs) return S.data.prefs[k]; const v = LS.get('pref_' + k, undefined); return v === undefined ? d : v; }
+function setPref(k, v) { LS.set('pref_' + k, v); if (S.data) { S.data.prefs = S.data.prefs || {}; S.data.prefs[k] = v; } if ((prefsServeur() || (S.data && parseFloat(S.data.apiVersion) >= 3.7)) && !(k === 'objectifs' && parseFloat(S.data.apiVersion) < 3.8)) appel('pref-set', { cle: k, valeur: v }); sauver(); }
+// Calendrier de sortie des nouveautés (accès anticipé possible sur l'appli de Théo)
+const FEAT = [
+  ['escalier', "Escalier de l'épargne", 'Un objectif de mise de côté qui monte à chaque mois réussi.', 2026, 12],
+  ['saison', 'Défis saisonniers', 'Calendrier de l\'avent du budget, Novembre sobre, Wrapped…', 2026, 12],
+  ['tirelires', 'Tirelires à projet', 'Des cagnottes pour tes projets, avec date d\'arrivée estimée.', 2027, 1],
+  ['objectif', "Objectif d'épargne de l'année", "Un montant à mettre de côté sur l'année, avec sa propre jauge.", 2027, 1],
+  ['semaine', 'Défi de la semaine', 'Un petit défi proposé chaque lundi selon tes habitudes.', 2027, 2],
+  ['resume', 'Résumé du dimanche', "Chaque dimanche soir, ta semaine en un coup d'œil.", 2027, 2],
+  ['alertes', 'Alertes futées', 'Abonnements qui augmentent, catégories qui dérapent, gros prélèvements.', 2027, 3],
+  ['voyage', 'Mode voyage', 'Un budget à part pour tes voyages, import du Tricount à la fin.', 2027, 4],
+  ['cosmetiques', 'Collection étendue', 'Thèmes, mascotte, tampons, polices, aiguilles, fêtes, tickets.', 2027, 5]
+];
+const ACCES_ANTICIPE = true; // passé à true dans la version de Théo
+const anticipe = () => ACCES_ANTICIPE && LS.get('anticipe', false);
+const dispo = k => { const f = FEAT.find(x => x[0] === k); return !f || anticipe() || nowYM() >= ymNum(f[3], f[4]) || LS.get('debloques', []).includes(k); };
+const ouvert = k => dispo(k) && on(k === 'cosmetiques' ? 'jeu' : k);
+// --- Escalier de l'épargne ---
+function escalier() {
+  const cfg = Object.assign({ depart: 50, pas: 25 }, getPref('escalier', {}) || {});
+  let t = cfg.depart, ok = 0, best = 0; const hist = [];
+  moisJeu().forEach(([y, m]) => { const ep = calc(y, m).ep, r = ep >= t - 0.005; hist.push({ y, m, cible: t, ep, r }); if (r) { ok++; t += cfg.pas; } else t = Math.max(cfg.depart, t - cfg.pas); best = Math.max(best, Math.round((t - cfg.depart) / cfg.pas) + 1); });
+  const marche = Math.round((t - cfg.depart) / cfg.pas) + 1, ep = calc(now.getFullYear(), now.getMonth() + 1).ep;
+  return { cfg, cible: t, marche, best: Math.max(best, marche), ok, hist, ep, frac: t > 0 ? Math.max(0, Math.min(1, ep / t)) : 0 };
+}
+function blocEscalier() {
+  const e = escalier(), h6 = e.hist.slice(-5);
+  const marches = h6.map(x => ({ c: x.cible, r: x.r, l: MC[x.m - 1] })).concat([{ c: e.cible, r: null, l: MC[now.getMonth()] }]);
+  const mx = Math.max(...marches.map(x => x.c), 1);
+  return `<div class="sec"><span>ESCALIER DE L'ÉPARGNE</span><button class="lnk" data-act="esc-cfg">RÉGLER</button></div>
+    <div class="esc"><div class="eschd"><b>MARCHE ${e.marche}</b><span>Objectif ce mois : <b>${e0(e.cible)}</b> d'épargne</span></div>
+    <div class="nivbar"><i style="width:${Math.round(e.frac * 100)}%"></i></div><div class="note" style="display:block;margin-top:4px">${e0(e.ep)} épargnés ce mois-ci${e.frac >= 1 ? ' · <b class="c-ok">marche validée ✓</b>' : ' · encore ' + e0(e.cible - e.ep)}</div>
+    <div class="stairs">${marches.map(x => `<div><i style="height:${Math.round(18 + 62 * x.c / mx)}px" class="${x.r === true ? 'ok' : x.r === false ? 'ko' : 'cur'}"></i><small>${esc(x.l)}</small></div>`).join('')}</div>
+    <div class="note" style="display:block">Réussi → la marche suivante monte de ${e0(e.cfg.pas)}. Raté → tu redescends d'une marche. L'épargne compte tout ce qui part sur l'épargne ce mois-ci (Échéancier compris).</div></div>`;
+}
+function rendreEscCfg() {
+  const f = S.form;
+  $('#sheetIn').innerHTML = enteteSheet('ESCALIER DE L\'ÉPARGNE', null) + `<div class="note" style="display:block;margin-top:10px">Première marche et hauteur de chaque marche.</div>
+    <div class="grp" style="margin-top:12px">PREMIÈRE MARCHE</div><input class="libin" data-f="depart" inputmode="decimal" value="${esc(f.depart)}">
+    <div class="grp">HAUTEUR D'UNE MARCHE</div><input class="libin" data-f="pas" inputmode="decimal" value="${esc(f.pas)}">
+    <div class="err" id="ferr"></div><button class="go" data-act="esc-ok">ENREGISTRER</button>`;
+  lierChamps();
+}
+// --- Tirelires à projet ---
+const tirelires = () => (getPref('tirelires', []) || []).filter(t => t && t.nom);
+function soldeTirelire(t) {
+  const pre = 'Tirelire · ' + t.nom; let s0 = 0, r90 = 0; const lim = new Date(); lim.setDate(lim.getDate() - 92);
+  S.journal.forEach(e => { if (e.deleted || !String(e.lib || '').startsWith(pre)) return; const c = catMap()[e.cat]; if (!c) return; const v = c.type === 'Retrait' ? -e.montant : c.type === 'Épargne' ? e.montant : 0; s0 += v; if (v > 0 && new Date(e.y, e.m - 1, 28) >= lim) r90 += v; });
+  const rythme = r90 / 3, reste = Math.max(0, t.cible - s0);
+  let eta = null; if (reste > 0 && rythme > 0) { const n = Math.ceil(reste / rythme), d = new Date(now.getFullYear(), now.getMonth() + n, 1); eta = MOIS[d.getMonth()] + ' ' + d.getFullYear(); }
+  return { solde: s0, frac: t.cible > 0 ? Math.min(1, s0 / t.cible) : 0, atteint: s0 >= t.cible - 0.005, rythme, eta };
+}
+function blocTirelires() {
+  const L = tirelires();
+  let h = `<div class="sec"><span>TIRELIRES À PROJET</span><button class="lnk" data-act="tir-new">+ NOUVELLE</button></div>`;
+  if (!L.length) return h + `<div class="note" style="display:block">Un projet (voyage, achat, coussin de sécurité…) avec un montant à atteindre. Tu l'alimentes depuis ici, et l'appli estime quand tu y arriveras.</div>`;
+  L.forEach(t => { const s = soldeTirelire(t);
+    h += `<div class="tir ${s.atteint ? 'win' : ''}"><div class="tirh"><span class="tem">${esc(t.emoji || '🐷')}</span><div><b>${esc(t.nom)}</b><small>${e0(s.solde)} / ${e0(t.cible)}${t.date ? ' · pour ' + esc(t.date) : ''}</small></div><button class="lnk" data-act="tir-edit" data-id="${t.id}">✎</button></div>
+      <div class="nivbar"><i style="width:${Math.round(s.frac * 100)}%"></i></div>
+      <div class="note" style="display:block;margin-top:4px">${s.atteint ? '🎉 Objectif atteint !' : s.eta ? 'À ce rythme (' + e0(s.rythme) + '/mois) : <b>' + esc(s.eta) + '</b>' : 'Ajoute un premier montant pour lancer l\'estimation'}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="chip on" data-act="tir-add" data-id="${t.id}" style="flex:1">+ AJOUTER</button><button class="chip" data-act="tir-out" data-id="${t.id}" style="flex:1">− RETIRER</button></div></div>`; });
+  return h;
+}
+const EMOJIS_TIR = ['🐷', '✈️', '🏝️', '🎮', '📺', '🚗', '🏠', '🎁', '💍', '🛟', '🎸', '📚'];
+function rendreTirEdit() {
+  const f = S.form;
+  $('#sheetIn').innerHTML = enteteSheet(f.id ? 'MODIFIER LA TIRELIRE' : 'NOUVELLE TIRELIRE', null) + `
+    <div class="chips" style="margin-top:12px">${EMOJIS_TIR.map(e => `<button class="chip ${f.emoji === e ? 'on' : ''}" data-act="tir-emo" data-e="${e}" style="font-size:18px">${e}</button>`).join('')}</div>
+    <input class="libin" data-f="nom" placeholder="Nom du projet (ex. Japon)" value="${esc(f.nom)}" maxlength="30">
+    <input class="libin" data-f="cible" inputmode="decimal" placeholder="Montant à atteindre en €" value="${esc(f.cible)}">
+    <input class="libin" data-f="date" placeholder="Pour quand ? (facultatif, ex. été 2027)" value="${esc(f.date || '')}" maxlength="30">
+    <div class="err" id="ferr"></div><button class="go" data-act="tir-ok">ENREGISTRER</button>
+    ${f.id ? `<button class="danger ${f.arm ? 'armed' : ''}" data-act="tir-del">${f.arm ? 'TOUCHE ENCORE : SUPPRIMER LA TIRELIRE' : 'SUPPRIMER LA TIRELIRE'}</button><div class="note" style="display:block">Supprimer la tirelire ne supprime pas l'argent saisi dans le Journal.</div>` : ''}`;
+  lierChamps();
+}
+function okTirelire() {
+  const f = S.form, nom = String(f.nom || '').trim().replace(/·/g, ''), cible = parseFloat(String(f.cible || '').replace(',', '.'));
+  if (!nom) { $('#ferr').textContent = 'Donne un nom'; return; }
+  if (!(cible > 0)) { $('#ferr').textContent = 'Indique le montant à atteindre'; return; }
+  const L = tirelires().filter(t => t.id !== f.id);
+  if (L.some(t => t.nom.toLowerCase() === nom.toLowerCase())) { $('#ferr').textContent = 'Ce nom existe déjà'; return; }
+  L.push({ id: f.id || uid(), nom, emoji: f.emoji || '🐷', cible: Math.round(cible * 100) / 100, date: String(f.date || '').trim() });
+  setPref('tirelires', L); fermer(); rendre(true); toast('Tirelire « ' + nom + ' » enregistrée');
+}
+function alimenterTirelire(id, sortie) {
+  const t = tirelires().find(x => x.id === id); if (!t) return;
+  const cE = catsDuType('Épargne').find(c => c.type === (sortie ? 'Retrait' : 'Épargne'));
+  if (!cE) { toast(sortie ? 'Aucune catégorie de retrait d\'épargne' : 'Aucune catégorie d\'épargne'); return; }
+  ouvrirSaisie({ cat: cE.nom, montant: '', lib: 'Tirelire · ' + t.nom }, true);
+}
+// --- Défi de la semaine ---
+const lundi = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const isoJ = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+function depSemaine(cat, l) { const a = isoJ(l), f = new Date(l); f.setDate(f.getDate() + 6); const b = isoJ(f); return S.journal.filter(e => !e.deleted && e.date && e.date >= a && e.date <= b && e.cat === cat && e.montant > 0).reduce((t, e) => t + e.montant, 0); }
+function propositionSemaine() {
+  const l = lundi(now); const cand = budgetsDefiables().filter(c => c.suivi === 'Mensuel' || c.suivi === 'Annuel').map(c => {
+    let t = 0; for (let k = 1; k <= 4; k++) { const d = new Date(l); d.setDate(d.getDate() - 7 * k); t += depSemaine(c.nom, d); }
+    const moy = t / 4 || c.budget * 12 / 52; return { cat: c.nom, moy };
+  }).sort((a, b) => b.moy - a.moy)[0];
+  if (!cand) return null;
+  return { cat: cand.cat, montant: Math.max(5, Math.round(cand.moy * 0.8 / 5) * 5) };
+}
+function semaines() { return getPref('semaines', {}) || {}; }
+function etatSemaines() {
+  const W = semaines(), l0 = isoJ(lundi(now)); let reussis = 0;
+  Object.keys(W).forEach(k => { if (k < l0 && k >= JEU_DEBUT.iso) { const d = new Date(k + 'T00:00:00'); if (depSemaine(W[k].cat, d) <= W[k].montant + 0.005) reussis++; } });
+  return { cur: W[l0] ? Object.assign({ cle: l0 }, W[l0], { dep: depSemaine(W[l0].cat, lundi(now)) }) : null, reussis, cle: l0 };
+}
+function blocSemaine() {
+  const st = etatSemaines(), fin = new Date(lundi(now)); fin.setDate(fin.getDate() + 6);
+  let h = `<div class="sec"><span>DÉFI DE LA SEMAINE</span><span>JUSQU'AU ${fin.getDate()} ${MC[fin.getMonth()].toUpperCase()}</span></div>`;
+  if (st.cur) { const ok = st.cur.dep <= st.cur.montant + 0.005, w = st.cur.montant > 0 ? Math.min(100, st.cur.dep / st.cur.montant * 100) : 100;
+    return h + `<div class="brow" style="border:1.5px solid ${ok ? 'var(--ok)' : 'var(--bad)'};border-radius:10px;padding:12px"><div class="bhead"><span class="bname">${esc(st.cur.cat)} ≤ ${e0(st.cur.montant)}</span><span class="stamp s-${ok ? 'ok' : 'bad'}">${ok ? 'EN COURS' : 'RATÉ'}</span></div><div class="bar"><i style="width:${w}%;background:${ok ? 'var(--ok)' : 'var(--bad)'}"></i></div><div class="bsub">${e0(st.cur.dep)} cette semaine · ${st.reussis} semaine${st.reussis > 1 ? 's' : ''} réussie${st.reussis > 1 ? 's' : ''} au total</div></div>`; }
+  const p = propositionSemaine(); if (!p) return '';
+  return h + `<div class="note" style="display:block;margin-top:0">Proposé pour toi : <b>${esc(p.cat)} sous ${e0(p.montant)}</b> d'ici dimanche (20 % de moins que ta semaine habituelle). Seules les dépenses saisies depuis l'appli comptent.</div><div style="display:flex;gap:8px;margin-top:8px"><button class="go" data-act="sem-ok" data-cat="${esc(p.cat)}" data-m="${p.montant}" style="flex:2;margin:0">RELEVER LE DÉFI</button></div>`;
+}
+// --- Défis saisonniers ---
+function saisonActuelle() {
+  const m = now.getMonth() + 1, y = now.getFullYear();
+  if (m === 11) { const j = joursJeu().filter(x => x[0].startsWith(y + '-11') && x[1] === true).length; return { id: 'nov' + y, nom: 'NOVEMBRE SOBRE', txt: '10 jours sans dépense courante en novembre', cur: Math.min(j, 10), max: 10, xp: 150 }; }
+  if (m === 12 && now.getDate() <= 26) { const J = joursJeu().filter(x => x[0].startsWith(y + '-12')).slice(0, 24); return { id: 'avent' + y, nom: "CALENDRIER DE L'AVENT", avent: J, cur: J.filter(x => x[1] === true).length, max: 15, xp: 250, txt: 'Chaque jour sans dépense courante ouvre une case. 15 cases = récompense.' }; }
+  if (m === 1 && now.getDate() <= 15) return { id: 'wrap' + (y - 1), nom: 'TON WRAPPED ' + (y - 1) + ' EST PRÊT', wrapped: y - 1 };
+  return null;
+}
+const CASES = ['☕', '🎄', '⭐', '🍪', '🎁', '❄️', '🕯️', '🦌', '🍫', '🧦', '🔔', '🎅', '🥐', '🎶', '🧣', '🍊', '🪵', '✨', '🍷', '🎀', '🧸', '🌟', '🍰', '🎉'];
+function blocSaison() {
+  const s = saisonActuelle(); if (!s) return '';
+  if (s.wrapped) return `<div class="sec"><span>ÉVÉNEMENT</span></div><button class="play" data-act="story" data-k="a" data-y="${s.wrapped}"><span>▶</span> ${esc(s.nom)}</button>`;
+  let h = `<div class="sec"><span>ÉVÉNEMENT · ${esc(s.nom)}</span><span>${s.cur}/${s.max}</span></div><div class="saison"><div class="note" style="display:block;margin:0 0 8px">${esc(s.txt)} · +${s.xp} XP${s.cur >= s.max ? ' · <b class="c-ok">réussi ✓</b>' : ''}</div>`;
+  if (s.avent) h += `<div class="avent">${Array.from({ length: 24 }, (_, i) => { const j = s.avent[i]; const ouv = j && j[1] === true, rate = j && j[1] === false; return `<div class="${ouv ? 'ouv' : rate ? 'rat' : ''}">${ouv ? CASES[i] : `<small>${i + 1}</small>`}</div>`; }).join('')}</div>`;
+  else h += `<div class="nivbar"><i style="width:${Math.round(s.cur / s.max * 100)}%"></i></div>`;
+  return h + '</div>';
+}
+// --- Alertes futées ---
+function alertes() {
+  const y = now.getFullYear(), m = now.getMonth() + 1, [py, pm] = reculer(y, m), cm = catMap(), out = [];
+  const abo = (yy, mm) => { const p = calc(yy, mm).par; return Object.keys(p).filter(n => cm[n] && cm[n].groupe === 'Abonnements').reduce((t, n) => t + p[n].j + p[n].e, 0); };
+  const a1 = abo(y, m), a0 = abo(py, pm); if (a1 - a0 >= 1) out.push({ id: 'abo' + y + m, ico: '📈', txt: `Tes abonnements passent de ${e0(a0)} à <b>${e0(a1)}</b> ce mois-ci (+${e0(a1 - a0)})` });
+  (S.data.echeancier || []).filter(e => !e.deleted && !e.pause && cm[e.cat] && cm[e.cat].groupe === 'Abonnements' && !echTermine(e)).map(e => { let an = 0; for (let k = 1; k <= 12; k++) an += echMontant(e, y, k, true); return { e, an }; })
+    .filter(x => x.an > 100).sort((a, b) => b.an - a.an).slice(0, 3).forEach(x => out.push({ id: 'cher' + x.e.lib, ico: '💸', txt: `${esc(x.e.lib)} te coûte <b>${e0(x.an)} par an</b>. Toujours utile ?` }));
+  const d = now.getDate(), fr = d / dim(y, m);
+  budgetsDefiables().forEach(c => { let t = 0, n = 0; for (let k = 1; k <= 6; k++) { let yy = y, mm = m - k; while (mm < 1) { mm += 12; yy--; } if (moisActif(yy, mm)) { t += depenseMois(c.nom, yy, mm); n++; } } const moy = n ? t / n : 0, cur = depenseMois(c.nom, y, m);
+    if (moy > 10 && cur > moy * 1.3 && cur > c.budget * fr) out.push({ id: 'drap' + c.nom + y + m, ico: '⚠️', txt: `${esc(c.nom)} : déjà <b>${e0(cur)}</b> ce mois-ci, ta moyenne est ${e0(moy)}` }); });
+  occurrences(y, m).filter(o => o.type !== 'Revenu' && o.type !== 'Retrait' && o.v >= 150 && o.jour >= d && o.jour <= d + 3).forEach(o => out.push({ id: 'gros' + o.lib + y + m, ico: '🏦', txt: `${esc(o.lib)} : <b>${e2(o.v)}</b> prélevés le ${o.jour}` }));
+  const vues = LS.get('alertesVues', []); return out.filter(a => !vues.includes(a.id));
+}
+function blocAlertes() {
+  const A = alertes(); if (!A.length) return '';
+  return `<div class="alerts"><div class="ah"><span>À SURVEILLER</span><span>${A.length}</span></div>${A.slice(0, S.allAlertes ? 99 : 2).map(a => `<div class="al"><span>${a.ico}</span><p>${a.txt}</p><button data-act="al-ok" data-id="${esc(a.id)}" aria-label="Masquer">✕</button></div>`).join('')}${A.length > 2 ? `<button class="lnk" data-act="allalertes">${S.allAlertes ? 'moins ▴' : 'voir les ' + A.length + ' ▾'}</button>` : ''}</div>`;
+}
+// --- Mode voyage ---
+const voyages = () => (getPref('voyages', []) || []).filter(v => v && v.nom);
+const voyageActif = () => { const a = auj(); return voyages().find(v => v.debut <= a && a <= v.fin) || null; };
+function depVoyage(v) { const pre = v.nom + ' · '; return S.journal.filter(e => !e.deleted && String(e.lib || '').startsWith(pre) && e.montant > 0 && (catMap()[e.cat] || {}).type === 'Dépense').reduce((t, e) => t + e.montant, 0); }
+function blocVoyageAccueil() {
+  const v = voyageActif(); if (!v) return '';
+  const dep = depVoyage(v), j = Math.round((new Date(auj() + 'T00:00:00') - new Date(v.debut + 'T00:00:00')) / 864e5) + 1, n = Math.round((new Date(v.fin + 'T00:00:00') - new Date(v.debut + 'T00:00:00')) / 864e5) + 1;
+  const w = v.budget > 0 ? Math.min(100, dep / v.budget * 100) : 0, ok = dep <= v.budget;
+  return `<div class="voy"><div class="bhead"><span class="bname">✈ ${esc(v.nom.toUpperCase())} · JOUR ${j}/${n}</span><span class="${ok ? '' : 'c-bad'} mono">${e0(dep)} / ${e0(v.budget)}</span></div><div class="bar"><i style="width:${w}%;background:${ok ? 'var(--ok)' : 'var(--bad)'}"></i></div><div class="bsub">${ok ? e0((v.budget - dep) / Math.max(1, n - j + 1)) + ' par jour jusqu\'au retour' : 'budget voyage dépassé de ' + e0(dep - v.budget)} · tes séries sont en pause</div></div>`;
+}
+function blocVoyages() {
+  const L = voyages();
+  let h = `<div class="sec"><span>VOYAGES</span><button class="lnk" data-act="voy-new">+ NOUVEAU</button></div>`;
+  if (!L.length) return h + `<div class="note" style="display:block">Pendant un voyage, l'appli suit un budget à part, ajoute le nom du voyage à tes saisies et met tes séries en pause.</div>`;
+  L.slice().sort((a, b) => b.debut.localeCompare(a.debut)).forEach(v => { const dep = depVoyage(v), a = auj();
+    h += `<button class="bil" data-act="voy-edit" data-id="${v.id}"><div><b>✈ ${esc(v.nom)}</b><small>${esc(v.debut.split('-').reverse().join('/'))} → ${esc(v.fin.split('-').reverse().join('/'))}${a < v.debut ? ' · à venir' : a <= v.fin ? ' · en cours' : v.tricount ? ' · Tricount importé ✓' : ' · Tricount à importer'}</small></div><span class="${dep > v.budget ? 'c-bad' : ''}">${e0(dep)} / ${e0(v.budget)}</span></button>`; });
+  return h;
+}
+function rendreVoyEdit() {
+  const f = S.form;
+  $('#sheetIn').innerHTML = enteteSheet(f.id ? 'MODIFIER LE VOYAGE' : 'NOUVEAU VOYAGE', null) + `
+    <input class="libin" data-f="nom" placeholder="Nom (ex. Pays Baltes)" value="${esc(f.nom)}" maxlength="25" style="margin-top:12px">
+    <div class="grp">DU</div><input class="libin" data-f="debut" type="date" value="${esc(f.debut)}">
+    <div class="grp">AU</div><input class="libin" data-f="fin" type="date" value="${esc(f.fin)}">
+    <div class="grp">BUDGET DU VOYAGE</div><input class="libin" data-f="budget" inputmode="decimal" placeholder="en €" value="${esc(f.budget)}">
+    <div class="err" id="ferr"></div><button class="go" data-act="voy-ok">ENREGISTRER</button>
+    ${f.id ? `<button class="chip" data-act="tri-open" data-id="${f.id}" style="margin-top:10px;width:100%">📥 Importer le Tricount du voyage</button>` : ''}
+    ${f.id ? `<button class="danger ${f.arm ? 'armed' : ''}" data-act="voy-del">${f.arm ? 'TOUCHE ENCORE : SUPPRIMER' : 'SUPPRIMER LE VOYAGE'}</button>` : ''}`;
+  lierChamps();
+}
+function okVoyage() {
+  const f = S.form, nom = String(f.nom || '').trim().replace(/·/g, ''), b = parseFloat(String(f.budget || '').replace(',', '.'));
+  if (!nom) { $('#ferr').textContent = 'Donne un nom'; return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.debut || '') || !/^\d{4}-\d{2}-\d{2}$/.test(f.fin || '') || f.fin < f.debut) { $('#ferr').textContent = 'Vérifie les dates'; return; }
+  if (!(b >= 0)) { $('#ferr').textContent = 'Indique un budget'; return; }
+  const L = voyages().filter(v => v.id !== f.id); L.push({ id: f.id || uid(), nom, debut: f.debut, fin: f.fin, budget: Math.round(b * 100) / 100 });
+  setPref('voyages', L); fermer(); rendre(true); toast('Voyage « ' + nom + ' » enregistré');
+}
+const jourEnVoyage = iso => voyages().some(v => v.debut <= iso && iso <= v.fin);
+
+// ================= 6.1 : DÉBLOCAGE À LA CARTE, OBJECTIF ANNUEL, RÉSUMÉ DU DIMANCHE, IMPORT TRICOUNT =================
+const FEAT_DETAIL = {
+  escalier: "Chaque mois, un objectif d'épargne. Tu l'atteins : la marche suivante monte un peu. Tu le rates : tu redescends d'une marche. Ça fait grimper ton épargne sans y penser.",
+  saison: "Des événements à durée limitée : Novembre sobre (10 jours sans dépense), calendrier de l'avent du budget en décembre, ton Wrapped de l'année en janvier. Chacun rapporte de l'XP.",
+  tirelires: "Crée une cagnotte par projet (voyage, achat, coussin de sécurité) avec un montant à atteindre. L'appli suit ce que tu y mets et estime la date où tu y arriveras.",
+  objectif: "Fixe un montant à mettre de côté sur l'année. Une jauge dédiée te montre si tu es en avance ou en retard, et combien mettre chaque mois pour y arriver.",
+  semaine: "Chaque lundi, un petit défi calculé sur tes habitudes : par exemple, Courses sous 35 € cette semaine. Réussi = de l'XP.",
+  resume: "Le dimanche soir, un bandeau sur l'accueil résume ta semaine : ce que tu as dépensé par rapport à d'habitude, tes jours sans dépense, et les prélèvements de la semaine qui arrive.",
+  alertes: "Un encadré « À surveiller » sur l'accueil : abonnements qui augmentent, abonnements qui coûtent cher à l'année, catégorie qui dérape par rapport à ta moyenne, gros prélèvement dans les 3 jours.",
+  voyage: "Pendant un voyage : un budget à part, le nom du voyage ajouté à tes saisies, tes séries en pause. À la fin, tu peux importer le Tricount pour enregistrer ta vraie part des dépenses.",
+  cosmetiques: "Plus de choses à débloquer avec les niveaux : thèmes complets, tirelire mascotte, tampons, styles de chiffres, aiguilles, fêtes, tickets, son « cha-ching »."
+};
+const debloques = () => LS.get('debloques', []);
+function rendreSoon() {
+  const f = S.form, F = FEAT.find(x => x[0] === f.k); if (!F) { fermer(); return; }
+  const deja = dispo(F[0]);
+  $('#sheetIn').innerHTML = enteteSheet(deja ? 'NOUVEAUTÉ' : 'PROCHAINEMENT', null) + `
+    <div class="soonh"><span>${deja ? '✨' : '🔒'}</span><b>${esc(F[1])}</b><small>${deja ? 'Débloqué' : 'Arrive pour tout le monde en ' + esc(MOIS[F[4] - 1].toLowerCase()) + ' ' + F[3]}</small></div>
+    <p class="soonp">${esc(FEAT_DETAIL[F[0]] || F[2])}</p>
+    ${deja ? '<button class="go" data-act="close">OK</button>' : `<button class="go" data-act="soon-ok" data-k="${F[0]}">DÉBLOQUER MAINTENANT</button>
+    <div class="note" style="display:block;text-align:center">Tu pourras le masquer à tout moment dans Réglages → Fonctionnalités.</div>`}`;
+}
+function blocProchainement(keys) {
+  const L = FEAT.filter(f => !dispo(f[0]) && (!keys || keys.includes(f[0])));
+  if (!L.length) return '';
+  return `<div class="sec"><span>PROCHAINEMENT</span><span>TOUCHE POUR DÉCOUVRIR</span></div>${L.map(f => `<button class="soon" data-act="soon" data-k="${f[0]}"><span>🔒</span><div><b>${esc(f[1])}</b><small>${esc(f[2])}</small></div><em>${esc(MC[f[4] - 1])} ${f[3]}</em></button>`).join('')}`;
+}
+
+// --- Objectif d'épargne de l'année ---
+const objectifs = () => getPref('objectifs', {}) || {};
+function epAnnee(y) {
+  const fin = y < now.getFullYear() ? 12 : y > now.getFullYear() ? 0 : now.getMonth() + 1; let t = 0;
+  for (let m = 1; m <= fin; m++) if (moisActif(y, m) || statut(y, m) === 'cours') t += calc(y, m).ep;
+  return t;
+}
+function etatObjectif(y) {
+  const cible = +objectifs()[y] || 0; if (!(cible > 0)) return null;
+  const ep = epAnnee(y), cur = y === now.getFullYear();
+  const ecoule = y < now.getFullYear() ? 12 : cur ? now.getMonth() + now.getDate() / dim(y, now.getMonth() + 1) : 0;
+  const attendu = cible * ecoule / 12, reste = Math.max(0, cible - ep), moisRest = cur ? 12 - now.getMonth() : 0;
+  return { y, cible, ep, frac: Math.max(0, Math.min(1, ep / cible)), attendu, ecart: ep - attendu, reste, parMois: moisRest > 0 ? reste / moisRest : 0, proj: ecoule >= 1 ? ep / ecoule * 12 : null, atteint: ep >= cible - 0.005 };
+}
+function jaugeObjectif(f) {
+  const a = Math.PI * (1 - f), x = 100 + 80 * Math.cos(a), yy = 100 - 80 * Math.sin(a);
+  return `<svg viewBox="0 0 200 112" class="objg"><path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--track)" stroke-width="16" stroke-linecap="round"/>
+    ${f > 0.001 ? `<path class="objarc" d="M20 100 A80 80 0 0 1 ${x.toFixed(1)} ${yy.toFixed(1)}" fill="none" stroke="${f >= 1 ? 'var(--ok)' : 'url(#objgr)'}" stroke-width="16" stroke-linecap="round"/>` : ''}
+    <defs><linearGradient id="objgr" x1="0" x2="1"><stop offset="0" stop-color="#2B7FD8"/><stop offset="1" stop-color="#1D9E75"/></linearGradient></defs>
+    <text x="100" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="30" font-weight="700" fill="var(--ink)">${Math.round(f * 100)} %</text></svg>`;
+}
+function blocObjectif() {
+  const y = now.getFullYear(), o = etatObjectif(y);
+  let h = `<div class="sec"><span>OBJECTIF D'ÉPARGNE ${y}</span>${o ? '<button class="lnk" data-act="obj-edit">RÉGLER</button>' : ''}</div>`;
+  if (!o) return h + `<div class="note" style="display:block;margin-top:0">Combien veux-tu mettre de côté en ${y} ? Une jauge dédiée te dira si tu es dans les temps.</div><button class="go" data-act="obj-edit" style="margin-top:8px">FIXER MON OBJECTIF</button>`;
+  return h + `<div class="obj ${o.atteint ? 'win' : ''}">${jaugeObjectif(o.frac)}
+    <div class="objn"><b>${e0(o.ep)}</b><span>sur ${e0(o.cible)}</span></div>
+    <div class="note" style="display:block;text-align:center;margin-top:4px">${o.atteint ? '🎉 Objectif atteint, bravo !' : `${o.ecart >= 0 ? `<b class="c-ok">En avance de ${e0(o.ecart)}</b>` : `<b class="c-bad">En retard de ${e0(-o.ecart)}</b>`} sur le rythme prévu · encore <b>${e0(o.parMois)}/mois</b> d'ici décembre`}${o.proj != null && !o.atteint ? `<br>À ce rythme, tu finis l'année à <b>${e0(o.proj)}</b>` : ''}</div></div>`;
+}
+function rendreObjEdit() {
+  const f = S.form;
+  let t = 0, n = 0; for (let k = 1; k <= 6; k++) { let yy = now.getFullYear(), mm = now.getMonth() + 1 - k; while (mm < 1) { mm += 12; yy--; } if (moisActif(yy, mm)) { t += calc(yy, mm).ep; n++; } }
+  const sug = n ? Math.max(100, Math.round(t / n * 12 / 100) * 100) : 0;
+  $('#sheetIn').innerHTML = enteteSheet("OBJECTIF D'ÉPARGNE " + f.y, null) + `
+    <div class="note" style="display:block;margin-top:10px">Tout ce qui part sur l'épargne dans l'année compte (Échéancier compris), moins les retraits.</div>
+    <input class="libin" data-f="montant" inputmode="decimal" placeholder="Montant pour l'année en €" value="${esc(f.montant)}" style="margin-top:12px">
+    ${sug ? `<button class="chip sug" data-act="obj-sug" data-v="${sug}">Suggestion : ${e0(sug)} (ton rythme des 6 derniers mois)</button>` : ''}
+    <div class="err" id="ferr"></div><button class="go" data-act="obj-ok">ENREGISTRER</button>
+    ${f.existe ? `<button class="danger" data-act="obj-del">RETIRER L'OBJECTIF</button>` : ''}`;
+  lierChamps();
+}
+
+// --- Résumé du dimanche ---
+function resumeCle() { // lundi de la semaine à résumer (dimanche dès 17 h, et toute la journée du lundi)
+  const j = now.getDay(), h = new Date().getHours();
+  if (j === 0 && h >= 17) return isoJ(lundi(now));
+  if (j === 1) { const l = lundi(now); l.setDate(l.getDate() - 7); return isoJ(l); }
+  return null;
+}
+function banniereResume() {
+  if (!ouvert('resume')) return '';
+  const k = resumeCle(); if (!k || LS.get('resumeVu', '') === k) return '';
+  const r = calcResume(k);
+  return `<button class="bilban sem" data-act="res-ban" data-k="${k}"><span class="bbp">☾</span><span><b>TA SEMAINE EN BREF</b><small>${e0(r.dep)} de dépenses courantes${r.moy > 0 ? ' · ' + (r.dep <= r.moy ? 'moins' : 'plus') + " que d'habitude" : ''}</small></span><span>›</span></button>`;
+}
+function depCourantes(a, b) { return S.journal.filter(e => !e.deleted && e.date && e.date >= a && e.date <= b && e.montant > 0 && estCourante(e.cat)); }
+function calcResume(k) {
+  const l = new Date(k + 'T00:00:00'), fin = new Date(l); fin.setDate(fin.getDate() + 6); const a = k, b = isoJ(fin);
+  const L = depCourantes(a, b), dep = L.reduce((t, e) => t + e.montant, 0);
+  let t4 = 0; for (let w = 1; w <= 4; w++) { const d0 = new Date(l); d0.setDate(d0.getDate() - 7 * w); const d1 = new Date(d0); d1.setDate(d1.getDate() + 6); t4 += depCourantes(isoJ(d0), isoJ(d1)).reduce((t, e) => t + e.montant, 0); }
+  const par = {}; L.forEach(e => par[e.cat] = (par[e.cat] || 0) + e.montant);
+  const top = Object.entries(par).sort((x, y) => y[1] - x[1]).slice(0, 3), gros = L.slice().sort((x, y) => y.montant - x.montant)[0] || null;
+  const jd = new Set(L.map(e => e.date)); let sans = 0, vus = 0; const lim = auj();
+  for (let i = 0; i < 7; i++) { const d = new Date(l); d.setDate(d.getDate() + i); const s = isoJ(d); if (s > lim) break; if (jourEnVoyage(s)) continue; vus++; if (!jd.has(s)) sans++; }
+  const W = semaines()[k], defi = W ? { cat: W.cat, montant: W.montant, dep: depSemaine(W.cat, l) } : null;
+  // la semaine qui vient : prélèvements et revenus prévus
+  const deb = new Date(fin); deb.setDate(deb.getDate() + 1); const fn = new Date(deb); fn.setDate(fn.getDate() + 6); const av = [];
+  [[deb.getFullYear(), deb.getMonth() + 1], [fn.getFullYear(), fn.getMonth() + 1]].filter((x, i, A) => i === 0 || x[1] !== A[0][1]).forEach(([yy, mm]) => {
+    occurrences(yy, mm).forEach(o => { if (!o.jour) return; const s = yy + '-' + String(mm).padStart(2, '0') + '-' + String(o.jour).padStart(2, '0'); if (s >= isoJ(deb) && s <= isoJ(fn) && o.type !== 'Revenu' && o.type !== 'Retrait' && o.v > 0) av.push({ lib: o.lib, v: o.v, s }); });
+  });
+  av.sort((x, y) => y.v - x.v);
+  return { k, a, b, l, fin, dep, moy: t4 / 4, n: L.length, top, gros, sans, vus, defi, av, avTot: av.reduce((t, x) => t + x.v, 0) };
+}
+function rendreResume() {
+  const r = calcResume(S.form.k), jm = d => d.getDate() + ' ' + MC[d.getMonth()];
+  const diff = r.moy > 0 ? Math.round((r.dep - r.moy) / r.moy * 100) : null;
+  const verdict = r.n === 0 ? 'Aucune dépense courante saisie cette semaine.' : diff == null ? 'Première semaine suivie, bravo.' : diff <= -15 ? 'Belle semaine, nettement sous ton habitude 👏' : diff <= 5 ? 'Une semaine dans ta moyenne.' : 'Semaine un peu plus chargée que d\'habitude.';
+  $('#sheetIn').innerHTML = `<div class="grab"></div><div class="shead"><span>SEMAINE DU ${jm(r.l).toUpperCase()} AU ${jm(r.fin).toUpperCase()}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
+    <div class="wrap">
+      <div class="whero" style="background:linear-gradient(135deg,#1E2A44,#3A2E5C)"><small>DÉPENSES COURANTES</small><b>${e0(r.dep)}</b><span>${verdict}</span></div>
+      <div class="wgrid">
+        ${tuile("VS D'HABITUDE", diff == null ? '—' : (diff > 0 ? '+' : '') + diff + ' %', 'moyenne : ' + e0(r.moy) + '/sem.', diff != null && diff > 0 ? 'c-bad' : 'c-ok')}
+        ${tuile('JOURS SANS DÉPENSE', r.sans + '/' + r.vus, r.sans >= 3 ? 'joli !' : '')}
+        ${r.defi ? tuile('DÉFI ' + esc(r.defi.cat.toUpperCase()), r.defi.dep <= r.defi.montant + 0.005 ? 'RÉUSSI' : 'RATÉ', e0(r.defi.dep) + ' / ' + e0(r.defi.montant), r.defi.dep <= r.defi.montant + 0.005 ? 'c-ok' : 'c-bad') : tuile('SAISIES', r.n, 'dépenses courantes')}
+        ${tuile('SEMAINE PROCHAINE', e0(r.avTot), r.av.length ? r.av.length + ' prélèvement' + (r.av.length > 1 ? 's' : '') : 'rien de prévu')}
+      </div>
+      ${r.top.length ? `<div class="wline">💸 ${r.top.map((t, i) => `<b>${i + 1}. ${esc(t[0])}</b> ${e0(t[1])}`).join(' · ')}</div>` : ''}
+      ${r.gros ? `<div class="wline">🧾 Plus grosse dépense : <b>${esc(r.gros.lib)}</b> ${e0(r.gros.montant)}</div>` : ''}
+      ${r.av.length ? `<div class="wline">📅 À venir : ${r.av.slice(0, 3).map(x => `<b>${esc(x.lib)}</b> ${e0(x.v)} (${+x.s.slice(8)} ${MC[+x.s.slice(5, 7) - 1]})`).join(' · ')}</div>` : ''}
+      ${ouvert('escalier') ? (() => { const e = escalier(); return `<div class="wline">🪜 Escalier : ${e0(e.ep)} épargnés sur ${e0(e.cible)} ce mois-ci${e.frac >= 1 ? ' ✓' : ''}</div>`; })() : ''}
+    </div>`;
+}
+
+// --- Import Tricount (fin de voyage) ---
+function parseCSV(txt) {
+  txt = String(txt || '').replace(/^﻿/, '');
+  const l0 = txt.split(/\r?\n/)[0] || '', cnt = c => (l0.match(new RegExp('\\' + c, 'g')) || []).length;
+  const sep = [';', ',', '\t'].sort((a, b) => cnt(b) - cnt(a))[0];
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (q) { if (c === '"') { if (txt[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; continue; }
+    if (c === '"') q = true; else if (c === sep) { row.push(cur); cur = ''; } else if (c === '\n' || c === '\r') { if (c === '\r' && txt[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; } else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.map(r => r.map(x => String(x).trim()));
+}
+function montantTC(s) {
+  let t = String(s == null ? '' : s).replace(/[^\d,.\-]/g, ''); if (!t) return NaN;
+  const c = t.lastIndexOf(','), p = t.lastIndexOf('.');
+  if (c > -1 && p > -1) t = c > p ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, ''); else if (c > -1) t = t.replace(',', '.');
+  const n = parseFloat(t); return isFinite(n) ? n : NaN;
+}
+function dateTC(s, def) {
+  s = String(s || '').trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
+  if ((m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/))) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return y + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); }
+  if (/^\d{5}(\.\d+)?$/.test(s)) { const d = new Date(Math.round((+s - 25569) * 864e5)); return isoJ(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); }
+  return def;
+}
+function chargerTableur(file, ok) {
+  const nom = (file.name || '').toLowerCase();
+  if (/\.(xlsx|xls|ods)$/.test(nom)) {
+    const go = () => { const r = new FileReader(); r.onload = () => { try { const wb = XLSX.read(r.result, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; ok(XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' }).map(x => x.map(v => String(v).trim()))); } catch (e) { ok(null, 'Fichier illisible'); } }; r.readAsArrayBuffer(file); };
+    if (window.XLSX) return go();
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; sc.onload = go; sc.onerror = () => ok(null, 'Connexion nécessaire pour lire un fichier Excel'); document.head.appendChild(sc);
+  } else { const r = new FileReader(); r.onload = () => ok(parseCSV(r.result)); r.readAsText(file); }
+}
+const RE_REMB = /rembours|refund|reimburs|virement|transfer|settle|équilibr|equilibr/i;
+function analyserTC(rows) {
+  const f = S.form; rows = (rows || []).filter(r => r.some(x => x !== ''));
+  const hi = rows.findIndex(r => r.filter(x => x !== '').length >= 3);
+  if (hi < 0 || rows.length < hi + 2) { f.err = "Je n'ai pas trouvé de tableau dans ce fichier"; rendreTricount(); return; }
+  const head = rows[hi].map((x, i) => x || 'Colonne ' + (i + 1)), data = rows.slice(hi + 1).filter(r => r.filter(x => x !== '').length >= 2);
+  const g = re => head.findIndex(x => re.test(x));
+  f.head = head; f.data = data; f.err = '';
+  f.cDate = g(/date/i); f.cDesc = g(/titre|title|descr|libell|objet|what|quoi/i); f.cCat = g(/cat/i);
+  f.cPart = g(/ma part|my share|part de|share of|impact|pour |for /i); if (f.cPart < 0) f.cPart = g(/montant|amount|total/i);
+  f.cPaye = g(/pay|par$|paid/i);
+  f.sel = data.map((r, i) => i); f.step = 2; rendreTricount();
+}
+function lignesTC() {
+  const f = S.form, v = voyages().find(x => x.id === f.vid) || {};
+  return (f.data || []).map((r, i) => {
+    const desc = f.cDesc >= 0 ? r[f.cDesc] : 'Dépense', part = f.cPart >= 0 ? Math.abs(montantTC(r[f.cPart])) : NaN;
+    const date = dateTC(f.cDate >= 0 ? r[f.cDate] : '', v.fin || auj()), tcat = f.cCat >= 0 ? r[f.cCat] || '' : '';
+    return { i, desc: desc || 'Dépense', part, date, tcat, remb: RE_REMB.test(desc + ' ' + tcat) };
+  }).filter(x => isFinite(x.part) && x.part > 0.004);
+}
+function rendreTricount() {
+  const f = S.form, v = voyages().find(x => x.id === f.vid); if (!v) { fermer(); return; }
+  let h = enteteSheet('IMPORTER LE TRICOUNT · ' + esc(v.nom.toUpperCase()), null);
+  if (f.step === 1) {
+    h += `<div class="note" style="display:block;margin-top:10px"><b>Dans Tricount :</b> ouvre le tricount du voyage → menu ⋯ ou Réglages → <b>Exporter</b> (Excel ou CSV) → enregistre le fichier dans Fichiers. Puis choisis-le ici.</div>
+      <label class="go tcfile">CHOISIR LE FICHIER<input type="file" id="tcfile" accept=".csv,.txt,.xlsx,.xls,.ods,text/csv"></label>
+      <div class="grp" style="margin-top:14px">OU COLLE LE CONTENU ICI</div>
+      <textarea class="libin" data-f="raw" rows="4" placeholder="Date;Titre;Montant;…">${esc(f.raw || '')}</textarea>
+      <button class="chip" data-act="tc-txt" style="margin-top:6px">Analyser le texte collé</button>
+      <div class="err" id="ferr">${esc(f.err || '')}</div>
+      <div class="note" style="display:block">Ce qui compte pour ton budget, c'est <b>ta part</b> de chaque dépense, pas ce que tu as payé. Les remboursements entre vous sont ignorés.</div>`;
+    $('#sheetIn').innerHTML = h; lierChamps();
+    const inp = $('#tcfile'); if (inp) inp.addEventListener('change', () => { const fl = inp.files && inp.files[0]; if (!fl) return; $('#ferr').textContent = 'Lecture…'; chargerTableur(fl, (rows, err) => { if (err) { f.err = err; rendreTricount(); return; } analyserTC(rows); }); });
+    return;
+  }
+  const L = lignesTC(), sel = new Set(f.sel), cm = cats().filter(c => c.type === 'Dépense' && !estAv(c.nom));
+  if (!f.cat) { const g = cm.find(c => /voyage|vacance|séjour|sejour/i.test(c.nom)) || cm.find(c => c.groupe === 'Loisirs') || cm[0]; f.cat = g ? g.nom : ''; }
+  if (f.init !== true) { L.forEach(x => { if (x.remb) sel.delete(x.i); }); f.sel = [...sel]; f.init = true; }
+  const choisies = L.filter(x => sel.has(x.i)), tot = choisies.reduce((t, x) => t + x.part, 0);
+  const deja = S.journal.filter(e => !e.deleted && String(e.lib || '').startsWith(v.nom + ' · ') && (catMap()[e.cat] || {}).type === 'Dépense' && !e.tc);
+  const col = (k, lab) => `<div class="grp">${lab}</div><div class="chips tcc">${f.head.map((x, i) => `<button class="chip ${f[k] === i ? 'on' : ''}" data-act="tc-col" data-k="${k}" data-i="${i}">${esc(x.slice(0, 22))}</button>`).join('')}${k === 'cCat' ? `<button class="chip ${f.cCat < 0 ? 'on' : ''}" data-act="tc-col" data-k="cCat" data-i="-1">Aucune</button>` : ''}</div>`;
+  h += `<div class="note" style="display:block;margin-top:8px">${f.data.length} lignes trouvées. Vérifie les colonnes : surtout <b>TA PART</b> (souvent la colonne à ton prénom).</div>
+    ${col('cPart', 'TA PART (MONTANT POUR TOI)')}${col('cDate', 'DATE')}${col('cDesc', 'DESCRIPTION')}${col('cCat', 'CATÉGORIE TRICOUNT (FACULTATIF)')}
+    <div class="grp">RANGER DANS</div><div class="chips">${cm.map(c => `<button class="chip ${f.cat === c.nom ? 'on' : ''}" data-act="tc-cat" data-c="${esc(c.nom)}">${esc(c.nom)}</button>`).join('')}</div>
+    <div class="grp">FORMAT</div><div class="chips"><button class="chip ${f.grp ? '' : 'on'}" data-act="tc-grp" data-v="0">Une ligne par dépense</button><button class="chip ${f.grp ? 'on' : ''}" data-act="tc-grp" data-v="1">Une seule ligne au total</button></div>
+    ${deja.length ? `<div class="alerts" style="margin-top:12px"><div class="ah"><span>DÉJÀ SAISI PENDANT LE VOYAGE</span><span>${e0(deja.reduce((t, e) => t + e.montant, 0))}</span></div><p style="margin:4px 0 8px;font-size:13px">${deja.length} dépense${deja.length > 1 ? 's' : ''} « ${esc(v.nom)} · … » déjà dans ton journal. Pour ne pas compter deux fois :</p><div class="chips"><button class="chip ${f.remp === true ? 'on' : ''}" data-act="tc-remp" data-v="1">Les remplacer par le Tricount</button><button class="chip ${f.remp === false ? 'on' : ''}" data-act="tc-remp" data-v="0">Garder les deux</button></div></div>` : ''}
+    <div class="sec" style="margin-top:16px"><span>${choisies.length}/${L.length} DÉPENSES</span><span>${e2(tot)} €</span></div>
+    <div class="tcl">${L.map(x => `<button class="tcr ${sel.has(x.i) ? 'on' : ''}" data-act="tc-sel" data-i="${x.i}"><i>${sel.has(x.i) ? '✓' : ''}</i><span><b>${esc(x.desc)}</b><small>${x.date.split('-').reverse().slice(0, 2).join('/')}${x.tcat ? ' · ' + esc(x.tcat) : ''}${x.remb ? ' · remboursement ?' : ''}</small></span><em>${e2(x.part)}</em></button>`).join('')}</div>
+    <div class="err" id="ferr">${esc(f.err || '')}</div>
+    <button class="go" data-act="tc-ok" ${!choisies.length || (deja.length && f.remp == null) ? 'disabled style="opacity:.45"' : ''}>IMPORTER ${f.grp ? '1 LIGNE' : choisies.length + ' LIGNE' + (choisies.length > 1 ? 'S' : '')} · ${e0(tot)}</button>
+    <button class="chip" data-act="tc-back" style="margin-top:8px">‹ Changer de fichier</button>`;
+  $('#sheetIn').innerHTML = h;
+}
+function importerTC() {
+  const f = S.form, v = voyages().find(x => x.id === f.vid); if (!v) return;
+  const sel = new Set(f.sel), L = lignesTC().filter(x => sel.has(x.i));
+  const deja = S.journal.filter(e => !e.deleted && String(e.lib || '').startsWith(v.nom + ' · ') && (catMap()[e.cat] || {}).type === 'Dépense' && !e.tc);
+  if (!L.length || !f.cat) return;
+  if (deja.length && f.remp == null) { f.err = 'Choisis : remplacer ou garder tes saisies'; rendreTricount(); return; }
+  let lignes = L.map(x => ({ date: x.date, lib: v.nom + ' · ' + x.desc, montant: Math.round(x.part * 100) / 100 }));
+  if (f.grp) { const dmax = L.map(x => x.date).sort().pop(); lignes = [{ date: dmax, lib: v.nom + ' · Tricount (' + L.length + ' dépenses)', montant: Math.round(L.reduce((t, x) => t + x.part, 0) * 100) / 100 }]; }
+  const es = lignes.map(x => { const y = +x.date.slice(0, 4), m = +x.date.slice(5, 7); return { id: uid(), row: null, date: x.date, mois: moisLabel(y, m), lib: x.lib.slice(0, 80), cat: f.cat, montant: x.montant, y, m, srv: null, pending: true, nw: true, tc: true }; });
+  const manque = es.find(e => S.data.mois && S.data.mois.length && !S.data.mois.includes(e.mois));
+  if (manque) { f.err = manque.mois + " n'existe pas dans ton fichier"; rendreTricount(); return; }
+  if (f.remp) deja.forEach(e => supprimer(e));
+  es.forEach(e => S.journal.push(e)); memo = new Map();
+  setPref('voyages', voyages().map(x => x.id === v.id ? Object.assign({}, x, { tricount: auj() }) : x));
+  fermer(); S.y = es[0].y; S.m = es[0].m; rendre(true); celebrer();
+  toast(`Tricount importé : ${es.length} ligne${es.length > 1 ? 's' : ''} · ${e0(es.reduce((t, e) => t + e.montant, 0))}`, 'ANNULER', () => es.forEach(e => supprimer(e)));
+  es.forEach(e => enfiler({ op: 'add', id: e.id }));
+}
+
+// ================= 6.1 : STYLES D'INTERFACE ET POLICES =================
+// Chaque style change la police, la forme des blocs, des boutons, des titres… Se débloque par niveau ou par succès.
+const UI_SKINS = [
+  { t: 'ui', id: 'papier', nom: 'Papier', niv: 1, f: ['IBM Plex Sans'], p: { ff: 'IBM Plex Sans', r: '8px', b: '1.5px solid var(--rule)', sh: 'none', bg: 'var(--card)' } },
+  { t: 'ui', id: 'bulle', nom: 'Bulle', niv: 3, f: ['Nunito'], p: { ff: 'Nunito', r: '18px', b: '0', sh: '0 4px 10px rgba(0,0,0,.12)', bg: 'var(--card)' } },
+  { t: 'ui', id: 'carnet', nom: 'Carnet', niv: 99, suc: 'jours-3', f: ['Patrick Hand', 'Caveat'], p: { ff: 'Caveat', r: '3px 12px 4px 10px', b: '1.5px solid var(--ink2)', sh: 'none', bg: 'var(--card)' } },
+  { t: 'ui', id: 'brutal', nom: 'Brutal', niv: 5, f: ['Space Grotesk'], p: { ff: 'Space Grotesk', r: '3px', b: '2.5px solid var(--ink)', sh: '3px 3px 0 var(--ink)', bg: '#FFD84D' } },
+  { t: 'ui', id: 'console', nom: 'Console', niv: 99, suc: 'defi-lance', f: [], p: { ff: 'IBM Plex Mono', r: '0', b: '1px solid var(--ink3)', sh: 'none', bg: 'transparent' } },
+  { t: 'ui', id: 'magazine', nom: 'Magazine', niv: 7, f: ['Inter', 'Fraunces'], p: { ff: 'Fraunces', r: '0', b: '0', sh: '0 -1.5px 0 var(--ink), 0 1.5px 0 var(--ink)', bg: 'transparent', fs: 'italic' } },
+  { t: 'ui', id: 'verre', nom: 'Verre', niv: 99, suc: 'vert-1', f: ['Nunito'], p: { ff: 'Nunito', r: '14px', b: '1px solid rgba(255,255,255,.5)', sh: '0 6px 16px rgba(43,127,216,.25)', bg: 'linear-gradient(135deg,rgba(123,91,214,.35),rgba(29,158,117,.35))' } },
+  { t: 'ui', id: 'suisse', nom: 'Suisse', niv: 9, f: ['Inter'], p: { ff: 'Inter', r: '0', b: '0', sh: '-5px 0 0 #E2412E', bg: 'var(--card)', fw: 800 } },
+  { t: 'ui', id: 'arcade', nom: 'Arcade', niv: 99, suc: 'jours-7', f: ['VT323'], p: { ff: 'VT323', r: '0', b: '0', sh: '0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink)', bg: 'var(--card)', fz: '22px' } },
+  { t: 'ui', id: 'zen', nom: 'Zen', niv: 99, suc: 'zero-1', f: ['Lexend'], p: { ff: 'Lexend', r: '14px', b: '0', sh: 'none', bg: 'var(--soft)', fw: 300 } },
+  { t: 'ui', id: 'prestige', nom: 'Prestige', niv: 12, f: ['EB Garamond', 'Cinzel'], p: { ff: 'Cinzel', r: '2px', b: '1px solid #C9A443', sh: '0 0 0 3px var(--card), 0 0 0 4px #C9A443', bg: 'var(--card)' } }
+];
+const TEXTES = [
+  { t: 'texte', id: 'auto', nom: 'Celle du style', niv: 1, ff: '' },
+  { t: 'texte', id: 'plex', nom: 'Plex', niv: 1, ff: 'IBM Plex Sans' },
+  { t: 'texte', id: 'lisible', nom: 'Très lisible', niv: 2, ff: 'Atkinson Hyperlegible' },
+  { t: 'texte', id: 'inter', nom: 'Inter', niv: 3, ff: 'Inter' },
+  { t: 'texte', id: 'nunito', nom: 'Ronde', niv: 4, ff: 'Nunito' },
+  { t: 'texte', id: 'grotesk', nom: 'Grotesque', niv: 6, ff: 'Space Grotesk' },
+  { t: 'texte', id: 'lexend', nom: 'Aérée', niv: 8, ff: 'Lexend' },
+  { t: 'texte', id: 'serif', nom: 'Classique', niv: 10, ff: 'EB Garamond' },
+  { t: 'texte', id: 'mono', nom: 'Machine', niv: 99, suc: 'coffre', ff: 'IBM Plex Mono' },
+  { t: 'texte', id: 'manu', nom: 'Écriture', niv: 14, ff: 'Patrick Hand' },
+  { t: 'texte', id: 'pixel', nom: 'Pixel', niv: 99, suc: 'jours-14', ff: 'VT323' }
+];
+const POLICES_URL = { 'Nunito': 'Nunito:wght@400;600;800', 'Space Grotesk': 'Space+Grotesk:wght@400;500;700', 'Fraunces': 'Fraunces:ital,wght@0,600;0,800;1,600', 'Inter': 'Inter:wght@400;600;800', 'Patrick Hand': 'Patrick+Hand', 'Caveat': 'Caveat:wght@600', 'VT323': 'VT323', 'EB Garamond': 'EB+Garamond:wght@400;600', 'Cinzel': 'Cinzel:wght@600;700', 'Lexend': 'Lexend:wght@300;400;600', 'Atkinson Hyperlegible': 'Atkinson+Hyperlegible:wght@400;700', 'Courier Prime': 'Courier+Prime:wght@700' };
+const policesChargees = new Set();
+function chargerPolices(L) {
+  const a = (L || []).filter(f => POLICES_URL[f] && !policesChargees.has(f)); if (!a.length) return;
+  a.forEach(f => policesChargees.add(f));
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?' + a.map(f => 'family=' + POLICES_URL[f]).join('&') + '&display=swap'; document.head.appendChild(l);
+}
+const succesFait = id => { try { const s = etatJeu().succes.find(x => x.id === id); return !!(s && s.ok); } catch (e) { return false; } };
+const nomSucces = id => { const s = SUCCES.find(x => x[0] === id || x.id === id); return s ? (s.nom || s[2]) : id; };
+function appliquerUI() {
+  const d = document.documentElement.dataset, u = cos('ui'), tx = cos('texte');
+  d.ui = u; d.texte = tx;
+  const o = UI_SKINS.find(x => x.id === u), t = TEXTES.find(x => x.id === tx);
+  chargerPolices((o ? o.f : []).concat(t && t.ff ? [t.ff] : []));
+}
+function apercuUI(o) {
+  if (o.t === 'texte') return `<div class="uiprev"><b style="font-family:'${o.ff || 'IBM Plex Sans'}',sans-serif;font-size:${o.id === 'pixel' ? 26 : 20}px">Aa</b><small style="font-family:'${o.ff || 'IBM Plex Sans'}',sans-serif">${o.id === 'auto' ? 'auto' : '855 €'}</small></div>`;
+  const p = o.p;
+  return `<div class="uiprev" style="font-family:'${p.ff}',sans-serif"><span style="border:${p.b};border-radius:${p.r};box-shadow:${p.sh};background:${p.bg};font-style:${p.fs || 'normal'};font-weight:${p.fw || 600};font-size:${p.fz || '15px'}">Aa</span><i style="border-radius:${p.r};box-shadow:${p.sh};border:${p.b}"></i></div>`;
+}
+// Essai de 4 secondes d'un style verrouillé
+let essaiUI = null;
+function essayerUI(t, id) {
+  const d = document.documentElement.dataset, k = t === 'ui' ? 'ui' : t === 'texte' ? 'texte' : 'cth';
+  if (essaiUI) { clearTimeout(essaiUI.to); d[essaiUI.k] = essaiUI.v; }
+  const avant = d[k]; d[k] = id;
+  const o = tousCosm().find(x => x.t === t && x.id === id);
+  if (t === 'ui' && o) chargerPolices(o.f); if (t === 'texte' && o && o.ff) chargerPolices([o.ff]);
+  essaiUI = { k, v: avant, to: setTimeout(() => { d[k] = avant; essaiUI = null; }, 4000) };
+}
+
+// ================= COSMÉTIQUES 6.0 =================
+const COSM_EXTRA = [
+  { t: 'theme', id: 'defaut', nom: 'Papier', niv: 1 }, { t: 'theme', id: 'kraft', nom: 'Kraft', niv: 5 }, { t: 'theme', id: 'nuit', nom: 'Nuit bleue', niv: 9 },
+  { t: 'theme', id: 'poudre', nom: 'Rose poudré', niv: 13 }, { t: 'theme', id: 'terminal', nom: 'Terminal', niv: 15 }, { t: 'theme', id: 'noiror', nom: 'Noir & or', niv: 19 },
+  { t: 'mascotte', id: 'off', nom: 'Sans mascotte', niv: 1 }, { t: 'mascotte', id: 'on', nom: 'Tirelire vivante', niv: 3 },
+  { t: 'tampon', id: 'encre', nom: 'Encre', niv: 1 }, { t: 'tampon', id: 'neon', nom: 'Néon', niv: 2 }, { t: 'tampon', id: 'pixel', nom: 'Pixel', niv: 9 }, { t: 'tampon', id: 'cire', nom: 'Sceau de cire', niv: 14 },
+  { t: 'police', id: 'mono', nom: 'Mono', niv: 1 }, { t: 'police', id: 'ticket', nom: 'Ticket de caisse', niv: 5 }, { t: 'police', id: 'lcd', nom: 'Compteur LCD', niv: 10 }, { t: 'police', id: 'manu', nom: 'Manuscrite', niv: 15 },
+  { t: 'fete', id: 'confettis', nom: 'Confettis', niv: 1 }, { t: 'fete', id: 'pieces', nom: 'Pluie de pièces', niv: 6 }, { t: 'fete', id: 'feux', nom: "Feu d'artifice", niv: 13 },
+  { t: 'son', id: 'off', nom: 'Silence', niv: 1 }, { t: 'son', id: 'chaching', nom: 'Cha-ching !', niv: 11 },
+  { t: 'aiguille', id: 'classique', nom: 'Classique', niv: 1 }, { t: 'aiguille', id: 'fine', nom: 'Fine', niv: 4 }, { t: 'aiguille', id: 'fleche', nom: 'Flèche', niv: 8 }, { t: 'aiguille', id: 'laser', nom: 'Laser', niv: 12 }, { t: 'aiguille', id: 'doree', nom: 'Dorée', niv: 17 },
+  { t: 'ticket', id: 'thermique', nom: 'Thermique', niv: 1 }, { t: 'ticket', id: 'carnet', nom: 'Carnet', niv: 7 }, { t: 'ticket', id: 'dore', nom: 'Reçu doré', niv: 16 }];
+const TYPES_COSM = [['ui', 'INTERFACE'], ['theme', 'COULEURS'], ['texte', 'POLICE'], ['skin', 'JAUGES'], ['accent', 'ACCENT'], ['aiguille', 'AIGUILLES'], ['tampon', 'TAMPONS'], ['police', 'CHIFFRES'], ['fete', 'FÊTES'], ['son', 'SON'], ['ticket', 'TICKET'], ['mascotte', 'MASCOTTE'], ['titre', 'TITRE']];
+const cleCos = t => t === 'skin' ? 'skin' : t === 'accent' ? 'accent' : 'cos_' + t;
+const defCos = t => ({ ui: 'papier', texte: 'auto', skin: 'classique', accent: 'foret', theme: 'defaut', mascotte: 'off', tampon: 'encre', police: 'mono', fete: 'confettis', son: 'off', aiguille: 'classique', ticket: 'thermique', titre: '' })[t];
+const cos = t => on('jeu') ? LS.get(cleCos(t), defCos(t)) : defCos(t);
+function tousCosm() {
+  const L = SKINS.map(o => Object.assign({ t: 'skin' }, o)).concat(ACCENTS.map(o => Object.assign({ t: 'accent' }, o)));
+  return dispo('cosmetiques') ? L.concat(COSM_EXTRA, UI_SKINS, TEXTES) : L;
+}
+function appliquerCosmetiques() {
+  const d = document.documentElement.dataset;
+  try { appliquerUI(); } catch (e) {}
+  d.cth = cos('theme'); d.tampon = cos('tampon'); d.police = cos('police'); d.ticket = cos('ticket');
+  const sombre = ['nuit', 'terminal', 'noiror'].includes(d.cth), clair = ['kraft', 'poudre'].includes(d.cth);
+  if (sombre) d.theme = 'dark'; if (clair) d.theme = 'light';
+  const mt = document.querySelector('meta[name=theme-color]'); if (mt && (sombre || clair)) mt.content = getComputedStyle(document.documentElement).getPropertyValue('--nav').trim() || mt.content;
+  try { appliquerAccent(); } catch (e) {}
+}
+// --- Fêtes ---
+function celebrer() {
+  const f = cos('fete'); if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (f === 'confettis') return confettis();
+  const cv = document.createElement('canvas'), W = innerWidth, H = innerHeight; cv.width = W; cv.height = H; cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99';
+  document.body.appendChild(cv); const x = cv.getContext('2d'); let t = 0, P;
+  if (f === 'pieces') P = Array.from({ length: 40 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, vy: 3 + Math.random() * 4, r: 18 + Math.random() * 14, a: Math.random() * 6 }));
+  else { P = []; [[.3, .35], [.7, .3], [.5, .2]].forEach(([cx, cy], k) => { const col = ['#FFD166', '#EF476F', '#06D6A0'][k]; for (let i = 0; i < 46; i++) { const a = Math.PI * 2 * i / 46, v = 2 + Math.random() * 3.5; P.push({ x: W * cx, y: H * cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: col, d: k * 18 }); } }); }
+  const step = () => { x.clearRect(0, 0, W, H);
+    if (f === 'pieces') { x.font = '26px serif'; P.forEach(p => { p.y += p.vy; p.a += .1; x.save(); x.translate(p.x, p.y); x.scale(Math.cos(p.a), 1); x.fillText('🪙', -13, 9); x.restore(); }); }
+    else P.forEach(p => { if (t < p.d) return; p.vy += .05; p.x += p.vx; p.y += p.vy; x.globalAlpha = Math.max(0, 1 - (t - p.d) / 90); x.fillStyle = p.c; x.beginPath(); x.arc(p.x, p.y, 2.6, 0, 7); x.fill(); x.globalAlpha = 1; });
+    if (++t < 130) requestAnimationFrame(step); else cv.remove(); };
+  requestAnimationFrame(step);
+}
+// --- Son « cha-ching » à l'enregistrement ---
+function sonCaisse() {
+  if (cos('son') !== 'chaching') return;
+  try { const A = new (window.AudioContext || window.webkitAudioContext)(), t = A.currentTime;
+    [[1318, 0], [1760, .09], [2093, .16]].forEach(([fq, d]) => { const o = A.createOscillator(), g = A.createGain(); o.type = 'triangle'; o.frequency.value = fq; g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.18, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + .25); o.connect(g).connect(A.destination); o.start(t + d); o.stop(t + d + .3); });
+  } catch (e) {}
+}
+// --- Aiguille de la jauge classique ---
+function aiguilleClassique() {
+  switch (cos('aiguille')) {
+    case 'fine': return `<path d="M150 148.6 L36 150 L150 151.4 Z" fill="var(--ink)"/>`;
+    case 'fleche': return `<path d="M150 146 L64 146 L64 141 L40 150 L64 159 L64 154 L150 154 Z" fill="var(--bad)"/>`;
+    case 'laser': return `<line x1="150" y1="150" x2="34" y2="150" stroke="#FF2D55" stroke-width="3.5" stroke-linecap="round" style="filter:drop-shadow(0 0 5px #FF2D55)"/>`;
+    case 'doree': return `<defs><linearGradient id="agd" x1="0" x2="1"><stop offset="0" stop-color="#8E6A0E"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#B8860B"/></linearGradient></defs><path d="M150 144.5 L40 150 L150 155.5 Z" fill="url(#agd)"/>`;
+  }
+  return `<path d="M150 146 L44 150 L150 154 Z" fill="var(--bad)"/>`;
+}
+// --- Mascotte : tirelire qui grossit avec l'épargne depuis novembre 2026 ---
+const STADES = [[0, '🐷', 'Porcelet'], [200, '🐖', 'Cochon dodu'], [500, '🧰', 'Coffre'], [1000, '🪙', 'Lingot'], [2500, '💰', 'Trésor'], [5000, '🏦', 'Banque perso']];
+function mascotte() {
+  let ep = 0; let y = JEU_DEBUT.y, m = JEU_DEBUT.m;
+  while (ymNum(y, m) <= nowYM()) { ep += calc(y, m).ep; m++; if (m > 12) { m = 1; y++; } }
+  let i = 0; STADES.forEach((s, k) => { if (ep >= s[0]) i = k; });
+  return { ep, s: STADES[i], next: STADES[i + 1] || null };
+}
+function blocMascotte() {
+  if (!dispo('cosmetiques') || cos('mascotte') !== 'on') return '';
+  const M = mascotte();
+  return `<button class="masc" data-act="masc" aria-label="Ma tirelire"><span>${M.s[1]}</span><small>${e0(M.ep)}</small></button>`;
+}
+// --- Collection (tous types) ---
+function blocCollection(e) {
+  const T = S.collT || 'skin', L = tousCosm(), types = TYPES_COSM.filter(([t]) => t === 'titre' || L.some(o => o.t === t));
+  const vus = LS.get('cosmVus', null), nouveaux = L.filter(o => o.niv > 1 && debloque(o, e.niv) && vus && !vus.includes(o.t + ':' + o.id));
+  const n = L.filter(o => debloque(o, e.niv)).length;
+  let h = `<div class="sec"><span>COLLECTION</span><span>${n}/${L.length}${nouveaux.length ? ' · <b class="nouv">' + nouveaux.length + ' NOUVEAU' + (nouveaux.length > 1 ? 'X' : '') + '</b>' : ''}</span></div>
+    <div class="ctabs">${types.map(([t, l]) => `<button class="${T === t ? 'on' : ''}" data-act="colt" data-t="${t}">${l}${nouveaux.some(o => o.t === t) ? '<i></i>' : ''}</button>`).join('')}</div>`;
+  if (T === 'titre') {
+    const cur = LS.get('cos_titre', '') || e.titre;
+    return h + `<div class="chips">${TITRES.map((ti, k) => { const u = e.niv >= k + 1; return `<button class="chip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-niv="${k + 1}" style="${u ? '' : 'opacity:.4'}">${u ? '' : '🔒 '}${esc(ti)}</button>`; }).join('')}</div>`;
+  }
+  const sel = LS.get(cleCos(T), defCos(T));
+  if (T === 'ui') chargerPolices([].concat(...UI_SKINS.map(o => o.f))); if (T === 'texte') chargerPolices(TEXTES.map(o => o.ff).filter(Boolean));
+  if (T === 'ui' || T === 'texte' || T === 'theme') h += `<div class="note" style="display:block;margin:0 0 8px">Touche un style verrouillé pour l'essayer 4 secondes.</div>`;
+  h += `<div class="coll ${T === 'skin' ? 'c3' : ''}">`;
+  L.filter(o => o.t === T).forEach(o => { const u = debloque(o, e.niv), nv = nouveaux.includes(o), proche = !u && o.niv === e.niv + 1;
+    h += `<button class="cit ${sel === o.id ? 'on' : ''} ${u ? '' : 'verr'} ${proche ? 'proche' : ''}" data-act="${u ? 'cosm' : 'lock'}" data-t="${o.t}" data-id="${o.id}" data-niv="${o.niv}" data-suc="${o.suc || ''}">${nv ? '<em class="nbadge">NOUVEAU</em>' : ''}<span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b><small>${u ? (sel === o.id ? 'ACTIF' : 'CHOISIR') : o.suc ? '🏆 ' + esc(nomSucces(o.suc)) : '🔒 NIV. ' + o.niv}</small></button>`; });
+  return h + '</div>';
+}
+function apercuCosm(o) {
+  switch (o.t) {
+    case 'skin': return o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null);
+    case 'accent': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="20" fill="${o.c ? o.c[0] : '#1D9E75'}"/></svg>`;
+    case 'theme': { const C = { defaut: ['#F1EFE8', '#2C2C2A', '#1D9E75'], kraft: ['#E8DCC4', '#3B2F1E', '#B5651D'], nuit: ['#0F1A2B', '#E8EEF8', '#4FA3FF'], poudre: ['#F8E9EC', '#4A2731', '#D6457E'], terminal: ['#0A0F0A', '#9BE564', '#9BE564'], noiror: ['#0E0D0B', '#F3D27A', '#F3D27A'] }[o.id];
+      return `<svg viewBox="0 0 100 60"><rect width="100" height="60" rx="8" fill="${C[0]}"/><rect x="10" y="12" width="50" height="7" rx="3" fill="${C[1]}"/><rect x="10" y="25" width="34" height="5" rx="2" fill="${C[1]}" opacity=".5"/><circle cx="76" cy="38" r="12" fill="${C[2]}"/></svg>`; }
+    case 'aiguille': { const save = LS.get('cos_aiguille', 'classique'); LS.set('cos_aiguille', o.id); const a = aiguilleClassique(); LS.set('cos_aiguille', save); return `<svg viewBox="20 110 150 80"><g transform="rotate(35 150 150)">${a}</g><circle cx="150" cy="150" r="9" fill="var(--ink)"/></svg>`; }
+    case 'tampon': return `<div class="tprev" data-tampon="${o.id}"><span class="stamp s-ok">TENU</span></div>`;
+    case 'police': return `<div class="pprev" data-police="${o.id}"><span class="big">855 €</span></div>`;
+    case 'fete': return `<div class="fprev">${{ confettis: '🎊', pieces: '🪙', feux: '🎆' }[o.id]}</div>`;
+    case 'son': return `<div class="fprev">${o.id === 'off' ? '🔇' : '🔔'}</div>`;
+    case 'ticket': return `<div class="kprev" data-ticket="${o.id}"><div class="ticket"><div class="tl"><span>RESTE</span><span>+120</span></div></div></div>`;
+    case 'ui': case 'texte': return apercuUI(o);
+    case 'mascotte': return `<div class="fprev">${o.id === 'on' ? '🐷' : '·'}</div>`;
+  }
+  return '';
+}
+// --- Montée de niveau en plein écran + XP flottante ---
+function ecranNiveau(avant, e) {
+  const gagnes = tousCosm().filter(o => o.niv > avant && o.niv <= e.niv);
+  const el = document.createElement('div'); el.className = 'lvlup';
+  el.innerHTML = `<div class="lvin"><small>NIVEAU SUPÉRIEUR</small><div class="lvn">${e.niv}</div><div class="lvt">${esc(e.titre.toUpperCase())}</div>
+    ${gagnes.length ? `<div class="lvc">${gagnes.slice(0, 6).map((o, k) => `<div class="flip" style="animation-delay:${.5 + k * .15}s"><span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b></div>`).join('')}${gagnes.length > 6 ? `<div class="flip" style="animation-delay:1.4s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700">+${gagnes.length - 6}</div>` : ''}</div><p>Débloqué${gagnes.length > 1 ? 's' : ''} : à équiper dans PROGRÈS › COLLECTION</p>` : ''}
+    <button class="go" style="margin-top:18px">SUPER !</button></div>`;
+  document.body.appendChild(el); setTimeout(celebrer, 300);
+  el.querySelector('.go').onclick = () => { el.remove(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'style'; S.collT = gagnes[0] ? gagnes[0].t : S.collT; rendre(); scrollTo(0, 0); };
+  el.onclick = ev => { if (ev.target === el) el.remove(); };
+}
+function xpFlottante(n) {
+  const b = $('#hprog'); if (!b || n <= 0) return; const r = b.getBoundingClientRect();
+  const el = document.createElement('div'); el.className = 'xpf'; el.textContent = '+' + n + ' XP'; el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = (r.bottom + 4) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1700);
+}
+
+appliquerCosmetiques();
 // ================= RÉCAPS : bilan du mois et « Wrapped » en story =================
 function bilanMois(y, m) {
   const c = calc(y, m), bu = budgets(y, m).filter(x => !x.sa), res = c.restant + c.av;
@@ -1938,6 +2858,7 @@ function rendreBilMois() {
   const b = bilanMois(S.form.y, S.form.m), sg = v => (v >= 0 ? '+' : '') + e0(v);
   $('#sheetIn').innerHTML = `<div class="grab"></div><div class="shead"><span>${esc(MOIS[b.m - 1].toUpperCase())} ${b.y}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     <button class="play" data-act="story" data-k="m" data-y="${b.y}" data-m="${b.m}"><span>▶</span> MON MOIS EN STORY</button>
+    ${(() => { const c = calc(b.y, b.m); return ymNum(b.y, b.m) === nowYM() - 1 && c.restant >= 10 ? `<button class="go" data-act="decote" data-y="${b.y}" data-m="${b.m}" data-v="${Math.floor(c.restant / 10) * 10}" style="margin-top:10px">METTRE ${e0(Math.floor(c.restant / 10) * 10)} DE CÔTÉ</button>` : ''; })()}
     <div class="wrap">
       <div class="whero"><small>RÉSULTAT DU MOIS</small><b class="${b.res < -0.5 ? 'c-bad' : ''}">${sg(b.res)}</b><span>${e0(b.c.rev)} de revenus · ${e0(b.c.dep)} de dépenses</span></div>
       <div class="wgrid">
@@ -1993,7 +2914,7 @@ function lancerStory(slides) {
     body.classList.remove('in'); void body.offsetWidth; body.classList.add('in');
     const nEl = body.querySelector('[data-n]');
     if (nEl) { const cible = +nEl.dataset.n, d0 = performance.now(); const anim = t => { const p = Math.min(1, (t - d0) / 900), q = 1 - Math.pow(1 - p, 3), v = cible * q; nEl.textContent = (cible >= 0 ? '+' : '') + e0(v); if (p < 1) requestAnimationFrame(anim); }; requestAnimationFrame(anim); }
-    if (s.stamp) setTimeout(() => confettis(), 350);
+    if (s.stamp) setTimeout(() => celebrer(), 350);
     t0 = performance.now();
   };
   const fermerS = () => { cancelAnimationFrame(raf); el.remove(); };
@@ -2112,7 +3033,7 @@ function statsMois(y, m) {
 /* ================= VERROU ================= */
 const URL_OK = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]+\/exec\/?$/.test(u);
 function oublierCompte() {
-  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent'].forEach(k => LS.del(k));
+  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
   Object.assign(S, { key: '', api: '', data: null, journal: [], queue: [], lastBig: null, lastFrac: 0 });
 }
 // Écran de connexion : chacun branche SON script et SA clé. Rien n'est stocké ailleurs que sur ce téléphone.
@@ -2203,15 +3124,56 @@ document.addEventListener('click', ev => {
     case 'cat': S.form.cat = el.dataset.cat; if (livretsDispo().length && S.form.type === 'Épargne') { S.form.all = false; rendreForm(); break; } if (S.form.all) { S.form.all = false; rendreForm(); break; } document.querySelectorAll('#sheetIn [data-act=cat]').forEach(c => c.classList.toggle('on', c.dataset.cat === S.form.cat)); majHint(); break;
     case 'all': S.form.all = !S.form.all; rendreForm(); break;
     case 'save': enregistrer(); break;
+    case 'soon': S.form = { mode: 'soon', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
+    case 'soon-ok': { const k = el.dataset.k; LS.set('debloques', [...new Set(debloques().concat(k))]); const o = LS.get('off', []); if (o.includes(k)) LS.set('off', o.filter(x => x !== k)); if (k === 'cosmetiques') { const o2 = LS.get('off', []); LS.set('off', o2.filter(x => x !== 'jeu')); } rendreSoon(); rendre(true); celebrer(); toast('Débloqué : ' + FEAT.find(x => x[0] === k)[1]); if ($('#sheetIn .tgl')) rendreReglages(); break; }
+    case 'obj-edit': { const y = now.getFullYear(), o = objectifs()[y]; S.form = { mode: 'objedit', y, montant: o ? String(o) : '', existe: !!o }; rendreForm(); ouvrirSheet(); break; }
+    case 'obj-sug': S.form.montant = el.dataset.v; rendreObjEdit(); break;
+    case 'obj-ok': { const n = parseFloat(String(S.form.montant || '').replace(/\s/g, '').replace(',', '.')); if (!(n > 0)) { $('#ferr').textContent = 'Tape un montant'; break; } const O = Object.assign({}, objectifs()); O[S.form.y] = Math.round(n); setPref('objectifs', O); fermer(); rendre(true); toast('Objectif ' + S.form.y + ' : ' + e0(n)); break; }
+    case 'obj-del': { const O = Object.assign({}, objectifs()); delete O[S.form.y]; setPref('objectifs', O); fermer(); rendre(true); toast('Objectif retiré'); break; }
+    case 'res-ban': LS.set('resumeVu', el.dataset.k); rendre(true); S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
+    case 'res-open': S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
+    case 'tri-open': S.form = { mode: 'tricount', vid: el.dataset.id, step: 1, raw: '', err: '' }; rendreForm(); ouvrirSheet(); break;
+    case 'tc-txt': { const rows = parseCSV(S.form.raw || ''); analyserTC(rows); break; }
+    case 'tc-col': S.form[el.dataset.k] = +el.dataset.i; S.form.init = false; S.form.sel = (S.form.data || []).map((r, i) => i); rendreTricount(); break;
+    case 'tc-cat': S.form.cat = el.dataset.c; rendreTricount(); break;
+    case 'tc-grp': S.form.grp = el.dataset.v === '1'; rendreTricount(); break;
+    case 'tc-remp': S.form.remp = el.dataset.v === '1'; rendreTricount(); break;
+    case 'tc-sel': { const i = +el.dataset.i, st = new Set(S.form.sel); st.has(i) ? st.delete(i) : st.add(i); S.form.sel = [...st]; const sc = $('#sheet').scrollTop; rendreTricount(); $('#sheet').scrollTop = sc; break; }
+    case 'tc-ok': importerTC(); break;
+    case 'tc-back': S.form.step = 1; S.form.err = ''; rendreTricount(); break;
+    case 'anticipe': LS.set('anticipe', !anticipe()); rendreReglages(); rendre(true); break;
+    case 'colt': S.collT = el.dataset.t; rendre(true); break;
+    case 'cosm': { const t = el.dataset.t, id = el.dataset.id; LS.set(cleCos(t), id); const v0 = LS.get('cosmVus', []); if (!v0.includes(t + ':' + id)) LS.set('cosmVus', v0.concat(t + ':' + id)); appliquerCosmetiques(); vibrer(); if (t === 'fete') celebrer(); if (t === 'son') sonCaisse(); rendre(true); break; }
+    case 'titre': LS.set('cos_titre', el.dataset.t); rendre(true); break;
+    case 'masc': { const M = mascotte(); toast(M.s[1] + ' ' + M.s[2] + ' · ' + e0(M.ep) + ' épargnés depuis novembre' + (M.next ? ' · prochain stade à ' + e0(M.next[0]) : '')); break; }
+    case 'esc-cfg': { const c = escalier().cfg; S.form = { mode: 'esccfg', depart: String(c.depart), pas: String(c.pas) }; rendreForm(); ouvrirSheet(); break; }
+    case 'esc-ok': { const d0 = parseFloat(String(S.form.depart).replace(',', '.')), p0 = parseFloat(String(S.form.pas).replace(',', '.')); if (!(d0 > 0) || !(p0 > 0)) { $('#ferr').textContent = 'Deux montants positifs'; break; } setPref('escalier', { depart: d0, pas: p0 }); fermer(); rendre(true); toast('Escalier réglé'); break; }
+    case 'tir-new': S.form = { mode: 'tiredit', id: null, nom: '', cible: '', date: '', emoji: '🐷', arm: false }; rendreForm(); ouvrirSheet(); break;
+    case 'tir-edit': { const t = tirelires().find(x => x.id === el.dataset.id); if (!t) break; S.form = { mode: 'tiredit', id: t.id, nom: t.nom, cible: String(t.cible), date: t.date || '', emoji: t.emoji, arm: false }; rendreForm(); ouvrirSheet(); break; }
+    case 'tir-emo': S.form.emoji = el.dataset.e; rendreTirEdit(); break;
+    case 'tir-ok': okTirelire(); break;
+    case 'tir-del': if (!S.form.arm) { S.form.arm = true; rendreTirEdit(); } else { setPref('tirelires', tirelires().filter(t => t.id !== S.form.id)); fermer(); rendre(true); toast('Tirelire supprimée'); } break;
+    case 'tir-add': alimenterTirelire(el.dataset.id, false); break;
+    case 'tir-out': alimenterTirelire(el.dataset.id, true); break;
+    case 'sem-ok': { const W = Object.assign({}, semaines()); W[isoJ(lundi(now))] = { cat: el.dataset.cat, montant: +el.dataset.m }; setPref('semaines', W); rendre(true); toast('Défi de la semaine lancé 💪'); break; }
+    case 'al-ok': LS.set('alertesVues', LS.get('alertesVues', []).concat(el.dataset.id).slice(-200)); rendre(true); break;
+    case 'allalertes': S.allAlertes = !S.allAlertes; rendre(true); break;
+    case 'voy-new': { const d = auj(); S.form = { mode: 'voyedit', id: null, nom: '', debut: d, fin: d, budget: '', arm: false }; rendreForm(); ouvrirSheet(); break; }
+    case 'voy-edit': { const v = voyages().find(x => x.id === el.dataset.id); if (!v) break; S.form = { mode: 'voyedit', id: v.id, nom: v.nom, debut: v.debut, fin: v.fin, budget: String(v.budget), arm: false }; rendreForm(); ouvrirSheet(); break; }
+    case 'voy-ok': okVoyage(); break;
+    case 'voy-del': if (!S.form.arm) { S.form.arm = true; rendreVoyEdit(); } else { setPref('voyages', voyages().filter(v => v.id !== S.form.id)); fermer(); rendre(true); toast('Voyage supprimé'); } break;
+    case 'voy-tog': S.form.voy = S.form.voy === false; rendreForm(); break;
+    case 'ptab': S.progT = el.dataset.t; LS.set('progT', S.progT); rendre(true); scrollTo(0, Math.min(scrollY, ($('.ptabs') || { offsetTop: 0 }).offsetTop - 60)); break;
     case 'go-progres': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; rendre(); scrollTo(0, 0); break;
     case 'allseries': S.allSeries = !S.allSeries; rendre(true); break;
     case 'story': { const sl = el.dataset.k === 'm' ? slidesMois(+el.dataset.y, +el.dataset.m) : slidesAnnee(+el.dataset.y); lancerStory(sl); break; }
+    case 'bil-ban': LS.set('bilanVu', el.dataset.key); rendre(true); S.form = { mode: 'bilmois', y: +el.dataset.y, m: +el.dataset.m }; rendreForm(); ouvrirSheet(); break;
     case 'bilmois': S.form = { mode: 'bilmois', y: +el.dataset.y, m: +el.dataset.m }; rendreForm(); ouvrirSheet(); break;
     case 'sdiff': S.succesDiff = el.dataset.t; rendre(true); break;
     case 'allsucces': S.allSucces = !S.allSucces; rendre(true); break;
     case 'skin': LS.set('skin', el.dataset.id); vibrer(); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
     case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); vibrer(); rendre(true); break;
-    case 'lock': toast('Se débloque au niveau ' + el.dataset.niv); break;
+    case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme'].includes(t) ? 'Aperçu · ' : '') + (sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : 'se débloque au niveau ' + el.dataset.niv)); break; }
     case 'bilvue': S.bilVue = el.dataset.t; S.bilAll = false; rendre(true); break;
     case 'bilall': S.bilAll = !S.bilAll; rendre(true); break;
     case 'wrapped': S.form = { mode: 'wrapped', y: +el.dataset.y }; rendreForm(); ouvrirSheet(); break;
