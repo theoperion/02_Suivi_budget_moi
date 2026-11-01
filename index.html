@@ -546,6 +546,22 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 :root[data-texte=pixel]{--sans:'VT323',monospace}
 :root[data-texte=pixel] body{font-size:19px}
 .rap{display:flex;gap:6px;align-items:flex-start;margin-top:8px}.rapx{width:30px;height:30px;flex:none;border-radius:50%;color:var(--ink3);font-size:13px}.rapx:active{background:var(--soft)}
+/* prestige */
+.niv.prestige{border-color:#C9A443;background:linear-gradient(135deg,color-mix(in srgb,#E8B923 10%,var(--card)),var(--card) 60%);box-shadow:0 0 0 1px color-mix(in srgb,#E8B923 30%,transparent),0 6px 18px color-mix(in srgb,#E8B923 18%,transparent)}
+.pstars{font-family:var(--mono);font-size:12px;letter-spacing:.5px;color:var(--ink2);margin-top:6px}.pstars em{font-style:normal;color:#E8B923;font-size:16px;letter-spacing:2px;text-shadow:0 0 8px rgba(232,185,35,.6);animation:twk 2.4s ease-in-out infinite}
+@keyframes twk{50%{opacity:.6;text-shadow:0 0 14px rgba(232,185,35,.9)}}
+.pbar i{background:linear-gradient(90deg,#9A7408,#FFD966,#E8B923)!important;box-shadow:0 0 8px rgba(232,185,35,.6)}
+.nivmini.prestige{border-color:#C9A443}.nivmini.prestige u{background:linear-gradient(90deg,#9A7408,#FFD966)}.nivmini em{font-style:normal;color:#E8B923;letter-spacing:1px}
+.pchip.on{background:#C9A443;border-color:#C9A443;color:#1A1406}
+.plvl{background:radial-gradient(circle at 50% 35%,#1C1A3A,#06050F)}.plvl .lvn{font-size:96px;background:linear-gradient(180deg,#FFF3C4,#E8B923 60%,#9A7408);-webkit-background-clip:text;background-clip:text}
+.pciel{position:fixed;inset:0;pointer-events:none}.pciel i{position:absolute;width:3px;height:3px;border-radius:50%;background:#FFF3C4;box-shadow:0 0 6px #FFE08A;animation:twk 1.8s ease-in-out infinite}
+.lvin{position:relative}
+:root[data-cth=cosmos]{--paper:#07060F;--card:#100E1F;--soft:#18152C;--track:#221E3A;--ink:#F3E6C4;--ink2:#D3C29A;--ink3:#8F8466;--rule:#3A3355;--nav:#030208;--navInk:#8F8466;--navOn:#FFD966;--ok:#E8B923;--okInk:#FFD966;--warn:#E8A33A;--warnInk:#F0C070;--bad:#E0664A;--badInk:#F08A70;--veil:rgba(0,0,0,.7);--acc:#E8B923}
+:root[data-cth=cosmos] body{background:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),radial-gradient(1px 1px at 70% 10%,#fff6,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#ffe9a8aa,transparent),radial-gradient(1px 1px at 85% 60%,#fff5,transparent),var(--paper);background-attachment:fixed}
+[data-tampon=etoiledor] .stamp:not(.tprev .stamp),.tprev[data-tampon=etoiledor] .stamp{border:1.5px solid #B8860B;border-radius:12px;color:#5A4206!important;background:linear-gradient(135deg,#FFF3C4,#E8B923);box-shadow:0 0 8px rgba(232,185,35,.6)}
+[data-tampon=etoiledor] .stamp:not(.tprev .stamp)::before,.tprev[data-tampon=etoiledor] .stamp::before{content:'★ '}
+[data-ticket=celeste] .ticket:not(.kprev .ticket),.kprev[data-ticket=celeste] .ticket{background:linear-gradient(160deg,#1C1A3A,#2E2352 60%,#3E2F6E);color:#F3E6C4}
+[data-ticket=celeste] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=celeste] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#3E2F6E 5.5px) 0 0/12px 6px repeat-x}
 </style>
 </head>
 <body>
@@ -576,7 +592,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '6.2.1';
+const VERSION = '6.3';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -2012,7 +2028,7 @@ function vueProgres() {
   if (!vis.length) return '';
   let cur = S.progT || LS.get('progT', 'bilans'); if (!vis.some(([k]) => k === cur)) cur = vis[0][0];
   let h = '';
-  if (ej) { const ti = LS.get('cos_titre', '') || ej.titre; h += `<button class="nivmini" data-act="ptab" data-t="succes"><b>NIV. ${ej.niv}</b><span>${esc(ti.toUpperCase())}</span><i><u style="width:${Math.round(ej.frac * 100)}%"></u></i><small>${ej.xp} XP</small></button>`; }
+  if (ej) { const ti = LS.get('cos_titre', '') || ej.titre; const pz = ej.niv === NIV_MAX; h += `<button class="nivmini ${pz ? 'prestige' : ''}" data-act="ptab" data-t="succes"><b>NIV. ${ej.niv}${pz && ej.prest ? ' <em>' + etoilesTxt(ej.prest) + '</em>' : ''}</b><span>${esc(ti.toUpperCase())}</span><i><u style="width:${Math.round((pz ? ej.pfrac : ej.frac) * 100)}%"></u></i><small>${ej.xp} XP</small></button>`; }
   h += `<div class="ptabs">${vis.map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" data-act="ptab" data-t="${k}">${l}</button>`).join('')}</div>`;
   const [c, fk] = T[cur];
   h += `<div class="pcont">${c}${blocProchainement(fk)}</div>`;
@@ -2038,6 +2054,7 @@ const ACCENTS = [
   { id: 'ormassif', nom: 'Or massif', niv: 20, c: ['#C9971C', '#8E6A0E', '#E8C25A'] },
   { id: 'corail', nom: 'Corail', niv: 9, c: ['#E2603F', '#B4462B', '#F5A08A'] }, { id: 'menthe', nom: 'Menthe', niv: 14, c: ['#2BB59A', '#1E8571', '#8FE3D1'] },
   { id: 'cerise', nom: 'Cerise', niv: 17, c: ['#C8243C', '#961A2D', '#F07A8C'] }, { id: 'turquoise', nom: 'Lagon', niv: 23, c: ['#0FA3B1', '#0A7480', '#7FDDE6'] },
+  { id: 'polaris', nom: 'Polaris', niv: 99, prest: 1, c: ['#D9A50F', '#9A7408', '#FFD966'] },
   { id: 'lavande', nom: 'Lavande', niv: 26, c: ['#9B7FE0', '#6E52BF', '#CDBDF5'] }, { id: 'emeraude', nom: 'Émeraude', niv: 29, c: ['#0E8A5F', '#086444', '#5ED6A8'] }];
 function appliquerAccent() {
   const a = ACCENTS.find(x => x.id === LS.get('accent', 'foret')) || ACCENTS[0], st = document.documentElement.style;
@@ -2143,11 +2160,22 @@ function etatJeu() {
     ["Marches d'épargne réussies", 'moyen', 40, f.escOk], ['Défis de la semaine réussis', 'moyen', 30, f.semOk], ['Tirelires remplies', 'difficile', 100, f.tirOk],
     ['Novembre sobre', 'moyen', 150, f.novOk], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ['Voyages tenus', 'moyen', 80, f.voyOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
+  return Object.assign({ f, succes, rec, xp }, niveauDe(xp));
+}
+// Niveau (1 à 30) puis étoiles de prestige : une étoile tous les 1 000 XP au-delà du niveau 30
+const PRESTIGE_XP = 1000;
+const PRESTIGE_TITRES = [[1, 'Étoilé'], [2, 'Astre'], [3, 'Constellation'], [5, 'Nébuleuse'], [8, 'Galaxie'], [12, 'Univers'], [20, 'Infini']];
+function niveauDe(xp) {
   let niv = 1; while (niv < NIV_MAX && xp >= xpNiveau(niv + 1)) niv++;
   const debut = xpNiveau(niv), fin = niv < NIV_MAX ? xpNiveau(niv + 1) : debut;
-  return { f, succes, rec, xp, niv, titre: TITRES[niv - 1], frac: niv < NIV_MAX ? (xp - debut) / (fin - debut) : 1, reste: fin - xp };
+  const o = { niv, titre: TITRES[niv - 1], frac: niv < NIV_MAX ? (xp - debut) / (fin - debut) : 1, reste: fin - xp, prest: 0, pfrac: 0, preste: 0 };
+  if (niv === NIV_MAX) { const au = xp - xpNiveau(NIV_MAX); o.prest = Math.floor(au / PRESTIGE_XP); o.pfrac = (au % PRESTIGE_XP) / PRESTIGE_XP; o.preste = PRESTIGE_XP - au % PRESTIGE_XP;
+    const pt = PRESTIGE_TITRES.filter(t => o.prest >= t[0]).pop(); if (pt) o.titre = pt[1]; }
+  return o;
 }
-const debloque = (o, niv) => o.suc ? succesFait(o.suc) : niv >= o.niv;
+const etoilesTxt = n => n <= 0 ? '' : n <= 5 ? '★'.repeat(n) : '★×' + n;
+const debloque = (o, niv) => o.suc ? succesFait(o.suc) : o.prest ? etoilesPrestige() >= o.prest : niv >= o.niv;
+const etoilesPrestige = () => { try { return etatJeu().prest || 0; } catch (e) { return 0; } };
 // Nouveautés : succès et cosmétiques débloqués depuis la dernière visite
 function nouveautes(e) {
   const ids = e.succes.filter(s => s.ok).map(s => 's:' + s.id);
@@ -2165,6 +2193,7 @@ function annoncerJeu() {
   const avant = LS.get('nivVu', e.niv);
   if (e.niv > avant) { LS.set('nivVu', e.niv); ecranNiveau(avant, e); return; }
   if (e.niv < avant) LS.set('nivVu', e.niv);
+  { const pv = LS.get('prestVu', null); if (pv == null) LS.set('prestVu', e.prest); else if (e.prest > pv) { LS.set('prestVu', e.prest); ecranNiveau(pv, e, true); return; } else if (e.prest < pv) LS.set('prestVu', e.prest); }
   if (n.length) { const s0 = SUCCES.find(x => 's:' + x.id === n[0]); const dbq = tousCosm().filter(o => o.suc === s0.id); toast('🏆 Succès : ' + s0.nom + ' (+' + DIFF[s0.d].xp + ' XP)' + (dbq.length ? ' · débloque « ' + dbq.map(o => o.nom).join(' », « ') + ' »' : ''), 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = dbq.length ? 'style' : 'succes'; if (dbq.length) S.collT = dbq[0].t; rendre(); scrollTo(0, 0); }); celebrer(); }
   majBadgeProgres(e);
 }
@@ -2217,11 +2246,18 @@ function skinSVG(id, frac, col, rep) {
 }
 // --- Écran Progrès : niveau, succès, collection ---
 function blocNiveau(e) {
-  const prochain = tousCosm().filter(o => !o.suc && o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
+  const prochain = tousCosm().filter(o => !o.suc && !o.prest && o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
   const ti = LS.get('cos_titre', '') || e.titre, M = dispo('cosmetiques') && cos('mascotte') !== 'off' ? mascotte() : null;
+  if (e.niv === NIV_MAX) {
+    const pr = tousCosm().filter(o => o.prest > e.prest).sort((a, b) => a.prest - b.prest)[0], pt = PRESTIGE_TITRES.find(t => t[0] > e.prest);
+    return `<div class="niv prestige">${M ? `<button class="mascn" data-act="masc">${M.s[1]}</button>` : ''}<div class="nivh"><b>NIV. 30</b><span>${esc(ti.toUpperCase())}</span><small>${e.xp} XP</small></div>
+      <div class="pstars">${e.prest ? `<em>${etoilesTxt(e.prest)}</em> ${e.prest} étoile${e.prest > 1 ? 's' : ''} de prestige` : '<em>☆</em> Niveau maximum : place aux étoiles de prestige'}</div>
+      <div class="nivbar pbar"><i style="width:${Math.round(e.pfrac * 100)}%"></i></div>
+      <div class="note" style="margin-top:6px;display:block">Encore <b>${e.preste} XP</b> pour l'étoile ${e.prest + 1}${pr ? ` · à l'étoile ${pr.prest} : <b>${esc(pr.nom)}</b>` : pt ? ` · à l'étoile ${pt[0]} : titre <b>${esc(pt[1])}</b>` : ''}</div></div>`;
+  }
   return `<div class="niv">${M ? `<button class="mascn" data-act="masc">${M.s[1]}</button>` : ''}<div class="nivh"><b>NIV. ${e.niv}</b><span>${esc(ti.toUpperCase())}</span><small>${e.xp} XP</small></div>
     <div class="nivbar"><i style="width:${Math.round(e.frac * 100)}%"></i></div>
-    <div class="note" style="margin-top:6px;display:block">${e.niv < NIV_MAX ? `Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}` : 'Niveau maximum atteint'}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
+    <div class="note" style="margin-top:6px;display:block">${`Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}`}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
 }
 function blocSucces(e) {
   const d = S.succesDiff || 'tous', L = e.succes.filter(s => d === 'tous' || s.d === d);
@@ -2806,6 +2842,8 @@ const COSM_EXTRA = [
   { t: 'police', id: 'serif', nom: 'Élégante', niv: 7 }, { t: 'police', id: 'arrondie', nom: 'Arrondie', niv: 12 }, { t: 'police', id: 'grotesk', nom: 'Grotesque', niv: 18 }, { t: 'police', id: 'neon', nom: 'Néon', niv: 21 }, { t: 'police', id: 'pochoir', nom: 'Pochoir', niv: 25 }, { t: 'police', id: 'graffiti', nom: 'Graffiti', niv: 28 },
   { t: 'fete', id: 'etoiles', nom: 'Étoiles filantes', niv: 9 }, { t: 'fete', id: 'coeurs', nom: 'Cœurs', niv: 16 }, { t: 'fete', id: 'neige', nom: 'Neige', niv: 19 }, { t: 'fete', id: 'billets', nom: 'Pluie de billets', niv: 23 }, { t: 'fete', id: 'emojis', nom: 'Fiesta', niv: 27 },
   { t: 'son', id: 'pop', nom: 'Pop', niv: 4 }, { t: 'son', id: 'piece', nom: 'Pièce', niv: 8 }, { t: 'son', id: 'clochette', nom: 'Clochette', niv: 14 }, { t: 'son', id: 'arcade', nom: 'Arcade', niv: 20 }, { t: 'son', id: 'fanfare', nom: 'Fanfare', niv: 26 },
+  { t: 'aiguille', id: 'comete', nom: 'Comète', niv: 99, prest: 2 }, { t: 'theme', id: 'cosmos', nom: 'Cosmos', niv: 99, prest: 3 }, { t: 'tampon', id: 'etoiledor', nom: 'Sceau étoilé', niv: 99, prest: 5 },
+  { t: 'ticket', id: 'celeste', nom: 'Céleste', niv: 99, prest: 8 }, { t: 'fete', id: 'supernova', nom: 'Supernova', niv: 99, prest: 12 },
   { t: 'aiguille', id: 'goutte', nom: 'Goutte', niv: 15 }, { t: 'aiguille', id: 'baguette', nom: 'Baguette magique', niv: 20 }, { t: 'aiguille', id: 'plume', nom: 'Plume', niv: 23 }, { t: 'aiguille', id: 'eclair', nom: 'Éclair', niv: 26 }, { t: 'aiguille', id: 'arcenciel', nom: 'Arc-en-ciel', niv: 29 }];
 const TYPES_COSM = [['ui', 'INTERFACE'], ['theme', 'COULEURS'], ['texte', 'POLICE'], ['skin', 'JAUGES'], ['accent', 'ACCENT'], ['aiguille', 'AIGUILLES'], ['tampon', 'TAMPONS'], ['police', 'CHIFFRES'], ['fete', 'FÊTES'], ['son', 'SON'], ['ticket', 'TICKET'], ['mascotte', 'MASCOTTE'], ['titre', 'TITRE']];
 const cleCos = t => t === 'skin' ? 'skin' : t === 'accent' ? 'accent' : 'cos_' + t;
@@ -2819,7 +2857,7 @@ function appliquerCosmetiques() {
   const d = document.documentElement.dataset;
   try { appliquerUI(); } catch (e) {}
   d.cth = cos('theme'); d.tampon = cos('tampon'); d.police = cos('police'); d.ticket = cos('ticket');
-  const sombre = ['nuit', 'terminal', 'noiror', 'abysses', 'bordeaux', 'aurore'].includes(d.cth), clair = ['kraft', 'poudre', 'sauge', 'menthe'].includes(d.cth);
+  const sombre = ['nuit', 'terminal', 'noiror', 'abysses', 'bordeaux', 'aurore', 'cosmos'].includes(d.cth), clair = ['kraft', 'poudre', 'sauge', 'menthe'].includes(d.cth);
   { const pf = { serif: 'Fraunces', arrondie: 'Nunito', grotesk: 'Space Grotesk', pochoir: 'Stardos Stencil', graffiti: 'Permanent Marker', lcd: 'VT323', manu: 'Caveat', ticket: 'Courier Prime' }[d.police]; if (pf) try { chargerPolices([pf]); } catch (e) {} }
   if (d.tampon === 'craie') try { chargerPolices(['Caveat']); } catch (e) {}
   if (sombre) d.theme = 'dark'; if (clair) d.theme = 'light';
@@ -2832,7 +2870,7 @@ function celebrer() {
   if (f === 'confettis') return confettis();
   const cv = document.createElement('canvas'), W = innerWidth, H = innerHeight; cv.width = W; cv.height = H; cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99';
   document.body.appendChild(cv); const x = cv.getContext('2d'); let t = 0, P;
-  const EMO = { pieces: ['🪙'], etoiles: ['⭐', '✨', '🌟'], coeurs: ['💖', '💚', '💛', '💜'], neige: ['❄️', '❅', '❆'], billets: ['💶', '💵', '💸'], emojis: ['🥳', '🎉', '🎊', '🤑', '🙌', '🍾'] }[f];
+  const EMO = { supernova: ['🌟', '⭐', '💫', '✨', '🌠'], pieces: ['🪙'], etoiles: ['⭐', '✨', '🌟'], coeurs: ['💖', '💚', '💛', '💜'], neige: ['❄️', '❅', '❆'], billets: ['💶', '💵', '💸'], emojis: ['🥳', '🎉', '🎊', '🤑', '🙌', '🍾'] }[f];
   if (EMO) { f = 'pluie'; P = Array.from({ length: 42 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .7, vy: (EMO[0] === '❄️' ? 1.3 : 3) + Math.random() * 3, vx: (Math.random() - .5) * (EMO[0] === '❄️' ? 1.4 : .6), a: Math.random() * 6, e: EMO[Math.floor(Math.random() * EMO.length)], s: 18 + Math.random() * 14 })); }
   else { P = []; [[.3, .35], [.7, .3], [.5, .2]].forEach(([cx, cy], k) => { const col = ['#FFD166', '#EF476F', '#06D6A0'][k]; for (let i = 0; i < 46; i++) { const a = Math.PI * 2 * i / 46, v = 2 + Math.random() * 3.5; P.push({ x: W * cx, y: H * cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: col, d: k * 18 }); } }); }
   const step = () => { x.clearRect(0, 0, W, H);
@@ -2857,6 +2895,7 @@ function aiguilleClassique() {
     case 'fine': return `<path d="M150 148.6 L36 150 L150 151.4 Z" fill="var(--ink)"/>`;
     case 'fleche': return `<path d="M150 146 L64 146 L64 141 L40 150 L64 159 L64 154 L150 154 Z" fill="var(--bad)"/>`;
     case 'laser': return `<line x1="150" y1="150" x2="34" y2="150" stroke="#FF2D55" stroke-width="3.5" stroke-linecap="round" style="filter:drop-shadow(0 0 5px #FF2D55)"/>`;
+    case 'comete': return `<defs><linearGradient id="cmg" x1="0" x2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#7B5BD6" stop-opacity="0"/></linearGradient></defs><path d="M150 141 L56 149 L56 151 L150 159 Z" fill="url(#cmg)"/><text x="46" y="158" font-size="24" text-anchor="middle">🌟</text>`;
     case 'goutte': return `<path d="M150 150 Q118 138 44 150 Q118 162 150 150 Z" fill="#2B7FD8"/><circle cx="150" cy="150" r="5" fill="#7FB6F0"/>`;
     case 'baguette': return `<line x1="150" y1="150" x2="58" y2="150" stroke="#3B2F1E" stroke-width="4.5" stroke-linecap="round"/><line x1="150" y1="150" x2="132" y2="150" stroke="#F1EFE8" stroke-width="4.5"/><text x="46" y="157" font-size="22" text-anchor="middle">⭐</text>`;
     case 'plume': return `<path d="M150 150 C118 136 70 136 38 150 C70 164 118 164 150 150 Z" fill="var(--ink2)" opacity=".85"/><line x1="150" y1="150" x2="38" y2="150" stroke="var(--paper)" stroke-width="1.2"/>`;
@@ -2895,26 +2934,27 @@ function blocCollection(e) {
     <div class="ctabs">${types.map(([t, l]) => `<button class="${T === t ? 'on' : ''}" data-act="colt" data-t="${t}">${l}${nouveaux.some(o => o.t === t) ? '<i></i>' : ''}</button>`).join('')}</div>`;
   if (T === 'titre') {
     const cur = LS.get('cos_titre', '') || e.titre;
-    return h + `<div class="chips">${TITRES.map((ti, k) => { const u = e.niv >= k + 1; return `<button class="chip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-niv="${k + 1}" style="${u ? '' : 'opacity:.4'}">${u ? '' : '🔒 '}${esc(ti)}</button>`; }).join('')}</div>`;
+    return h + `<div class="chips">${TITRES.map((ti, k) => { const u = e.niv >= k + 1; return `<button class="chip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-niv="${k + 1}" style="${u ? '' : 'opacity:.4'}">${u ? '' : '🔒 '}${esc(ti)}</button>`; }).join('')}</div>
+      <div class="grp" style="margin-top:12px">TITRES DE PRESTIGE</div><div class="chips">${PRESTIGE_TITRES.map(([n, ti]) => { const u = e.prest >= n; return `<button class="chip pchip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-prest="${n}" style="${u ? '' : 'opacity:.4'}">${u ? '★ ' : '☆' + n + ' '}${esc(ti)}</button>`; }).join('')}</div>`;
   }
   const sel = LS.get(cleCos(T), defCos(T));
   if (T === 'ui') chargerPolices([].concat(...UI_SKINS.map(o => o.f))); if (T === 'texte') chargerPolices(TEXTES.map(o => o.ff).filter(Boolean));
   if (T === 'ui' || T === 'texte' || T === 'theme') h += `<div class="note" style="display:block;margin:0 0 8px">Touche un style verrouillé pour l'essayer 4 secondes.</div>`;
   h += `<div class="coll ${T === 'skin' ? 'c3' : ''}">`;
   L.filter(o => o.t === T).forEach(o => { const u = debloque(o, e.niv), nv = nouveaux.includes(o), proche = !u && o.niv === e.niv + 1;
-    h += `<button class="cit ${sel === o.id ? 'on' : ''} ${u ? '' : 'verr'} ${proche ? 'proche' : ''}" data-act="${u ? 'cosm' : 'lock'}" data-t="${o.t}" data-id="${o.id}" data-niv="${o.niv}" data-suc="${o.suc || ''}">${nv ? '<em class="nbadge">NOUVEAU</em>' : ''}<span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b><small>${u ? (sel === o.id ? 'ACTIF' : 'CHOISIR') : o.suc ? '🏆 ' + esc(nomSucces(o.suc)) : '🔒 NIV. ' + o.niv}</small></button>`; });
+    h += `<button class="cit ${sel === o.id ? 'on' : ''} ${u ? '' : 'verr'} ${proche ? 'proche' : ''}" data-act="${u ? 'cosm' : 'lock'}" data-t="${o.t}" data-id="${o.id}" data-niv="${o.niv}" data-suc="${o.suc || ''}" data-prest="${o.prest || ''}">${nv ? '<em class="nbadge">NOUVEAU</em>' : ''}<span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b><small>${u ? (sel === o.id ? 'ACTIF' : 'CHOISIR') : o.suc ? '🏆 ' + esc(nomSucces(o.suc)) : o.prest ? '★ ' + o.prest + ' ÉTOILE' + (o.prest > 1 ? 'S' : '') : '🔒 NIV. ' + o.niv}</small></button>`; });
   return h + '</div>';
 }
 function apercuCosm(o) {
   switch (o.t) {
     case 'skin': return o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null);
     case 'accent': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="20" fill="${o.c ? o.c[0] : '#1D9E75'}"/></svg>`;
-    case 'theme': { const C = { defaut: ['#F1EFE8', '#2C2C2A', '#1D9E75'], kraft: ['#E8DCC4', '#3B2F1E', '#B5651D'], nuit: ['#0F1A2B', '#E8EEF8', '#4FA3FF'], poudre: ['#F8E9EC', '#4A2731', '#D6457E'], terminal: ['#0A0F0A', '#9BE564', '#9BE564'], noiror: ['#0E0D0B', '#F3D27A', '#F3D27A'], sauge: ['#E4E8DC', '#2F3A2C', '#5E8C5A'], menthe: ['#E6F6F1', '#163B33', '#1BA88A'], abysses: ['#071A22', '#D6F1F5', '#22C3D6'], bordeaux: ['#1E0F12', '#F4E3E0', '#D9546A'], aurore: ['#120C24', '#EDE7FF', '#7FE3C4'] }[o.id];
+    case 'theme': { const C = { defaut: ['#F1EFE8', '#2C2C2A', '#1D9E75'], kraft: ['#E8DCC4', '#3B2F1E', '#B5651D'], nuit: ['#0F1A2B', '#E8EEF8', '#4FA3FF'], poudre: ['#F8E9EC', '#4A2731', '#D6457E'], terminal: ['#0A0F0A', '#9BE564', '#9BE564'], noiror: ['#0E0D0B', '#F3D27A', '#F3D27A'], sauge: ['#E4E8DC', '#2F3A2C', '#5E8C5A'], menthe: ['#E6F6F1', '#163B33', '#1BA88A'], abysses: ['#071A22', '#D6F1F5', '#22C3D6'], bordeaux: ['#1E0F12', '#F4E3E0', '#D9546A'], aurore: ['#120C24', '#EDE7FF', '#7FE3C4'], cosmos: ['#07060F', '#F3E6C4', '#E8B923'] }[o.id];
       return `<svg viewBox="0 0 100 60"><rect width="100" height="60" rx="8" fill="${C[0]}"/><rect x="10" y="12" width="50" height="7" rx="3" fill="${C[1]}"/><rect x="10" y="25" width="34" height="5" rx="2" fill="${C[1]}" opacity=".5"/><circle cx="76" cy="38" r="12" fill="${C[2]}"/></svg>`; }
     case 'aiguille': { const save = LS.get('cos_aiguille', 'classique'); LS.set('cos_aiguille', o.id); const a = aiguilleClassique(); LS.set('cos_aiguille', save); return `<svg viewBox="20 110 150 80"><g transform="rotate(35 150 150)">${a}</g><circle cx="150" cy="150" r="9" fill="var(--ink)"/></svg>`; }
     case 'tampon': return `<div class="tprev" data-tampon="${o.id}"><span class="stamp s-ok">TENU</span></div>`;
     case 'police': return `<div class="pprev" data-police="${o.id}"><span class="big">855 €</span></div>`;
-    case 'fete': return `<div class="fprev">${{ confettis: '🎊', pieces: '🪙', feux: '🎆', etoiles: '🌠', coeurs: '💖', neige: '❄️', billets: '💸', emojis: '🥳' }[o.id] || '🎉'}</div>`;
+    case 'fete': return `<div class="fprev">${{ confettis: '🎊', pieces: '🪙', feux: '🎆', etoiles: '🌠', coeurs: '💖', neige: '❄️', billets: '💸', emojis: '🥳', supernova: '💫' }[o.id] || '🎉'}</div>`;
     case 'son': return `<div class="fprev">${{ off: '🔇', chaching: '🛎️', pop: '🫧', piece: '🪙', clochette: '🔔', arcade: '👾', fanfare: '🎺' }[o.id] || '🔔'}</div>`;
     case 'ticket': return `<div class="kprev" data-ticket="${o.id}"><div class="ticket"><div class="tl"><span>RESTE</span><span>+120</span></div></div></div>`;
     case 'ui': case 'texte': return apercuUI(o);
@@ -2923,14 +2963,15 @@ function apercuCosm(o) {
   return '';
 }
 // --- Montée de niveau en plein écran + XP flottante ---
-function ecranNiveau(avant, e) {
-  const gagnes = tousCosm().filter(o => o.niv > avant && o.niv <= e.niv);
-  const el = document.createElement('div'); el.className = 'lvlup';
-  el.innerHTML = `<div class="lvin"><small>NIVEAU SUPÉRIEUR</small><div class="lvn">${e.niv}</div><div class="lvt">${esc(e.titre.toUpperCase())}</div>
+function ecranNiveau(avant, e, prestige) {
+  const gagnes = prestige ? tousCosm().filter(o => o.prest > avant && o.prest <= e.prest) : tousCosm().filter(o => !o.prest && !o.suc && o.niv > avant && o.niv <= e.niv);
+  const nt = prestige ? PRESTIGE_TITRES.find(t => t[0] > avant && t[0] <= e.prest) : null;
+  const el = document.createElement('div'); el.className = 'lvlup' + (prestige ? ' plvl' : '');
+  el.innerHTML = `<div class="lvin">${prestige ? '<div class="pciel">' + Array.from({ length: 24 }, (_, i) => `<i style="left:${(i * 37) % 100}%;top:${(i * 53) % 100}%;animation-delay:${(i % 7) * .3}s"></i>`).join('') + '</div>' : ''}<small>${prestige ? 'ÉTOILE DE PRESTIGE' : 'NIVEAU SUPÉRIEUR'}</small><div class="lvn">${prestige ? '★' + e.prest : e.niv}</div><div class="lvt">${esc(e.titre.toUpperCase())}${nt ? ' · NOUVEAU TITRE' : ''}</div>
     ${gagnes.length ? `<div class="lvc">${gagnes.slice(0, 6).map((o, k) => `<div class="flip" style="animation-delay:${.5 + k * .15}s"><span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b></div>`).join('')}${gagnes.length > 6 ? `<div class="flip" style="animation-delay:1.4s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700">+${gagnes.length - 6}</div>` : ''}</div><p>Débloqué${gagnes.length > 1 ? 's' : ''} : à équiper dans PROGRÈS › COLLECTION</p>` : ''}
     <button class="go" style="margin-top:18px">SUPER !</button></div>`;
   document.body.appendChild(el); setTimeout(celebrer, 300);
-  el.querySelector('.go').onclick = () => { el.remove(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'style'; S.collT = gagnes[0] ? gagnes[0].t : S.collT; rendre(); scrollTo(0, 0); };
+  el.querySelector('.go').onclick = () => { el.remove(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = gagnes.length ? 'style' : 'succes'; S.collT = gagnes[0] ? gagnes[0].t : S.collT; rendre(); scrollTo(0, 0); };
   el.onclick = ev => { if (ev.target === el) el.remove(); };
 }
 function xpFlottante(n) {
@@ -3134,7 +3175,7 @@ function statsMois(y, m) {
 /* ================= VERROU ================= */
 const URL_OK = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]+\/exec\/?$/.test(u);
 function oublierCompte() {
-  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
+  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'prestVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
   Object.assign(S, { key: '', api: '', data: null, journal: [], queue: [], lastBig: null, lastFrac: 0 });
 }
 // Écran de connexion : chacun branche SON script et SA clé. Rien n'est stocké ailleurs que sur ce téléphone.
@@ -3274,7 +3315,7 @@ document.addEventListener('click', ev => {
     case 'allsucces': S.allSucces = !S.allSucces; rendre(true); break;
     case 'skin': LS.set('skin', el.dataset.id); vibrer(); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
     case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); vibrer(); rendre(true); break;
-    case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme'].includes(t) ? 'Aperçu · ' : '') + (sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : 'se débloque au niveau ' + el.dataset.niv)); break; }
+    case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme'].includes(t) ? 'Aperçu · ' : '') + (sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : el.dataset.prest ? 'se débloque à l\'étoile de prestige ' + el.dataset.prest : 'se débloque au niveau ' + el.dataset.niv)); break; }
     case 'bilvue': S.bilVue = el.dataset.t; S.bilAll = false; rendre(true); break;
     case 'bilall': S.bilAll = !S.bilAll; rendre(true); break;
     case 'wrapped': S.form = { mode: 'wrapped', y: +el.dataset.y }; rendreForm(); ouvrirSheet(); break;
