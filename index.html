@@ -373,8 +373,8 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 .nivmini b{font-size:13px}.nivmini span{font-size:10.5px;letter-spacing:1px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34%}
 .nivmini i{flex:1;height:6px;border-radius:3px;background:var(--track);overflow:hidden}.nivmini u{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#E8A33A);text-decoration:none;animation:grow .8s ease-out}
 .nivmini small{font-size:10.5px;color:var(--ink3)}
-.ptabs{display:flex;gap:4px;margin:10px 0 2px;position:sticky;top:58px;z-index:4;background:var(--paper);padding:4px 0}
-.ptabs button{flex:1;font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;padding:8px 0;border-radius:8px;border:1.5px solid var(--rule);color:var(--ink2)}
+.ptabs{overflow-x:auto;scrollbar-width:none;display:flex;gap:4px;margin:10px 0 2px;position:sticky;top:58px;z-index:4;background:var(--paper);padding:4px 0}
+.ptabs::-webkit-scrollbar{display:none}.ptabs button{flex:1 0 auto;padding-left:6px!important;padding-right:6px!important;font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;padding:8px 0;border-radius:8px;border:1.5px solid var(--rule);color:var(--ink2)}
 .ptabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .pcont{animation:fade .25s ease-out}
 /* collection plus compacte */
@@ -475,7 +475,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 [data-ui=arcade] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:0!important;border-radius:0!important;box-shadow:0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink)!important;margin-left:3px;margin-right:3px}
 [data-ui=arcade] .ticket:after{display:none}
 [data-ui=arcade] .sec{font-size:18px;letter-spacing:1px;color:var(--ink)}[data-ui=arcade] .sec>span:first-child:before{content:'★ ';color:var(--warn)}
-[data-ui=arcade] .tab{font-size:14px}[data-ui=arcade] :is(.chip,.ptabs button,.ctabs button,.seg button,.bhead,.tl,.note,.bil,.lnk,.stamp,.wt small,.cit small,.cit b){font-size:16px}
+[data-ui=arcade] .tab{font-size:14px}[data-ui=arcade] .ptabs button{font-size:14px}[data-ui=arcade] :is(.chip,.ctabs button,.seg button,.bhead,.tl,.note,.bil,.lnk,.stamp,.wt small,.cit small,.cit b){font-size:16px}
 [data-ui=arcade] .go{border-radius:0;font-size:22px;box-shadow:0 -3px 0 var(--bad),0 3px 0 var(--bad),-3px 0 0 var(--bad),3px 0 0 var(--bad)}
 [data-ui=arcade] :is(.chip,.ptabs button,.ctabs button,.seg,.seg button,.libin,.fab,.sheet){border-radius:0}
 [data-ui=arcade] .big{font-size:64px;letter-spacing:2px}
@@ -576,7 +576,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '6.2';
+const VERSION = '6.2.1';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -598,7 +598,7 @@ const FONCS = [
 const on = k => !LS.get('off', []).includes(k);
 const progresVisible = () => on('defi') || on('series') || on('bilan') || on('jeu') || ['saison', 'semaine', 'escalier', 'tirelires', 'voyage', 'objectif', 'resume'].some(k => ouvert(k)) || FEAT.some(f => !dispo(f[0]));
 // Optionnel : lien proposé par défaut au premier lancement. Laisser vide pour la version commune.
-const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbzzk3u1n0cIpxIybvkhoX5p-ohuVVpZUn6Kng2SVcOqwySM_yNXa9wviC8gn5F-gEIn8A/exec';
+const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbxic0DvJsgyBD85882Qrw3eyla5JKb-_bby15PPuGabot4Hma7oN7dZZxIoPMIVwxu5kw/exec';
 const API_ATTENDUE = '3.5'; // version minimale du script ; les versions plus récentes sont acceptées
 
 /* ================= OUTILS ================= */
@@ -3229,7 +3229,7 @@ document.addEventListener('click', ev => {
     case 'soon-ok': { const k = el.dataset.k; LS.set('debloques', [...new Set(debloques().concat(k))]); const o = LS.get('off', []); if (o.includes(k)) LS.set('off', o.filter(x => x !== k)); if (k === 'cosmetiques') { const o2 = LS.get('off', []); LS.set('off', o2.filter(x => x !== 'jeu')); } rendreSoon(); rendre(true); celebrer(); toast('Débloqué : ' + FEAT.find(x => x[0] === k)[1]); if ($('#sheetIn .tgl')) rendreReglages(); break; }
     case 'obj-edit': { const y = now.getFullYear(), o = objectifs()[y]; S.form = { mode: 'objedit', y, montant: o ? String(o) : '', existe: !!o }; rendreForm(); ouvrirSheet(); break; }
     case 'obj-sug': S.form.montant = el.dataset.v; rendreObjEdit(); break;
-    case 'obj-ok': { const n = parseFloat(String(S.form.montant || '').replace(/\s/g, '').replace(',', '.')); if (!(n > 0)) { $('#ferr').textContent = 'Tape un montant'; break; } const O = Object.assign({}, objectifs()); O[S.form.y] = Math.round(n); setPref('objectifs', O); fermer(); rendre(true); toast('Objectif ' + S.form.y + ' : ' + e0(n)); break; }
+    case 'obj-ok': { const n = parseFloat(String(S.form.montant || '').replace(/\s/g, '').replace(',', '.')); if (!(n > 0)) { $('#ferr').textContent = 'Tape un montant'; break; } const O = Object.assign({}, objectifs()); const oy = S.form.y; O[oy] = Math.round(n); setPref('objectifs', O); fermer(); rendre(true); toast('Objectif ' + oy + ' : ' + e0(n)); break; }
     case 'obj-del': { const O = Object.assign({}, objectifs()); delete O[S.form.y]; setPref('objectifs', O); fermer(); rendre(true); toast('Objectif retiré'); break; }
     case 'res-ban': LS.set('resumeVu', el.dataset.k); rendre(true); S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
     case 'res-open': S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
