@@ -232,25 +232,47 @@ body.discret .pbh b{filter:blur(7px)}
 :root[data-cth=terminal]{--paper:#0A0F0A;--card:#0F170F;--soft:#152015;--track:#1D2B1D;--ink:#9BE564;--ink2:#7FC24F;--ink3:#58873A;--rule:#2C4422;--nav:#050805;--navInk:#58873A;--navOn:#9BE564;--ok:#9BE564;--okInk:#9BE564;--warn:#E5D564;--warnInk:#E5D564;--bad:#FF6B5B;--badInk:#FF6B5B;--veil:rgba(0,0,0,.7);--sans:'IBM Plex Mono',monospace;--acc:#9BE564}
 :root[data-cth=noiror]{--paper:#0E0D0B;--card:#191714;--soft:#221F1A;--track:#2E2A22;--ink:#F3E6C4;--ink2:#D3C29A;--ink3:#9C8C66;--rule:#4A4130;--nav:#000;--navInk:#9C8C66;--navOn:#E2B84F;--ok:#E2B84F;--okInk:#E2B84F;--warn:#E8A33A;--warnInk:#F0C070;--bad:#E0664A;--badInk:#F08A70;--veil:rgba(0,0,0,.7);--acc:#E2B84F}
 :root[data-cth=noiror] .niv,:root[data-cth=noiror] .ticket{box-shadow:0 0 0 1px #6B5A2E inset}
-/* tampons */
-[data-tampon=neon] .stamp{border-radius:5px;transform:rotate(-2deg);text-shadow:0 0 6px currentColor;box-shadow:0 0 8px currentColor,inset 0 0 6px currentColor}
-[data-tampon=pixel] .stamp{border-radius:0;transform:none;border-width:2px;border-style:solid;font-family:'VT323',var(--mono);font-size:14px;letter-spacing:1px;padding:0 6px;box-shadow:2px 2px 0 currentColor}
-[data-tampon=cire] .stamp{border:0;border-radius:50% 46% 52% 44%;padding:3px 8px;color:#FFF3E8!important;background:radial-gradient(circle at 35% 30%,#D2513F,#8E1F17);box-shadow:0 1px 0 #5E120C,inset 0 0 0 2px rgba(255,255,255,.15);transform:rotate(-6deg)}
-/* chiffres */
-[data-police=ticket] .big,[data-police=ticket] .ticket{font-family:'Courier Prime',var(--mono)}
-[data-police=lcd] .big{font-family:'VT323',var(--mono);font-size:54px;letter-spacing:1px;text-shadow:0 0 10px color-mix(in srgb,currentColor 40%,transparent)}
-[data-police=manu] .big{font-family:'Caveat',cursive;font-size:50px;letter-spacing:0}
-/* tickets */
-[data-ticket=carnet] .ticket{background:repeating-linear-gradient(var(--card) 0 21px,color-mix(in srgb,#4FA3FF 22%,transparent) 21px 22px);border-left:3px double var(--bad);border-radius:2px}
-[data-ticket=carnet] .ticket:after{display:none}
-[data-ticket=dore] .ticket{background:linear-gradient(135deg,#F7E7B4,#E2C26A 45%,#F5DFA0 70%,#C9A443);color:#3A2C08}
-[data-ticket=dore] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#D8B95E 5.5px) 0 0/12px 6px repeat-x}
+/* tampons, chiffres, tickets (appli + aperçus isolés) */
+[data-tampon=neon] .stamp:not(.tprev .stamp),.tprev[data-tampon=neon] .stamp{border-radius:5px;transform:rotate(-2deg);text-shadow:0 0 6px currentColor;box-shadow:0 0 8px currentColor,inset 0 0 6px currentColor}
+[data-tampon=pixel] .stamp:not(.tprev .stamp),.tprev[data-tampon=pixel] .stamp{border-radius:0;transform:none;border-width:2px;border-style:solid;font-family:'VT323',var(--mono);font-size:14px;letter-spacing:1px;padding:0 6px;box-shadow:2px 2px 0 currentColor}
+[data-tampon=cire] .stamp:not(.tprev .stamp),.tprev[data-tampon=cire] .stamp{border:0;border-radius:50% 46% 52% 44%;padding:3px 8px;color:#FFF3E8!important;background:radial-gradient(circle at 35% 30%,#D2513F,#8E1F17);box-shadow:0 1px 0 #5E120C,inset 0 0 0 2px rgba(255,255,255,.15);transform:rotate(-6deg)}
+[data-tampon=rond] .stamp:not(.tprev .stamp),.tprev[data-tampon=rond] .stamp{border:3px double;border-radius:50%;padding:5px 7px;transform:rotate(-10deg)}
+[data-tampon=etoile] .stamp:not(.tprev .stamp),.tprev[data-tampon=etoile] .stamp{border-radius:12px;border-style:dashed;transform:rotate(3deg)}
+[data-tampon=craie] .stamp:not(.tprev .stamp),.tprev[data-tampon=craie] .stamp{border:0;font-family:'Caveat',cursive;font-size:17px;font-weight:600;letter-spacing:.5px;text-decoration:underline wavy;text-underline-offset:3px;transform:rotate(-4deg)}
+[data-tampon=holo] .stamp:not(.tprev .stamp),.tprev[data-tampon=holo] .stamp{border:0;color:#fff!important;background:linear-gradient(90deg,#EF476F,#FFD166,#06D6A0,#118AB2,#7B5BD6,#EF476F);background-size:300% 100%;animation:holo 3s linear infinite;border-radius:4px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+[data-tampon=dore] .stamp:not(.tprev .stamp),.tprev[data-tampon=dore] .stamp{border:1.5px solid #B8860B;color:#6B4E05!important;background:linear-gradient(135deg,#FBEFC4,#E2C26A 55%,#F5DFA0);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+[data-tampon=etoile] .stamp:not(.tprev .stamp)::before,.tprev[data-tampon=etoile] .stamp::before{content:'★ '}
+.tprev[data-tampon=encre] .stamp{border:1.5px solid;border-radius:2px;background:none;box-shadow:none;text-shadow:none;font-family:var(--mono);font-size:10px;animation:none;transform:rotate(-4deg);padding:1px 5px;text-decoration:none}
+[data-police=ticket] .big:not(.pprev .big),.pprev[data-police=ticket] .big{font-family:'Courier Prime',var(--mono)}
+[data-police=lcd] .big:not(.pprev .big),.pprev[data-police=lcd] .big{font-family:'VT323',var(--mono);letter-spacing:1px;text-shadow:0 0 10px color-mix(in srgb,currentColor 40%,transparent)}
+[data-police=lcd] .big:not(.pprev .big){font-size:54px}
+[data-police=manu] .big:not(.pprev .big),.pprev[data-police=manu] .big{font-family:'Caveat',cursive;letter-spacing:0}
+[data-police=manu] .big:not(.pprev .big){font-size:50px}
+[data-police=serif] .big:not(.pprev .big),.pprev[data-police=serif] .big{font-family:'Fraunces',Georgia,serif;font-weight:800;letter-spacing:-1px}
+[data-police=arrondie] .big:not(.pprev .big),.pprev[data-police=arrondie] .big{font-family:'Nunito',sans-serif;font-weight:800;letter-spacing:-1px}
+[data-police=grotesk] .big:not(.pprev .big),.pprev[data-police=grotesk] .big{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-2px}
+[data-police=neon] .big:not(.pprev .big),.pprev[data-police=neon] .big{color:var(--ok);text-shadow:0 0 6px var(--ok),0 0 18px color-mix(in srgb,var(--ok) 60%,transparent)}
+[data-police=pochoir] .big:not(.pprev .big),.pprev[data-police=pochoir] .big{font-family:'Stardos Stencil',serif;font-weight:700;letter-spacing:1px}
+[data-police=graffiti] .big:not(.pprev .big),.pprev[data-police=graffiti] .big{font-family:'Permanent Marker',cursive;letter-spacing:0;transform:rotate(-3deg)}
+[data-police=graffiti] .big:not(.pprev .big){font-size:46px}
+[data-police=ticket] .ticket{font-family:'Courier Prime',var(--mono)}
+.pprev .big{font-size:20px!important;margin:0}.pprev[data-police=mono] .big{font-family:var(--mono);text-shadow:none;transform:none}
+[data-ticket=carnet] .ticket:not(.kprev .ticket),.kprev[data-ticket=carnet] .ticket{background:repeating-linear-gradient(var(--card) 0 21px,color-mix(in srgb,#4FA3FF 22%,transparent) 21px 22px);border-left:3px double var(--bad);border-radius:2px}
+[data-ticket=dore] .ticket:not(.kprev .ticket),.kprev[data-ticket=dore] .ticket{background:linear-gradient(135deg,#F7E7B4,#E2C26A 45%,#F5DFA0 70%,#C9A443);color:#3A2C08}
+[data-ticket=kraft] .ticket:not(.kprev .ticket),.kprev[data-ticket=kraft] .ticket{background:#C9A97A url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Ccircle cx='1' cy='1' r='.6' fill='%23000' opacity='.08'/%3E%3C/svg%3E");color:#2E2112}
+[data-ticket=noir] .ticket:not(.kprev .ticket),.kprev[data-ticket=noir] .ticket{background:#1E1D1B;color:#F1EFE8}
+[data-ticket=polaroid] .ticket:not(.kprev .ticket),.kprev[data-ticket=polaroid] .ticket{background:#FFFFFF;color:#222;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.18);padding-bottom:18px}
+[data-ticket=holo] .ticket:not(.kprev .ticket),.kprev[data-ticket=holo] .ticket{background:linear-gradient(120deg,#E7F0FF,#F6E4FF,#E1FFF4,#FFF6D6,#E7F0FF);background-size:300% 300%;animation:holo 6s ease-in-out infinite;color:#2C2C2A}
+[data-ticket=carnet] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=carnet] .ticket:after{display:none}
+[data-ticket=polaroid] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=polaroid] .ticket:after{display:none}
+[data-ticket=dore] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=dore] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#D8B95E 5.5px) 0 0/12px 6px repeat-x}
+[data-ticket=kraft] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=kraft] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#C9A97A 5.5px) 0 0/12px 6px repeat-x}
+[data-ticket=noir] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=noir] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#1E1D1B 5.5px) 0 0/12px 6px repeat-x}
+[data-ticket=holo] .ticket:not(.kprev .ticket):after,.kprev[data-ticket=holo] .ticket:after{background:radial-gradient(circle at 6px -1px,transparent 5px,#EEE8FF 5.5px) 0 0/12px 6px repeat-x}
+[data-ticket=noir] .ticket:not(.kprev .ticket) .c-mute{color:#A9A79E}
+.kprev .ticket{font-size:10px;padding:6px 8px;width:86%}.kprev[data-ticket=polaroid] .ticket{padding-bottom:10px}
+@keyframes holo{to{background-position:300% 0}}
 .tprev,.pprev,.kprev,.fprev{height:56px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.pprev .big{font-size:24px;margin:0}[data-police] .pprev[data-police=mono] .big{font-family:var(--mono);font-size:24px;text-shadow:none}
-.pprev[data-police=ticket] .big{font-family:'Courier Prime',monospace}.pprev[data-police=lcd] .big{font-family:'VT323',monospace;font-size:32px}.pprev[data-police=manu] .big{font-family:'Caveat',cursive;font-size:30px}
-.kprev .ticket{font-size:10px;padding:6px 8px;width:86%}.kprev[data-ticket=carnet] .ticket{background:repeating-linear-gradient(var(--card) 0 11px,rgba(79,163,255,.25) 11px 12px);border-left:3px double var(--bad)}.kprev[data-ticket=carnet] .ticket:after{display:none}.kprev[data-ticket=dore] .ticket{background:linear-gradient(135deg,#F7E7B4,#E2C26A 45%,#C9A443);color:#3A2C08}
-.tprev[data-tampon=neon] .stamp{border-radius:5px;text-shadow:0 0 6px currentColor;box-shadow:0 0 8px currentColor}.tprev[data-tampon=pixel] .stamp{border-radius:0;transform:none;font-family:'VT323',monospace;font-size:14px;box-shadow:2px 2px 0 currentColor}.tprev[data-tampon=cire] .stamp{border:0;border-radius:50%;padding:3px 8px;color:#FFF3E8;background:radial-gradient(circle at 35% 30%,#D2513F,#8E1F17)}
-.tprev[data-tampon=encre] .stamp{border:1.5px solid;border-radius:2px;background:none;box-shadow:none;text-shadow:none;font-family:var(--mono);font-size:10px;color:var(--okInk)}
 .fprev{font-size:30px}
 /* collection : onglets, badges */
 .ctabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px 4px;scrollbar-width:none}.ctabs::-webkit-scrollbar{display:none}
@@ -481,6 +503,36 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 [data-ui=prestige] :is(.chip,.ptabs button,.ctabs button){border-radius:1px;border-color:var(--or)}
 [data-ui=prestige] .big,[data-ui=prestige] .nivh b{font-family:'Cinzel',serif;letter-spacing:0}
 [data-ui=prestige] :is(.jl,.brow,.bil,.suc,.soon){border-bottom:1px solid color-mix(in srgb,var(--or) 45%,transparent)}
+
+:root[data-cth=sauge]{--paper:#E4E8DC;--card:#EEF1E8;--soft:#D6DCCB;--track:#C6CEB8;--ink:#2F3A2C;--ink2:#4F5C4A;--ink3:#7D8A76;--rule:#AEB8A4;--nav:#2F3A2C;--navInk:#AEB8A4;--navOn:#EEF1E8;--ok:#4E8C4A;--okInk:#356632;--warn:#B07A1C;--warnInk:#7A5412;--bad:#C2543A;--badInk:#8E3824;--acc:#5E8C5A}
+:root[data-cth=menthe]{--paper:#E6F6F1;--card:#F2FBF8;--soft:#D3EEE6;--track:#BFE3D8;--ink:#163B33;--ink2:#2F5A50;--ink3:#5E8A7F;--rule:#9CCDBF;--nav:#163B33;--navInk:#9CCDBF;--navOn:#F2FBF8;--ok:#1BA88A;--okInk:#127A64;--warn:#C9851E;--warnInk:#8C5C12;--bad:#E05A4F;--badInk:#A63A31;--acc:#1BA88A}
+:root[data-cth=abysses]{--paper:#071A22;--card:#0C2530;--soft:#11303D;--track:#173D4D;--ink:#D6F1F5;--ink2:#A3CBD3;--ink3:#6C97A1;--rule:#24505F;--nav:#04121A;--navInk:#6C97A1;--navOn:#D6F1F5;--ok:#22C3D6;--okInk:#5CD9E8;--warn:#F2B84B;--warnInk:#F7CF7E;--bad:#FF7A6B;--badInk:#FF9C90;--veil:rgba(0,0,0,.6);--acc:#22C3D6}
+:root[data-cth=bordeaux]{--paper:#1E0F12;--card:#2A161A;--soft:#341C21;--track:#41242A;--ink:#F4E3E0;--ink2:#D6BDB8;--ink3:#A0837E;--rule:#5A363D;--nav:#120708;--navInk:#A0837E;--navOn:#F4E3E0;--ok:#7FC8A0;--okInk:#9AD9B6;--warn:#E8A33A;--warnInk:#F0C070;--bad:#D9546A;--badInk:#F08A9C;--veil:rgba(0,0,0,.65);--acc:#D9546A}
+:root[data-cth=aurore]{--paper:#120C24;--card:#1B1433;--soft:#231A40;--track:#2E2352;--ink:#EDE7FF;--ink2:#C3B8EA;--ink3:#8D80B8;--rule:#3E3270;--nav:#0A0616;--navInk:#8D80B8;--navOn:#EDE7FF;--ok:#7FE3C4;--okInk:#7FE3C4;--warn:#FFD166;--warnInk:#FFE09A;--bad:#FF6F91;--badInk:#FF9BB3;--veil:rgba(0,0,0,.65);--acc:#B18CFF}
+:root[data-cth=aurore] body{background:radial-gradient(ellipse at 15% 0%,rgba(127,227,196,.16),transparent 50%),radial-gradient(ellipse at 95% 12%,rgba(177,140,255,.22),transparent 55%),var(--paper);background-attachment:fixed}
+.anring{animation:anr 1.2s cubic-bezier(.3,1,.5,1)}@keyframes anr{from{stroke-dasharray:0 999}}
+/* — Néon — */
+[data-ui=neon]{--sans:'Space Grotesk',system-ui,sans-serif}
+[data-ui=neon] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.wt,.cit,.pill,.ser,.nivmini,.alerts,.brow[style]){border:1.5px solid var(--ok)!important;border-radius:10px!important;box-shadow:0 0 10px color-mix(in srgb,var(--ok) 45%,transparent),inset 0 0 8px color-mix(in srgb,var(--ok) 18%,transparent)}
+[data-ui=neon] .ticket:after{display:none}
+[data-ui=neon] .sec{color:var(--ok);text-shadow:0 0 6px var(--ok);font-family:'Space Grotesk';font-weight:700}
+[data-ui=neon] .go{background:transparent;color:var(--ok);border:1.5px solid var(--ok);box-shadow:0 0 12px color-mix(in srgb,var(--ok) 60%,transparent),inset 0 0 8px color-mix(in srgb,var(--ok) 30%,transparent);text-shadow:0 0 6px var(--ok)}
+[data-ui=neon] :is(.chip,.ptabs button,.ctabs button){border-color:color-mix(in srgb,var(--ok) 55%,transparent);border-radius:10px}
+[data-ui=neon] :is(.chip.on,.ptabs button.on,.ctabs button.on){background:var(--ok);border-color:var(--ok);color:#06110D;box-shadow:0 0 10px var(--ok)}
+[data-ui=neon] .big{text-shadow:0 0 16px color-mix(in srgb,var(--ink) 45%,transparent)}
+[data-ui=neon] :is(.jl,.brow,.bil,.suc,.soon){border-bottom:1px solid color-mix(in srgb,var(--ok) 30%,transparent)}
+[data-ui=neon] .fab{box-shadow:0 0 16px var(--ok)}
+/* — Rétro 70 — */
+[data-ui=retro]{--sans:'Nunito',system-ui,sans-serif}
+[data-ui=retro] :is(.ticket,.niv,.esc,.tir,.obj,.saison,.voy,.nivmini,.alerts){border:2px solid var(--ink)!important;border-radius:16px!important;box-shadow:4px 4px 0 #E8A33A,8px 8px 0 #D85A30;margin-right:8px;margin-bottom:8px}
+[data-ui=retro] :is(.wt,.cit,.pill,.ser){border:2px solid var(--ink)!important;border-radius:14px!important;box-shadow:3px 3px 0 #E8A33A}
+[data-ui=retro] .ticket:after{display:none}
+[data-ui=retro] .sec{font-family:'Fraunces',serif;font-style:italic;font-weight:800;color:#D85A30;letter-spacing:0;font-size:17px}
+[data-ui=retro] .go{border-radius:30px;background:#D85A30;color:#FFF3E0;box-shadow:0 4px 0 #8A2F1C}
+[data-ui=retro] :is(.chip,.ptabs button,.ctabs button){border-radius:20px;border-color:#E8A33A}
+[data-ui=retro] :is(.chip.on,.ptabs button.on,.ctabs button.on){background:#E8A33A;border-color:#E8A33A;color:#2C1A0A}
+[data-ui=retro] .big{font-family:'Fraunces',serif;font-weight:800;font-style:italic}
+[data-ui=retro] .seg{border-radius:20px}[data-ui=retro] .seg button{border-radius:16px}
 /* ================= POLICE DU TEXTE (prioritaire sur le style) ================= */
 :root[data-texte=plex]{--sans:'IBM Plex Sans',system-ui,sans-serif}
 :root[data-texte=lisible]{--sans:'Atkinson Hyperlegible',system-ui,sans-serif}
@@ -493,6 +545,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 :root[data-texte=manu]{--sans:'Patrick Hand',cursive}
 :root[data-texte=pixel]{--sans:'VT323',monospace}
 :root[data-texte=pixel] body{font-size:19px}
+.rap{display:flex;gap:6px;align-items:flex-start;margin-top:8px}.rapx{width:30px;height:30px;flex:none;border-radius:50%;color:var(--ink3);font-size:13px}.rapx:active{background:var(--soft)}
 </style>
 </head>
 <body>
@@ -523,7 +576,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '6.1';
+const VERSION = '6.2';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -941,9 +994,11 @@ function rendre(silencieux) {
   if (!S.data) { v.innerHTML = '<div class="empty">Chargement de ton fichier…</div>'; return; }
   $('#tdot').hidden = !/ANOMALIE/.test(S.data.anomalies || '');
   const html = { home: vueAccueil, journal: vueJournal, prevu: vuePrevu, stats: vueStats }[S.tab]();
+  const hx = [...v.querySelectorAll('.ctabs,.ptabs')].map(e => e.scrollLeft);
   if (silencieux && v.dataset.tab === S.tab && S.tab === 'journal' && document.activeElement && document.activeElement.id === 'q') { majListe(); return; }
   if (silencieux && v.dataset.tab === S.tab) { const sy = scrollY; v.innerHTML = html; scrollTo(0, sy); }
   else { v.className = ''; void v.offsetWidth; v.className = 'view'; v.innerHTML = html; v.dataset.tab = S.tab; }
+  if (silencieux) v.querySelectorAll('.ctabs,.ptabs').forEach((e, i) => { if (hx[i]) e.scrollLeft = hx[i]; });
   if (S.tab === 'home') animerJauge();
   if (S.tab === 'journal') { const q = $('#q'); if (q) q.addEventListener('input', ev => { S.filtre.q = ev.target.value; majListe(); const z = $('#prelev'); if (z) z.hidden = !!S.filtre.q; }); }
   if (S.pop) setTimeout(() => { S.pop = null; }, 900);
@@ -1003,7 +1058,9 @@ function blocAnomalies() {
   const rap = lines.filter(l => l.startsWith('📅')).map(l => l.replace(/^📅\s*/, ''));
   let h = '';
   if (head) h += `<button class="alert" data-act="anom"><b style="font-weight:600">${esc(head.replace(/^⚠\s*/, '⚠ '))}</b><span class="muted"> · ${S.anomOpen ? 'masquer' : 'voir'}</span>${S.anomOpen ? '<ul>' + items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' : ''}</button>`;
-  rap.forEach(r => h += /solde/i.test(r) ? `<button class="note" data-act="ctrl" style="width:100%;text-align:left">${ico.cal}<span>${esc(r.replace(/dans Paramètres ②/, ''))} <b style="font-weight:500;color:var(--ink);text-decoration:underline">Faire le contrôle ›</b></span></button>` : `<div class="note">${ico.cal}<span>${esc(r)}</span></div>`);
+  const fait = LS.get('ctrlFait', 0) === nowYM(), vus = LS.get('rappelsVus', []);
+  rap.forEach(r => { const k = nowYM() + '|' + r; if (vus.includes(k) || (/solde/i.test(r) && fait)) return;
+    h += `<div class="rap">${/solde/i.test(r) ? `<button class="note" data-act="ctrl" style="flex:1;text-align:left;margin:0">${ico.cal}<span>Nouveau mois : note ton solde bancaire <b style="font-weight:500;color:var(--ink);text-decoration:underline">C'est parti ›</b></span></button>` : `<div class="note" style="flex:1;margin:0">${ico.cal}<span>${esc(r.replace(/^Rappel[^:]*:\s*/, ''))}</span></div>`}<button class="rapx" data-act="rap-ok" data-k="${esc(k)}" aria-label="Masquer ce rappel">✕</button></div>`; });
   return h;
 }
 function carteBilanMois() {
@@ -1035,7 +1092,7 @@ function courbeSolde() {
 }
 function cartePointBas() {
   const pts = courbeSolde();
-  if (!pts) return `<button class="pbas" data-act="ctrl"><div class="pbh"><span>POINT BAS PRÉVU</span><b>—</b></div><div class="pbs">Indisponible : ton solde au 1er janvier ${now.getFullYear()} n'est pas saisi. Touche ici pour le régler.</div></button>`;
+  if (!pts) return `<button class="pbas" data-act="ctrl"><div class="pbh"><span>POINT BAS PRÉVU</span><b>—</b></div><div class="pbs">Indisponible : l'appli ne connaît pas encore ton solde. Touche ici et tape ce qu'il y a sur ton compte.</div></button>`;
   if (pts.length < 3) return '';
   const bas = pts.reduce((a, p) => p.s < a.s ? p : a, pts[0]);
   const cls = bas.s < 0 ? 'c-bad' : bas.s < 100 ? 'c-warn' : 'c-ok', col = bas.s < 0 ? 'var(--bad)' : bas.s < 100 ? 'var(--warn)' : 'var(--ok)';
@@ -1069,7 +1126,7 @@ function vueAccueil() {
   let h = carteBilanMois() + (b.st === 'cours' ? banniereResume() : '') + alerteVersion() + blocAnomalies() + (ouvert('alertes') && b.st === 'cours' ? blocAlertes() : '') + (ouvert('voyage') && b.st === 'cours' ? blocVoyageAccueil() : '');
   h += `<div class="gauge">${b.st === 'cours' ? blocMascotte() : ''}<button data-act="jmode" style="display:block;width:100%" aria-label="Basculer argent restant / solde">${jaugeSVG(b)}
     <div class="big ${val != null && val < 0 ? 'c-bad' : ''}" id="big" data-v="${val == null ? 0 : val}">${val == null ? '—' : e0(val)}</div>
-    <div class="lbl">${solde ? (sc == null ? 'SOLDE DE DÉPART NON SAISI' : 'SOLDE EN BANQUE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" : '')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span></div></button>
+    <div class="lbl">${solde ? (sc == null ? 'SOLDE PAS ENCORE NOTÉ · ⚙ › MON SOLDE' : 'SOLDE EN BANQUE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" : '')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span></div></button>
     ${b.st === 'cours' && !solde && on('pj') ? lignePJ() : ''}
     <p class="phrase">${phraseRythme(b)}</p>`;
   const pills = [];
@@ -1542,33 +1599,64 @@ function retirerCat() {
 function signe(type) { return type === 'Revenu' || type === 'Retrait' ? 1 : -1; }
 function soldeDepart(y) { const s = S.data.soldes ? S.data.soldes[String(y)] : null; return typeof s === 'number' && Math.abs(s) > 1 ? s : null; }
 function ouvrirSolde() {
-  const y = now.getFullYear(), m = now.getMonth() + 1;
   const c = S.data.controle || {};
-  S.form = { mode: 'solde', y, m, banque: '', especes: c.especes ? txtNum(c.especes) : '', dep: '', neg: false };
+  S.form = { mode: 'solde', y: now.getFullYear(), m: now.getMonth() + 1, banque: '', especes: c.especes ? txtNum(c.especes) : '', dep: '', neg: false, salDeja: false };
   rendreForm();
 }
-function ecartSolde() {
+// Salaire de l'Échéancier daté du 1er du mois prochain (souvent versé quelques jours avant)
+function salaireDejaLa() {
+  const y = now.getFullYear(), m = now.getMonth() + 1, ny = m === 12 ? y + 1 : y, nm = m === 12 ? 1 : m + 1;
+  return occurrences(ny, nm).filter(o => o.type === 'Revenu' && o.jour === 1).reduce((t, o) => t + o.v, 0);
+}
+function totalSaisi() {
   const f = S.form, b = numTxt(f.banque); if (isNaN(b)) return null;
-  const cal = soldeCalcule(f.y, f.m); if (cal == null) return null;
-  return (f.neg ? -b : b) + (numTxt(f.especes) || 0) - cal;
+  return (f.neg ? -b : b) + (numTxt(f.especes) || 0) - (f.salDeja ? salaireDejaLa() : 0);
+}
+function ecartSolde() {
+  const t = totalSaisi(); if (t == null) return null;
+  const cal = soldeCalcule(now.getFullYear(), now.getMonth() + 1); return cal == null ? null : t - cal;
 }
 function majSolde() {
   const z = $('#secart'); if (!z) return;
-  const e = ecartSolde();
-  z.innerHTML = e == null ? '<span class="muted">Tape le solde affiché par ta banque</span>' : Math.abs(e) <= 5 ? `<span class="c-ok">Écart ${e >= 0 ? '+' : ''}${e2(e)} € : tout est saisi ✓</span>`
-    : `<span class="c-bad">Écart ${e >= 0 ? '+' : ''}${e2(e)} € : ${e < 0 ? 'une dépense oubliée dans le Journal, ou un prélèvement plus cher que prévu ?' : 'un revenu oublié, ou une dépense saisie deux fois ?'}</span>`;
+  const t = totalSaisi(), e = ecartSolde();
+  z.innerHTML = t == null ? '<span class="muted">Tape le solde affiché par ta banque</span>'
+    : e == null ? '<span class="muted">Premier relevé : l\'appli partira de ce montant.</span>'
+    : Math.abs(e) <= 5 ? `<span class="c-ok">L'appli était juste (écart ${e >= 0 ? '+' : ''}${e2(e)} €) ✓</span>`
+    : `<span class="muted">L'appli calculait ${e2(t - e)} € (écart ${e >= 0 ? '+' : ''}${e2(e)} €). Pas grave : ton solde devient la référence. ${e < 0 ? 'Une dépense pas saisie ?' : 'Un revenu pas saisi ?'}</span>`;
 }
 function okSolde() {
-  const f = S.form, e = ecartSolde();
-  if (e == null) { $('#ferr').textContent = 'Tape le solde de ton compte'; return; }
-  const b = numTxt(f.banque) * (f.neg ? -1 : 1), esp = numTxt(f.especes) || 0;
-  appel('solde-ctrl', { mois: MOIS[f.m - 1][0].toUpperCase() + MOIS[f.m - 1].slice(1), solde: b, especes: esp });
-  S.data.controle = { mois: MOIS[f.m - 1], solde: b, especes: esp };
+  const f = S.form, t = totalSaisi();
+  if (t == null) { $('#ferr').textContent = 'Tape le solde de ton compte'; return; }
+  const y = now.getFullYear(), m = now.getMonth() + 1, e = ecartSolde(), esp = numTxt(f.especes) || 0;
+  // 1) l'appli repart de ce montant (base interne recalée)
+  const v = Math.round((t - soldeCalcule(y, m, 0)) * 100) / 100;
+  S.data.soldes = S.data.soldes || {}; S.data.soldes[String(y)] = v; memo = new Map();
+  appel('solde-dep', { annee: y, valeur: v });
+  // 2) fiche ② du fichier : fin du mois précédent, cohérente avec la nouvelle base (écart = 0)
+  if (m > 1) { const fin = Math.round((soldeCalcule(y, m - 1) - esp) * 100) / 100, mo = MOIS[m - 2][0].toUpperCase() + MOIS[m - 2].slice(1); appel('solde-ctrl', { mois: mo, solde: fin, especes: esp }); S.data.controle = { mois: mo, solde: fin, especes: esp }; }
+  else appel('solde-ctrl', { mois: 'Janvier', solde: null, especes: esp });
   const hist = LS.get('controles', []);
-  hist.unshift({ date: now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }), mois: MC[f.m - 1] + ' ' + f.y, ecart: Math.round(e * 100) / 100 });
-  LS.set('controles', hist.slice(0, 24));
-  toast(Math.abs(e) <= 5 ? 'Contrôle OK, tout est saisi' : 'Contrôle enregistré : écart de ' + e0(e));
-  rendreSolde();
+  hist.unshift({ date: now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }), mois: MC[m - 1] + ' ' + y, ecart: e == null ? 0 : Math.round(e * 100) / 100, solde: Math.round(t * 100) / 100 });
+  LS.set('controles', hist.slice(0, 24)); LS.set('ctrlFait', nowYM()); sauver();
+  fermer(); rendre(true);
+  toast(e == null || Math.abs(e) <= 5 ? 'Solde noté ✓ L\'appli repart de ' + e0(t) : 'Solde noté : écart de ' + e0(e) + ' absorbé, l\'appli repart de ' + e0(t));
+}
+function rendreSolde() {
+  const f = S.form, y = now.getFullYear(), m = now.getMonth() + 1, cal = soldeCalcule(y, m), d = now.getDate(), sal = salaireDejaLa();
+  let h = enteteSheet('MON SOLDE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Une fois par mois, idéalement <b>le 1er</b> : tape ce qu'il y a sur ton compte aujourd'hui. L'appli repart de ce montant, c'est tout.</div>
+    ${cal != null ? `<div class="ticket" style="margin-top:10px"><div class="tl"><span>L'APPLI CALCULE AUJOURD'HUI</span><span id="scal">${e2(cal)}</span></div></div>` : ''}
+    <div class="grp" style="margin-top:14px">SUR TON COMPTE AUJOURD'HUI</div>
+    <div style="display:flex;gap:8px"><button class="chip ${f.neg ? 'on' : ''}" data-act="s-neg" style="height:42px;margin-top:10px" aria-label="Solde négatif">±</button>
+      <input class="libin" data-f="banque" inputmode="decimal" placeholder="Solde de ton compte en €" value="${esc(f.banque)}"></div>
+    <input class="libin" data-f="especes" inputmode="decimal" placeholder="Espèces dans ton portefeuille (facultatif)" value="${esc(f.especes)}" style="margin-top:0">
+    ${d >= 20 && sal > 0 ? `<button class="chip ${f.salDeja ? 'on' : ''}" data-act="s-sal" style="margin-top:2px;white-space:normal;text-align:left">${f.salDeja ? '✓ ' : ''}Mon salaire du mois prochain (${e0(sal)}) est déjà sur le compte</button>` : ''}
+    <div class="hint" id="secart" style="margin-top:6px"></div><div class="err" id="ferr"></div>
+    <button class="go" data-act="s-ok">C'EST MON SOLDE</button>
+    <div class="note" style="display:block">Ce montant devient la référence : la jauge « solde », le point bas et les prévisions partent de là. L'écart n'est qu'une info, tu n'as rien à recaler toi-même. Le fichier est mis à jour tout seul.</div>`;
+  const hist = LS.get('controles', []).slice(0, 5);
+  if (hist.length) h += `<div class="grp" style="margin-top:18px">DERNIERS RELEVÉS</div>` + hist.map(c => `<div class="up"><span>${esc(c.date)}</span><span>${c.solde != null ? e0(c.solde) : esc(c.mois)}</span><span class="${Math.abs(c.ecart) <= 5 ? 'c-ok' : 'c-mute'}">${Math.abs(c.ecart) <= 5 ? 'juste ✓' : 'écart ' + (c.ecart >= 0 ? '+' : '') + e0(c.ecart)}</span></div>`).join('')
+    + `<button class="danger ${f.armH ? 'armed' : ''}" data-act="hist-clear" style="margin-top:12px">${f.armH ? "TOUCHE ENCORE : L'HISTORIQUE SERA EFFACÉ" : "VIDER L'HISTORIQUE"}</button>`;
+  $('#sheetIn').innerHTML = h; lierChamps(); majSolde();
 }
 function okDepart() {
   const f = S.form, v = numTxt(f.dep);
@@ -1758,7 +1846,7 @@ function rendreReglages() {
     <div class="grp" style="margin-top:16px">MON BUDGET</div>
     <button class="opt" data-act="go:budgets"><span>Budgets par catégorie</span><span class="muted mono" style="font-size:12px">${e0(bud)}/mois ›</span></button>
     <button class="opt" data-act="go:cats"><span>Catégories et favorites</span><span class="muted mono" style="font-size:12px">${cats().length} · ${S.data.libres || 0} libre${(S.data.libres || 0) > 1 ? 's' : ''} ›</span></button>
-    <button class="opt" data-act="go:solde"><span>Contrôle du solde</span><span class="muted mono" style="font-size:12px">${lc ? 'dernier : ' + lc.date : 'jamais fait'} ›</span></button>
+    <button class="opt" data-act="go:solde"><span>Mon solde (chaque début de mois)</span><span class="muted mono" style="font-size:12px">${lc ? 'dernier : ' + lc.date : 'jamais noté'} ›</span></button>
     <div class="grp" style="margin-top:18px">ACCUEIL</div>
     <div class="grp" style="margin:6px 0 0;letter-spacing:1px">ORDRE DES BUDGETS SUR L'ACCUEIL</div>
     <div class="note" style="margin:2px 0 4px;display:block">${ob === 'perso' ? 'Mon ordre : celui que tu as choisi dans Réglages › Catégories (flèches ▲▼).' : 'Les plus urgents d\'abord : ceux proches de leur limite, puis ceux déjà dépassés, puis ceux bien tenus.'}</div>
@@ -1813,34 +1901,6 @@ function soldeCalcule(y, m, base) {
   S.journal.forEach(e => { const c = cm[e.cat]; if (!e.deleted && c && e.y === y && e.m === m && e.montant) t += signe(c.type) * e.montant; });
   occurrences(y, m).forEach(o => { if (o.jour <= d) t += signe(o.type) * o.v; });
   return t;
-}
-function rendreSolde() {
-  const f = S.form, s0 = soldeDepart(f.y), cours = statut(f.y, f.m) === 'cours';
-  let h = enteteSheet('RÉGLAGES', 'reglages') + `<div class="mrow" style="margin:14px 0 4px"><button class="mbtn" data-act="sm:-1" aria-label="Mois précédent">‹</button><span>${esc(moisLabel(f.y, f.m).toUpperCase())}</span><button class="mbtn" data-act="sm:1" aria-label="Mois suivant">›</button></div>`;
-  const champsBanque = `<div style="display:flex;gap:8px"><button class="chip ${f.neg ? 'on' : ''}" data-act="s-neg" style="height:42px;margin-top:10px" aria-label="Solde négatif">±</button>
-      <input class="libin" data-f="banque" inputmode="decimal" placeholder="Solde de ton compte en €" value="${esc(f.banque)}"></div>
-      <input class="libin" data-f="especes" inputmode="decimal" placeholder="Espèces dans ton portefeuille (facultatif)" value="${esc(f.especes)}" style="margin-top:0">`;
-  if (s0 == null) {
-    h += `<div class="note">Le solde au 1er janvier ${f.y} n'est pas saisi. Deux façons de le régler :</div>
-      <div class="grp" style="margin-top:14px">JE LE CONNAIS</div>
-      <input class="libin" data-f="dep" inputmode="decimal" placeholder="Solde au 1er janvier ${f.y} en €" value="${esc(f.dep)}" style="margin-top:6px">
-      <button class="ghost" data-act="dep-ok" style="margin-top:0">ENREGISTRER</button>
-      <div class="grp" style="margin-top:18px">JE NE LE CONNAIS PAS : PARS DE MON SOLDE D'AUJOURD'HUI</div>${champsBanque}
-      <div class="err" id="ferr"></div><button class="go" data-act="dep-calc">RETROUVER MON SOLDE DE DÉPART</button>`;
-  } else {
-    h += `<div class="ticket" style="margin-top:10px"><div class="tl"><span>SOLDE AU 1ER JANVIER</span><span>${e2(s0)}</span></div>
-      <div class="tl"><span>CALCULÉ ${cours ? "AUJOURD'HUI" : 'FIN ' + MC[f.m - 1].toUpperCase()}</span><span id="scal">${e2(soldeCalcule(f.y, f.m))}</span></div></div>
-      <div class="grp" style="margin-top:16px">CE QUE DIT TA BANQUE</div>${champsBanque}
-      <div class="hint" id="secart" style="margin-top:6px"></div><div class="err" id="ferr"></div>
-      <button class="go" data-act="s-ok">ENREGISTRER LE CONTRÔLE</button>
-      <div class="note">${cours ? 'Le calcul compte tes saisies du mois et les prélèvements dont la date est passée.' : 'À faire quand toutes les dépenses du mois sont saisies.'}</div>
-      ${cours && now.getDate() >= 26 ? '<div class="note c-warn">Fin de mois : si ton salaire est déjà arrivé, il est compté au 1er du mois prochain, donc un écart positif de son montant est normal. Le meilleur moment pour contrôler, c\'est du 1er au 4.</div>' : ''}
-      <button class="ghost" data-act="dep-calc" style="margin-top:14px">RECALER LE SOLDE DE DÉPART SUR CE MONTANT</button>`;
-  }
-  const hist = LS.get('controles', []).slice(0, 5);
-  if (hist.length) h += `<div class="grp" style="margin-top:18px">DERNIERS CONTRÔLES</div>` + hist.map(c => `<div class="up"><span>${esc(c.date)}</span><span>${esc(c.mois)}</span><span class="${Math.abs(c.ecart) <= 5 ? 'c-ok' : 'c-bad'}">${c.ecart >= 0 ? '+' : ''}${e2(c.ecart)}</span></div>`).join('')
-    + `<button class="danger ${f.armH ? 'armed' : ''}" data-act="hist-clear" style="margin-top:12px">${f.armH ? "TOUCHE ENCORE : L'HISTORIQUE SERA EFFACÉ" : "VIDER L'HISTORIQUE"}</button>`;
-  $('#sheetIn').innerHTML = h; lierChamps(); majSolde();
 }
 function departCalcule() {
   const f = S.form, b = numTxt(f.banque);
@@ -1963,17 +2023,22 @@ function vueProgres() {
 const JEU_DEBUT = { y: 2026, m: 11, iso: '2026-11-01' };
 const ymNum = (y, m) => y * 12 + m;
 const DIFF = { facile: { l: 'FACILE', xp: 20, c: 'var(--ok)' }, moyen: { l: 'MOYEN', xp: 50, c: '#2B7FD8' }, difficile: { l: 'DIFFICILE', xp: 120, c: 'var(--warn)' }, extreme: { l: 'EXTRÊME', xp: 300, c: 'var(--bad)' } };
-const TITRES = ['Apprenti', 'Débutant', 'Économe', 'Prudent', 'Gestionnaire', 'Stratège', 'Comptable', 'Trésorier', 'Intendant', 'Argentier', 'Banquier', 'Gardien du budget', 'Expert', 'Virtuose', 'Maître', 'Grand maître', 'Légende', 'Mythe', 'Titan', 'Maître de la jauge'];
+const TITRES = ['Apprenti', 'Débutant', 'Économe', 'Prudent', 'Gestionnaire', 'Stratège', 'Comptable', 'Trésorier', 'Intendant', 'Argentier', 'Banquier', 'Gardien du budget', 'Expert', 'Virtuose', 'Maître', 'Grand maître', 'Légende', 'Mythe', 'Titan', 'Seigneur des comptes', 'Oracle', 'Alchimiste', 'Archiduc', 'Phénix', 'Empereur', 'Immortel', 'Demi-dieu', 'Divinité', 'Éternel', 'Maître de la jauge'];
+const NIV_MAX = 30;
 const xpNiveau = n => 20 * (n - 1) * (n - 1) + 40 * (n - 1); // XP cumulée pour atteindre le niveau n
 // Cosmétiques : skins de jauge et couleurs d'accent, débloqués par niveau
 const SKINS = [
   { id: 'classique', nom: 'Classique', niv: 1 }, { id: 'minimal', nom: 'Minimal', niv: 2 }, { id: 'reservoir', nom: 'Réservoir', niv: 4 },
   { id: 'batterie', nom: 'Batterie', niv: 6 }, { id: 'tableau', nom: 'Tableau de bord', niv: 8 }, { id: 'chrono', nom: 'Chrono rétro', niv: 10 },
-  { id: 'neon', nom: 'Néon', niv: 12 }, { id: 'pixel', nom: 'Pixel', niv: 14 }, { id: 'lcd', nom: 'Écran LCD', niv: 16 }, { id: 'or', nom: 'Or', niv: 18 }];
+  { id: 'neon', nom: 'Néon', niv: 12 }, { id: 'pixel', nom: 'Pixel', niv: 14 }, { id: 'lcd', nom: 'Écran LCD', niv: 16 }, { id: 'or', nom: 'Or', niv: 18 },
+  { id: 'anneau', nom: 'Anneau', niv: 21 }, { id: 'thermo', nom: 'Thermomètre', niv: 24 }, { id: 'aurore', nom: 'Aurore', niv: 27 }, { id: 'diamant', nom: 'Diamant', niv: 30 }];
 const ACCENTS = [
   { id: 'foret', nom: 'Forêt', niv: 1, c: null }, { id: 'ocean', nom: 'Océan', niv: 3, c: ['#2B7FD8', '#1D5FA8', '#7FB6F0'] },
   { id: 'rose', nom: 'Framboise', niv: 7, c: ['#D6457E', '#A82E5E', '#F08AB4'] }, { id: 'amethyste', nom: 'Améthyste', niv: 11, c: ['#7B5BD6', '#5A3FB0', '#B7A3F2'] },
-  { id: 'ormassif', nom: 'Or massif', niv: 20, c: ['#C9971C', '#8E6A0E', '#E8C25A'] }];
+  { id: 'ormassif', nom: 'Or massif', niv: 20, c: ['#C9971C', '#8E6A0E', '#E8C25A'] },
+  { id: 'corail', nom: 'Corail', niv: 9, c: ['#E2603F', '#B4462B', '#F5A08A'] }, { id: 'menthe', nom: 'Menthe', niv: 14, c: ['#2BB59A', '#1E8571', '#8FE3D1'] },
+  { id: 'cerise', nom: 'Cerise', niv: 17, c: ['#C8243C', '#961A2D', '#F07A8C'] }, { id: 'turquoise', nom: 'Lagon', niv: 23, c: ['#0FA3B1', '#0A7480', '#7FDDE6'] },
+  { id: 'lavande', nom: 'Lavande', niv: 26, c: ['#9B7FE0', '#6E52BF', '#CDBDF5'] }, { id: 'emeraude', nom: 'Émeraude', niv: 29, c: ['#0E8A5F', '#086444', '#5ED6A8'] }];
 function appliquerAccent() {
   const a = ACCENTS.find(x => x.id === LS.get('accent', 'foret')) || ACCENTS[0], st = document.documentElement.style;
   document.body && document.body.classList.toggle('accent', !!a.c);
@@ -2078,9 +2143,9 @@ function etatJeu() {
     ["Marches d'épargne réussies", 'moyen', 40, f.escOk], ['Défis de la semaine réussis', 'moyen', 30, f.semOk], ['Tirelires remplies', 'difficile', 100, f.tirOk],
     ['Novembre sobre', 'moyen', 150, f.novOk], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ['Voyages tenus', 'moyen', 80, f.voyOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
-  let niv = 1; while (niv < 20 && xp >= xpNiveau(niv + 1)) niv++;
-  const debut = xpNiveau(niv), fin = niv < 20 ? xpNiveau(niv + 1) : debut;
-  return { f, succes, rec, xp, niv, titre: TITRES[niv - 1], frac: niv < 20 ? (xp - debut) / (fin - debut) : 1, reste: fin - xp };
+  let niv = 1; while (niv < NIV_MAX && xp >= xpNiveau(niv + 1)) niv++;
+  const debut = xpNiveau(niv), fin = niv < NIV_MAX ? xpNiveau(niv + 1) : debut;
+  return { f, succes, rec, xp, niv, titre: TITRES[niv - 1], frac: niv < NIV_MAX ? (xp - debut) / (fin - debut) : 1, reste: fin - xp };
 }
 const debloque = (o, niv) => o.suc ? succesFait(o.suc) : niv >= o.niv;
 // Nouveautés : succès et cosmétiques débloqués depuis la dernière visite
@@ -2139,16 +2204,24 @@ function skinSVG(id, frac, col, rep) {
     case 'lcd': { let t = ''; for (let i = 0; i < 20; i++) t += `<rect x="${26 + i * 12.5}" y="112" width="9" height="34" rx="1" fill="${i < Math.round(f * 20) ? '#9BE564' : '#24331F'}"/>`;
       return vb('#141A12', `<text class="flick" x="150" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="54" font-weight="700" fill="#9BE564" letter-spacing="4">${String(pct).padStart(3, ' ')}%</text>${t}${rep == null ? '' : `<line x1="${24 + rep * 250}" y1="104" x2="${24 + rep * 250}" y2="154" stroke="#E8F5D0" stroke-width="2"/>`}`); }
     case 'or': return vb('#15120A', `<defs><linearGradient id="gold" x1="0" x2="1"><stop offset="0" stop-color="#8E6A0E"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#B8860B"/></linearGradient></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#3A2F12" stroke-width="22" fill="none"/><path d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="url(#gold)" stroke-width="22" fill="none"/>${repere(150, 150, 96, 128, '#F3D27A')}${AIG(150, 150, 100, a, 6, '#F3D27A')}<circle cx="150" cy="150" r="13" fill="url(#gold)"/>`);
+    case 'anneau': { const C = 2 * Math.PI * 64, rp = rep == null ? '' : (() => { const g = (90 - 360 * rep) * D, [x, y] = P(150, 89, 64, g); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="var(--ink)"/>`; })();
+      return vb('', `<circle cx="150" cy="89" r="64" fill="none" stroke="var(--track)" stroke-width="20"/><circle class="anring" cx="150" cy="89" r="64" fill="none" stroke="${col}" stroke-width="20" stroke-linecap="round" stroke-dasharray="${(C * f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 150 89)"/>${rp}<text x="150" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="700" font-size="30" fill="var(--ink)">${pct}%</text>`); }
+    case 'thermo': { let t = ''; for (let i = 0; i <= 10; i++) t += `<line x1="${80 + i * 19}" y1="${i % 5 ? 112 : 108}" x2="${80 + i * 19}" y2="120" stroke="var(--ink3)" stroke-width="${i % 5 ? 1.5 : 2.5}"/>`;
+      return vb('', `<rect x="62" y="70" width="214" height="30" rx="15" fill="var(--track)"/><rect class="charge" x="62" y="76" width="${(18 + 190 * f).toFixed(1)}" height="18" rx="9" fill="${col}"/><circle cx="58" cy="85" r="30" fill="${col}"/><circle cx="58" cy="85" r="30" fill="none" stroke="var(--ink)" stroke-width="3" opacity=".15"/><text x="58" y="93" text-anchor="middle" font-size="20">🌡️</text>${t}${rep == null ? '' : `<line x1="${80 + 190 * rep}" y1="62" x2="${80 + 190 * rep}" y2="104" stroke="var(--ink)" stroke-width="2.5"/>`}<text x="176" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="15" fill="var(--ink2)">${pct} %</text>`); }
+    case 'aurore': { let st = ''; for (let i = 0; i < 26; i++) { const x = (i * 97) % 280 + 10, y = (i * 53) % 130 + 8; st += `<circle cx="${x}" cy="${y}" r="${i % 4 ? 1 : 1.8}" fill="#fff" opacity="${.3 + (i % 5) / 8}"/>`; }
+      return vb('#0B1026', `<defs><linearGradient id="aug" x1="0" x2="1"><stop offset="0" stop-color="#3CF0C5"/><stop offset=".5" stop-color="#7B5BD6"/><stop offset="1" stop-color="#EF476F"/></linearGradient></defs>${st}<path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#1B2348" stroke-width="16" fill="none" stroke-linecap="round"/><path class="pulse" d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="url(#aug)" stroke-width="16" fill="none" stroke-linecap="round"/>${repere(150, 150, 98, 126, '#E8EEF8')}${AIG(150, 150, 96, a, 5, '#F1EFE8')}<circle cx="150" cy="150" r="9" fill="#F1EFE8"/>`); }
+    case 'diamant': { const fa = [[150, 18], [222, 60], [196, 150], [104, 150], [78, 60]]; const pts = fa.map(p => p.join(',')).join(' ');
+      return vb('#101820', `<defs><linearGradient id="dmg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7FDDE6"/><stop offset="${f.toFixed(3)}" stop-color="#E6FBFF"/><stop offset="${f.toFixed(3)}" stop-color="#1D2A33"/><stop offset="1" stop-color="#1D2A33"/></linearGradient></defs><polygon points="${pts}" fill="url(#dmg)" stroke="#BFF4FA" stroke-width="2.5"/><polyline points="78,60 150,150 222,60" fill="none" stroke="#BFF4FA" stroke-width="1.2" opacity=".6"/><polyline points="104,150 150,60 196,150" fill="none" stroke="#BFF4FA" stroke-width="1.2" opacity=".4"/><line x1="78" y1="60" x2="222" y2="60" stroke="#BFF4FA" stroke-width="1.2" opacity=".6"/>${rep == null ? '' : `<line x1="70" y1="${(150 - 132 * rep).toFixed(1)}" x2="230" y2="${(150 - 132 * rep).toFixed(1)}" stroke="#F3D27A" stroke-width="2" stroke-dasharray="4 4"/>`}<text x="150" y="172" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="14" fill="#BFF4FA">${pct} %</text>`); }
   }
   return null;
 }
 // --- Écran Progrès : niveau, succès, collection ---
 function blocNiveau(e) {
-  const prochain = SKINS.concat(ACCENTS).filter(o => o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
-  const ti = LS.get('cos_titre', '') || e.titre, M = dispo('cosmetiques') && cos('mascotte') === 'on' ? mascotte() : null;
+  const prochain = tousCosm().filter(o => !o.suc && o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
+  const ti = LS.get('cos_titre', '') || e.titre, M = dispo('cosmetiques') && cos('mascotte') !== 'off' ? mascotte() : null;
   return `<div class="niv">${M ? `<button class="mascn" data-act="masc">${M.s[1]}</button>` : ''}<div class="nivh"><b>NIV. ${e.niv}</b><span>${esc(ti.toUpperCase())}</span><small>${e.xp} XP</small></div>
     <div class="nivbar"><i style="width:${Math.round(e.frac * 100)}%"></i></div>
-    <div class="note" style="margin-top:6px;display:block">${e.niv < 20 ? `Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}` : 'Niveau maximum atteint'}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
+    <div class="note" style="margin-top:6px;display:block">${e.niv < NIV_MAX ? `Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}` : 'Niveau maximum atteint'}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
 }
 function blocSucces(e) {
   const d = S.succesDiff || 'tous', L = e.succes.filter(s => d === 'tous' || s.d === d);
@@ -2667,6 +2740,8 @@ const UI_SKINS = [
   { t: 'ui', id: 'suisse', nom: 'Suisse', niv: 9, f: ['Inter'], p: { ff: 'Inter', r: '0', b: '0', sh: '-5px 0 0 #E2412E', bg: 'var(--card)', fw: 800 } },
   { t: 'ui', id: 'arcade', nom: 'Arcade', niv: 99, suc: 'jours-7', f: ['VT323'], p: { ff: 'VT323', r: '0', b: '0', sh: '0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink)', bg: 'var(--card)', fz: '22px' } },
   { t: 'ui', id: 'zen', nom: 'Zen', niv: 99, suc: 'zero-1', f: ['Lexend'], p: { ff: 'Lexend', r: '14px', b: '0', sh: 'none', bg: 'var(--soft)', fw: 300 } },
+  { t: 'ui', id: 'neon', nom: 'Néon', niv: 18, f: ['Space Grotesk'], p: { ff: 'Space Grotesk', r: '10px', b: '1.5px solid #3CF0C5', sh: '0 0 10px #3CF0C5', bg: '#0E1116', c: '#3CF0C5' } },
+  { t: 'ui', id: 'retro', nom: 'Rétro 70', niv: 24, f: ['Nunito', 'Fraunces'], p: { ff: 'Fraunces', r: '16px', b: '2px solid var(--ink)', sh: '3px 3px 0 #E8A33A,6px 6px 0 #D85A30', bg: 'var(--card)', fs: 'italic' } },
   { t: 'ui', id: 'prestige', nom: 'Prestige', niv: 12, f: ['EB Garamond', 'Cinzel'], p: { ff: 'Cinzel', r: '2px', b: '1px solid #C9A443', sh: '0 0 0 3px var(--card), 0 0 0 4px #C9A443', bg: 'var(--card)' } }
 ];
 const TEXTES = [
@@ -2682,7 +2757,7 @@ const TEXTES = [
   { t: 'texte', id: 'manu', nom: 'Écriture', niv: 14, ff: 'Patrick Hand' },
   { t: 'texte', id: 'pixel', nom: 'Pixel', niv: 99, suc: 'jours-14', ff: 'VT323' }
 ];
-const POLICES_URL = { 'Nunito': 'Nunito:wght@400;600;800', 'Space Grotesk': 'Space+Grotesk:wght@400;500;700', 'Fraunces': 'Fraunces:ital,wght@0,600;0,800;1,600', 'Inter': 'Inter:wght@400;600;800', 'Patrick Hand': 'Patrick+Hand', 'Caveat': 'Caveat:wght@600', 'VT323': 'VT323', 'EB Garamond': 'EB+Garamond:wght@400;600', 'Cinzel': 'Cinzel:wght@600;700', 'Lexend': 'Lexend:wght@300;400;600', 'Atkinson Hyperlegible': 'Atkinson+Hyperlegible:wght@400;700', 'Courier Prime': 'Courier+Prime:wght@700' };
+const POLICES_URL = { 'Nunito': 'Nunito:wght@400;600;800', 'Space Grotesk': 'Space+Grotesk:wght@400;500;700', 'Fraunces': 'Fraunces:ital,wght@0,600;0,800;1,600', 'Inter': 'Inter:wght@400;600;800', 'Patrick Hand': 'Patrick+Hand', 'Caveat': 'Caveat:wght@600', 'VT323': 'VT323', 'EB Garamond': 'EB+Garamond:wght@400;600', 'Cinzel': 'Cinzel:wght@600;700', 'Lexend': 'Lexend:wght@300;400;600', 'Atkinson Hyperlegible': 'Atkinson+Hyperlegible:wght@400;700', 'Courier Prime': 'Courier+Prime:wght@700', 'Stardos Stencil': 'Stardos+Stencil:wght@700', 'Permanent Marker': 'Permanent+Marker' };
 const policesChargees = new Set();
 function chargerPolices(L) {
   const a = (L || []).filter(f => POLICES_URL[f] && !policesChargees.has(f)); if (!a.length) return;
@@ -2700,7 +2775,7 @@ function appliquerUI() {
 function apercuUI(o) {
   if (o.t === 'texte') return `<div class="uiprev"><b style="font-family:'${o.ff || 'IBM Plex Sans'}',sans-serif;font-size:${o.id === 'pixel' ? 26 : 20}px">Aa</b><small style="font-family:'${o.ff || 'IBM Plex Sans'}',sans-serif">${o.id === 'auto' ? 'auto' : '855 €'}</small></div>`;
   const p = o.p;
-  return `<div class="uiprev" style="font-family:'${p.ff}',sans-serif"><span style="border:${p.b};border-radius:${p.r};box-shadow:${p.sh};background:${p.bg};font-style:${p.fs || 'normal'};font-weight:${p.fw || 600};font-size:${p.fz || '15px'}">Aa</span><i style="border-radius:${p.r};box-shadow:${p.sh};border:${p.b}"></i></div>`;
+  return `<div class="uiprev" style="font-family:'${p.ff}',sans-serif"><span style="color:${p.c || 'var(--ink)'};border:${p.b};border-radius:${p.r};box-shadow:${p.sh};background:${p.bg};font-style:${p.fs || 'normal'};font-weight:${p.fw || 600};font-size:${p.fz || '15px'}">Aa</span><i style="border-radius:${p.r};box-shadow:${p.sh};border:${p.b}"></i></div>`;
 }
 // Essai de 4 secondes d'un style verrouillé
 let essaiUI = null;
@@ -2723,7 +2798,15 @@ const COSM_EXTRA = [
   { t: 'fete', id: 'confettis', nom: 'Confettis', niv: 1 }, { t: 'fete', id: 'pieces', nom: 'Pluie de pièces', niv: 6 }, { t: 'fete', id: 'feux', nom: "Feu d'artifice", niv: 13 },
   { t: 'son', id: 'off', nom: 'Silence', niv: 1 }, { t: 'son', id: 'chaching', nom: 'Cha-ching !', niv: 11 },
   { t: 'aiguille', id: 'classique', nom: 'Classique', niv: 1 }, { t: 'aiguille', id: 'fine', nom: 'Fine', niv: 4 }, { t: 'aiguille', id: 'fleche', nom: 'Flèche', niv: 8 }, { t: 'aiguille', id: 'laser', nom: 'Laser', niv: 12 }, { t: 'aiguille', id: 'doree', nom: 'Dorée', niv: 17 },
-  { t: 'ticket', id: 'thermique', nom: 'Thermique', niv: 1 }, { t: 'ticket', id: 'carnet', nom: 'Carnet', niv: 7 }, { t: 'ticket', id: 'dore', nom: 'Reçu doré', niv: 16 }];
+  { t: 'ticket', id: 'thermique', nom: 'Thermique', niv: 1 }, { t: 'ticket', id: 'carnet', nom: 'Carnet', niv: 7 }, { t: 'ticket', id: 'dore', nom: 'Reçu doré', niv: 16 },
+  { t: 'ticket', id: 'kraft', nom: 'Papier kraft', niv: 10 }, { t: 'ticket', id: 'noir', nom: 'Reçu noir', niv: 13 }, { t: 'ticket', id: 'polaroid', nom: 'Polaroïd', niv: 19 }, { t: 'ticket', id: 'holo', nom: 'Holographique', niv: 25 },
+  { t: 'theme', id: 'sauge', nom: 'Sauge', niv: 3 }, { t: 'theme', id: 'menthe', nom: 'Menthe glacée', niv: 22 }, { t: 'theme', id: 'abysses', nom: 'Abysses', niv: 25 }, { t: 'theme', id: 'bordeaux', nom: 'Bordeaux', niv: 28 }, { t: 'theme', id: 'aurore', nom: 'Aurore boréale', niv: 30 },
+  { t: 'mascotte', id: 'plante', nom: 'Plante', niv: 7 }, { t: 'mascotte', id: 'chat', nom: 'Chat', niv: 11 }, { t: 'mascotte', id: 'dragon', nom: 'Dragon', niv: 17 }, { t: 'mascotte', id: 'fusee', nom: 'Fusée', niv: 22 }, { t: 'mascotte', id: 'cristal', nom: 'Cristal', niv: 28 },
+  { t: 'tampon', id: 'rond', nom: 'Rond', niv: 5 }, { t: 'tampon', id: 'etoile', nom: 'Étoilé', niv: 11 }, { t: 'tampon', id: 'craie', nom: 'Craie', niv: 18 }, { t: 'tampon', id: 'holo', nom: 'Holo', niv: 22 }, { t: 'tampon', id: 'dore', nom: 'Doré', niv: 27 },
+  { t: 'police', id: 'serif', nom: 'Élégante', niv: 7 }, { t: 'police', id: 'arrondie', nom: 'Arrondie', niv: 12 }, { t: 'police', id: 'grotesk', nom: 'Grotesque', niv: 18 }, { t: 'police', id: 'neon', nom: 'Néon', niv: 21 }, { t: 'police', id: 'pochoir', nom: 'Pochoir', niv: 25 }, { t: 'police', id: 'graffiti', nom: 'Graffiti', niv: 28 },
+  { t: 'fete', id: 'etoiles', nom: 'Étoiles filantes', niv: 9 }, { t: 'fete', id: 'coeurs', nom: 'Cœurs', niv: 16 }, { t: 'fete', id: 'neige', nom: 'Neige', niv: 19 }, { t: 'fete', id: 'billets', nom: 'Pluie de billets', niv: 23 }, { t: 'fete', id: 'emojis', nom: 'Fiesta', niv: 27 },
+  { t: 'son', id: 'pop', nom: 'Pop', niv: 4 }, { t: 'son', id: 'piece', nom: 'Pièce', niv: 8 }, { t: 'son', id: 'clochette', nom: 'Clochette', niv: 14 }, { t: 'son', id: 'arcade', nom: 'Arcade', niv: 20 }, { t: 'son', id: 'fanfare', nom: 'Fanfare', niv: 26 },
+  { t: 'aiguille', id: 'goutte', nom: 'Goutte', niv: 15 }, { t: 'aiguille', id: 'baguette', nom: 'Baguette magique', niv: 20 }, { t: 'aiguille', id: 'plume', nom: 'Plume', niv: 23 }, { t: 'aiguille', id: 'eclair', nom: 'Éclair', niv: 26 }, { t: 'aiguille', id: 'arcenciel', nom: 'Arc-en-ciel', niv: 29 }];
 const TYPES_COSM = [['ui', 'INTERFACE'], ['theme', 'COULEURS'], ['texte', 'POLICE'], ['skin', 'JAUGES'], ['accent', 'ACCENT'], ['aiguille', 'AIGUILLES'], ['tampon', 'TAMPONS'], ['police', 'CHIFFRES'], ['fete', 'FÊTES'], ['son', 'SON'], ['ticket', 'TICKET'], ['mascotte', 'MASCOTTE'], ['titre', 'TITRE']];
 const cleCos = t => t === 'skin' ? 'skin' : t === 'accent' ? 'accent' : 'cos_' + t;
 const defCos = t => ({ ui: 'papier', texte: 'auto', skin: 'classique', accent: 'foret', theme: 'defaut', mascotte: 'off', tampon: 'encre', police: 'mono', fete: 'confettis', son: 'off', aiguille: 'classique', ticket: 'thermique', titre: '' })[t];
@@ -2736,30 +2819,36 @@ function appliquerCosmetiques() {
   const d = document.documentElement.dataset;
   try { appliquerUI(); } catch (e) {}
   d.cth = cos('theme'); d.tampon = cos('tampon'); d.police = cos('police'); d.ticket = cos('ticket');
-  const sombre = ['nuit', 'terminal', 'noiror'].includes(d.cth), clair = ['kraft', 'poudre'].includes(d.cth);
+  const sombre = ['nuit', 'terminal', 'noiror', 'abysses', 'bordeaux', 'aurore'].includes(d.cth), clair = ['kraft', 'poudre', 'sauge', 'menthe'].includes(d.cth);
+  { const pf = { serif: 'Fraunces', arrondie: 'Nunito', grotesk: 'Space Grotesk', pochoir: 'Stardos Stencil', graffiti: 'Permanent Marker', lcd: 'VT323', manu: 'Caveat', ticket: 'Courier Prime' }[d.police]; if (pf) try { chargerPolices([pf]); } catch (e) {} }
+  if (d.tampon === 'craie') try { chargerPolices(['Caveat']); } catch (e) {}
   if (sombre) d.theme = 'dark'; if (clair) d.theme = 'light';
   const mt = document.querySelector('meta[name=theme-color]'); if (mt && (sombre || clair)) mt.content = getComputedStyle(document.documentElement).getPropertyValue('--nav').trim() || mt.content;
   try { appliquerAccent(); } catch (e) {}
 }
 // --- Fêtes ---
 function celebrer() {
-  const f = cos('fete'); if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let f = cos('fete'); if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (f === 'confettis') return confettis();
   const cv = document.createElement('canvas'), W = innerWidth, H = innerHeight; cv.width = W; cv.height = H; cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99';
   document.body.appendChild(cv); const x = cv.getContext('2d'); let t = 0, P;
-  if (f === 'pieces') P = Array.from({ length: 40 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, vy: 3 + Math.random() * 4, r: 18 + Math.random() * 14, a: Math.random() * 6 }));
+  const EMO = { pieces: ['🪙'], etoiles: ['⭐', '✨', '🌟'], coeurs: ['💖', '💚', '💛', '💜'], neige: ['❄️', '❅', '❆'], billets: ['💶', '💵', '💸'], emojis: ['🥳', '🎉', '🎊', '🤑', '🙌', '🍾'] }[f];
+  if (EMO) { f = 'pluie'; P = Array.from({ length: 42 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .7, vy: (EMO[0] === '❄️' ? 1.3 : 3) + Math.random() * 3, vx: (Math.random() - .5) * (EMO[0] === '❄️' ? 1.4 : .6), a: Math.random() * 6, e: EMO[Math.floor(Math.random() * EMO.length)], s: 18 + Math.random() * 14 })); }
   else { P = []; [[.3, .35], [.7, .3], [.5, .2]].forEach(([cx, cy], k) => { const col = ['#FFD166', '#EF476F', '#06D6A0'][k]; for (let i = 0; i < 46; i++) { const a = Math.PI * 2 * i / 46, v = 2 + Math.random() * 3.5; P.push({ x: W * cx, y: H * cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: col, d: k * 18 }); } }); }
   const step = () => { x.clearRect(0, 0, W, H);
-    if (f === 'pieces') { x.font = '26px serif'; P.forEach(p => { p.y += p.vy; p.a += .1; x.save(); x.translate(p.x, p.y); x.scale(Math.cos(p.a), 1); x.fillText('🪙', -13, 9); x.restore(); }); }
+    if (f === 'pluie') { P.forEach(p => { p.y += p.vy; p.x += p.vx + Math.sin(p.a) * .4; p.a += .08; x.save(); x.font = p.s + 'px serif'; x.translate(p.x, p.y); x.scale(p.e === '🪙' ? Math.cos(p.a) : 1, 1); x.rotate(p.e === '🪙' ? 0 : Math.sin(p.a) * .3); x.fillText(p.e, -p.s / 2, p.s / 3); x.restore(); }); }
     else P.forEach(p => { if (t < p.d) return; p.vy += .05; p.x += p.vx; p.y += p.vy; x.globalAlpha = Math.max(0, 1 - (t - p.d) / 90); x.fillStyle = p.c; x.beginPath(); x.arc(p.x, p.y, 2.6, 0, 7); x.fill(); x.globalAlpha = 1; });
     if (++t < 130) requestAnimationFrame(step); else cv.remove(); };
   requestAnimationFrame(step);
 }
 // --- Son « cha-ching » à l'enregistrement ---
 function sonCaisse() {
-  if (cos('son') !== 'chaching') return;
-  try { const A = new (window.AudioContext || window.webkitAudioContext)(), t = A.currentTime;
-    [[1318, 0], [1760, .09], [2093, .16]].forEach(([fq, d]) => { const o = A.createOscillator(), g = A.createGain(); o.type = 'triangle'; o.frequency.value = fq; g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.18, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + .25); o.connect(g).connect(A.destination); o.start(t + d); o.stop(t + d + .3); });
+  const id = cos('son'); if (id === 'off') return;
+  const SEQ = { chaching: ['triangle', .25, [[1318, 0], [1760, .09], [2093, .16]]], pop: ['sine', .12, [[420, 0, 900]]], piece: ['square', .18, [[988, 0], [1319, .07]]],
+    clochette: ['sine', .7, [[1568, 0], [2093, .1], [2637, .2]]], arcade: ['square', .12, [[523, 0], [659, .06], [784, .12], [1047, .18]]], fanfare: ['triangle', .22, [[523, 0], [523, .13], [523, .26], [698, .39], [880, .62]]] }[id];
+  if (!SEQ) return;
+  try { const A = new (window.AudioContext || window.webkitAudioContext)(), t = A.currentTime, [ty, du, notes] = SEQ, vol = ty === 'square' ? .06 : .18;
+    notes.forEach(([fq, d, f2]) => { const o = A.createOscillator(), g = A.createGain(); o.type = ty; o.frequency.setValueAtTime(fq, t + d); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d + du * .8); g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(vol, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + du); o.connect(g).connect(A.destination); o.start(t + d); o.stop(t + d + du + .05); });
   } catch (e) {}
 }
 // --- Aiguille de la jauge classique ---
@@ -2768,20 +2857,32 @@ function aiguilleClassique() {
     case 'fine': return `<path d="M150 148.6 L36 150 L150 151.4 Z" fill="var(--ink)"/>`;
     case 'fleche': return `<path d="M150 146 L64 146 L64 141 L40 150 L64 159 L64 154 L150 154 Z" fill="var(--bad)"/>`;
     case 'laser': return `<line x1="150" y1="150" x2="34" y2="150" stroke="#FF2D55" stroke-width="3.5" stroke-linecap="round" style="filter:drop-shadow(0 0 5px #FF2D55)"/>`;
+    case 'goutte': return `<path d="M150 150 Q118 138 44 150 Q118 162 150 150 Z" fill="#2B7FD8"/><circle cx="150" cy="150" r="5" fill="#7FB6F0"/>`;
+    case 'baguette': return `<line x1="150" y1="150" x2="58" y2="150" stroke="#3B2F1E" stroke-width="4.5" stroke-linecap="round"/><line x1="150" y1="150" x2="132" y2="150" stroke="#F1EFE8" stroke-width="4.5"/><text x="46" y="157" font-size="22" text-anchor="middle">⭐</text>`;
+    case 'plume': return `<path d="M150 150 C118 136 70 136 38 150 C70 164 118 164 150 150 Z" fill="var(--ink2)" opacity=".85"/><line x1="150" y1="150" x2="38" y2="150" stroke="var(--paper)" stroke-width="1.2"/>`;
+    case 'eclair': return `<path d="M150 147 L112 146 L120 140 L80 145 L88 139 L38 150 L90 157 L82 152 L122 156 L114 151 L150 153 Z" fill="#F2B84B" stroke="#B5651D" stroke-width="1"/>`;
+    case 'arcenciel': return `<defs><linearGradient id="arcg" x1="0" x2="1"><stop offset="0" stop-color="#7B5BD6"/><stop offset=".25" stop-color="#118AB2"/><stop offset=".5" stop-color="#06D6A0"/><stop offset=".75" stop-color="#FFD166"/><stop offset="1" stop-color="#EF476F"/></linearGradient></defs><path d="M150 144.5 L40 150 L150 155.5 Z" fill="url(#arcg)"/>`;
     case 'doree': return `<defs><linearGradient id="agd" x1="0" x2="1"><stop offset="0" stop-color="#8E6A0E"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#B8860B"/></linearGradient></defs><path d="M150 144.5 L40 150 L150 155.5 Z" fill="url(#agd)"/>`;
   }
   return `<path d="M150 146 L44 150 L150 154 Z" fill="var(--bad)"/>`;
 }
 // --- Mascotte : tirelire qui grossit avec l'épargne depuis novembre 2026 ---
 const STADES = [[0, '🐷', 'Porcelet'], [200, '🐖', 'Cochon dodu'], [500, '🧰', 'Coffre'], [1000, '🪙', 'Lingot'], [2500, '💰', 'Trésor'], [5000, '🏦', 'Banque perso']];
+const MASCOTTES = { on: STADES,
+  plante: [[0, '🌱', 'Graine'], [200, '🌿', 'Pousse'], [500, '🪴', 'Plante en pot'], [1000, '🌳', 'Arbre'], [2500, '🌸', 'Arbre en fleurs'], [5000, '🏞️', 'Forêt']],
+  chat: [[0, '🐱', 'Chaton'], [200, '😺', 'Chat content'], [500, '😸', 'Chat ravi'], [1000, '😻', 'Chat comblé'], [2500, '🐈', 'Chat royal'], [5000, '🦁', 'Lion']],
+  dragon: [[0, '🥚', 'Œuf'], [200, '🐣', 'Éclosion'], [500, '🦎', 'Petit lézard'], [1000, '🐊', 'Croco'], [2500, '🐉', 'Dragon'], [5000, '🐲', 'Dragon gardien du trésor']],
+  fusee: [[0, '🔩', 'Pièces détachées'], [200, '🛠️', 'Atelier'], [500, '🚀', 'Fusée prête'], [1000, '🛰️', 'En orbite'], [2500, '🌕', 'Sur la Lune'], [5000, '🪐', 'Vers Saturne']],
+  cristal: [[0, '🪨', 'Caillou'], [200, '🧱', 'Pierre taillée'], [500, '🔮', 'Boule de cristal'], [1000, '💎', 'Diamant'], [2500, '👑', 'Couronne'], [5000, '🏰', 'Château']] };
 function mascotte() {
   let ep = 0; let y = JEU_DEBUT.y, m = JEU_DEBUT.m;
   while (ymNum(y, m) <= nowYM()) { ep += calc(y, m).ep; m++; if (m > 12) { m = 1; y++; } }
-  let i = 0; STADES.forEach((s, k) => { if (ep >= s[0]) i = k; });
-  return { ep, s: STADES[i], next: STADES[i + 1] || null };
+  const ST = MASCOTTES[cos('mascotte')] || STADES;
+  let i = 0; ST.forEach((s, k) => { if (ep >= s[0]) i = k; });
+  return { ep, s: ST[i], next: ST[i + 1] || null };
 }
 function blocMascotte() {
-  if (!dispo('cosmetiques') || cos('mascotte') !== 'on') return '';
+  if (!dispo('cosmetiques') || cos('mascotte') === 'off') return '';
   const M = mascotte();
   return `<button class="masc" data-act="masc" aria-label="Ma tirelire"><span>${M.s[1]}</span><small>${e0(M.ep)}</small></button>`;
 }
@@ -2808,16 +2909,16 @@ function apercuCosm(o) {
   switch (o.t) {
     case 'skin': return o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null);
     case 'accent': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="20" fill="${o.c ? o.c[0] : '#1D9E75'}"/></svg>`;
-    case 'theme': { const C = { defaut: ['#F1EFE8', '#2C2C2A', '#1D9E75'], kraft: ['#E8DCC4', '#3B2F1E', '#B5651D'], nuit: ['#0F1A2B', '#E8EEF8', '#4FA3FF'], poudre: ['#F8E9EC', '#4A2731', '#D6457E'], terminal: ['#0A0F0A', '#9BE564', '#9BE564'], noiror: ['#0E0D0B', '#F3D27A', '#F3D27A'] }[o.id];
+    case 'theme': { const C = { defaut: ['#F1EFE8', '#2C2C2A', '#1D9E75'], kraft: ['#E8DCC4', '#3B2F1E', '#B5651D'], nuit: ['#0F1A2B', '#E8EEF8', '#4FA3FF'], poudre: ['#F8E9EC', '#4A2731', '#D6457E'], terminal: ['#0A0F0A', '#9BE564', '#9BE564'], noiror: ['#0E0D0B', '#F3D27A', '#F3D27A'], sauge: ['#E4E8DC', '#2F3A2C', '#5E8C5A'], menthe: ['#E6F6F1', '#163B33', '#1BA88A'], abysses: ['#071A22', '#D6F1F5', '#22C3D6'], bordeaux: ['#1E0F12', '#F4E3E0', '#D9546A'], aurore: ['#120C24', '#EDE7FF', '#7FE3C4'] }[o.id];
       return `<svg viewBox="0 0 100 60"><rect width="100" height="60" rx="8" fill="${C[0]}"/><rect x="10" y="12" width="50" height="7" rx="3" fill="${C[1]}"/><rect x="10" y="25" width="34" height="5" rx="2" fill="${C[1]}" opacity=".5"/><circle cx="76" cy="38" r="12" fill="${C[2]}"/></svg>`; }
     case 'aiguille': { const save = LS.get('cos_aiguille', 'classique'); LS.set('cos_aiguille', o.id); const a = aiguilleClassique(); LS.set('cos_aiguille', save); return `<svg viewBox="20 110 150 80"><g transform="rotate(35 150 150)">${a}</g><circle cx="150" cy="150" r="9" fill="var(--ink)"/></svg>`; }
     case 'tampon': return `<div class="tprev" data-tampon="${o.id}"><span class="stamp s-ok">TENU</span></div>`;
     case 'police': return `<div class="pprev" data-police="${o.id}"><span class="big">855 €</span></div>`;
-    case 'fete': return `<div class="fprev">${{ confettis: '🎊', pieces: '🪙', feux: '🎆' }[o.id]}</div>`;
-    case 'son': return `<div class="fprev">${o.id === 'off' ? '🔇' : '🔔'}</div>`;
+    case 'fete': return `<div class="fprev">${{ confettis: '🎊', pieces: '🪙', feux: '🎆', etoiles: '🌠', coeurs: '💖', neige: '❄️', billets: '💸', emojis: '🥳' }[o.id] || '🎉'}</div>`;
+    case 'son': return `<div class="fprev">${{ off: '🔇', chaching: '🛎️', pop: '🫧', piece: '🪙', clochette: '🔔', arcade: '👾', fanfare: '🎺' }[o.id] || '🔔'}</div>`;
     case 'ticket': return `<div class="kprev" data-ticket="${o.id}"><div class="ticket"><div class="tl"><span>RESTE</span><span>+120</span></div></div></div>`;
     case 'ui': case 'texte': return apercuUI(o);
-    case 'mascotte': return `<div class="fprev">${o.id === 'on' ? '🐷' : '·'}</div>`;
+    case 'mascotte': { const st = MASCOTTES[o.id]; return `<div class="fprev" style="font-size:20px">${st ? st[0][1] + '<small style="font-size:11px;opacity:.5">→</small>' + st[5][1] : '·'}</div>`; }
   }
   return '';
 }
@@ -3192,6 +3293,8 @@ document.addEventListener('click', ev => {
     case 'go:cats': S.form = { mode: 'cats' }; rendreForm(); break;
     case 'go:solde': ouvrirSolde(); break;
     case 'ctrl': ouvrirSolde(); ouvrirSheet(); break;
+    case 'rap-ok': LS.set('rappelsVus', LS.get('rappelsVus', []).concat(el.dataset.k).slice(-30)); rendre(true); break;
+    case 's-sal': S.form.salDeja = !S.form.salDeja; rendreSolde(); break;
     case 'pv:mois': S.prevuVue = 'mois'; rendre(true); break;
     case 'pv:tout': S.prevuVue = 'tout'; rendre(true); break;
     case 'pvfin': S.pvFin = !S.pvFin; rendre(true); break;
