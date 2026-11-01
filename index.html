@@ -82,6 +82,18 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .bil{display:flex;width:100%;justify-content:space-between;align-items:center;text-align:left;padding:10px 0;border-bottom:1px dashed var(--rule);font-family:var(--mono)}
 .bil b{display:block;font-size:13px;letter-spacing:1px;font-weight:600}.bil small{display:block;font-size:11px;color:var(--ink3);margin-top:2px}
 .bil>span{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}.bil:active{background:var(--soft)}
+.niv{border:1.5px solid var(--ink);border-radius:12px;padding:12px;margin-top:12px;background:var(--card)}
+.nivh{display:flex;align-items:baseline;gap:10px;font-family:var(--mono)}.nivh b{font-size:20px;font-weight:700}.nivh span{flex:1;font-size:12px;letter-spacing:1.5px;color:var(--ink2)}.nivh small{font-size:12px;color:var(--ink3)}
+.nivbar{height:10px;border-radius:5px;background:var(--track);margin-top:8px;overflow:hidden}.nivbar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#E8A33A,var(--bad));border-radius:5px}
+.suc{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--rule)}.suc .sx{flex:1;min-width:0}.suc .sx b{display:block;font-size:14px;font-weight:600}.suc .sx small{display:block;font-size:12px;color:var(--ink3)}
+.sico{width:30px;height:30px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex:none}.suc:not(.ok) .sico{filter:grayscale(1);opacity:.7}
+.sxp{font-family:var(--mono);font-size:9.5px;letter-spacing:.6px;text-align:right;line-height:1.35;flex:none}
+.coll{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.cit{border:1.5px solid var(--rule);border-radius:10px;padding:6px 4px 7px;text-align:center;background:var(--card)}.cit.on{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink) inset}
+.cit.verr{opacity:.45}.cit.verr .cprev{filter:grayscale(1) blur(1.5px)}.cprev svg{width:100%;height:auto;display:block}.cit b{display:block;font-size:11.5px;font-weight:600;margin-top:2px}.cit small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.8px;color:var(--ink3)}
+.bil.wr b{font-size:15px}
+.wrap{margin-top:8px}.whero{text-align:center;padding:16px 8px;border-radius:14px;background:linear-gradient(135deg,#2C2C2A,#4A3A2A);color:#F1EFE8}.whero small{font-family:var(--mono);font-size:11px;letter-spacing:2px;opacity:.7}.whero b{display:block;font-family:var(--mono);font-size:40px;font-weight:700;margin:4px 0;color:#9BE5B4}.whero b.c-bad{color:#F0997B}.whero span{font-size:13px;opacity:.85}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.wt{border:1.5px solid var(--rule);border-radius:10px;padding:9px}.wt small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:1px;color:var(--ink3)}.wt b{display:block;font-family:var(--mono);font-size:19px;font-weight:700;margin-top:2px}.wt span{font-size:11.5px;color:var(--ink2)}
+.wline{font-size:13px;color:var(--ink2);margin-top:10px;line-height:1.5}.wline b{color:var(--ink)}
 .part{border:1.5px dashed var(--rule);border-radius:10px;padding:10px;margin:0 0 10px}
 .series{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .ser{border:1.5px dashed var(--rule);border-radius:8px;padding:6px 8px;display:flex;align-items:center;gap:8px;font-family:var(--mono);min-width:0}
@@ -234,11 +246,12 @@ const FONCS = [
   ['avances', 'Avances et « On te doit »', 'payer pour d\'autres et suivre les remboursements'],
   ['defi', 'Défi du mois', ''],
   ['series', 'Séries', 'jours sans dépense, mois dans le vert, budgets tenus'],
-  ['bilan', 'Bilans mensuels', 'récap du 1er au 3 et historique']];
+  ['bilan', 'Bilans mensuels', 'récap du 1er au 3 et historique'],
+  ['jeu', 'Niveaux, succès et collection', 'XP, skins de jauge et couleurs à débloquer']];
 const on = k => !LS.get('off', []).includes(k);
-const progresVisible = () => on('defi') || on('series') || on('bilan');
+const progresVisible = () => on('defi') || on('series') || on('bilan') || on('jeu');
 // Optionnel : lien proposé par défaut au premier lancement. Laisser vide pour la version commune.
-const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbxmd30NyCnBKKUw8iv8XRsHfrz7F4c0JbrHjnJyYpDCygsvylM7XUGTkdoPMZV6jgu7eA/exec';
+const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbx2oZ96Dm3DbmBwSDs8m7uyHvXi09QwlFKwPq3Aa0fkMPDc8a5FBRVRZ2vSD0ThF8hyEw/exec';
 const API_ATTENDUE = '3.5'; // version minimale du script ; les versions plus récentes sont acceptées
 
 /* ================= OUTILS ================= */
@@ -294,6 +307,7 @@ function appliquerTheme() {
   const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.querySelector('meta[name=theme-color]').content = dark ? '#0F0F0E' : '#2C2C2A';
+  try { appliquerAccent(); } catch (e) { /* module jeu pas encore chargé au tout premier appel */ }
 }
 appliquerTheme();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', appliquerTheme);
@@ -460,10 +474,8 @@ function parJour() {
   return { marge, jours: j, v: marge / j };
 }
 // Un mois « existe » s'il a des données et n'est pas avant le début de l'Échéancier.
-function moisActif(y, m) {
-  const d0 = debut(); if (d0 && new Date(y, m - 1, 1) < new Date(d0.getFullYear(), d0.getMonth(), 1)) return false;
-  const c = calc(y, m); return c.rev > 0 || c.dep > 0;
-}
+// Un mois compte dans les bilans et les séries dès qu'il contient des données (Journal ou Échéancier).
+function moisActif(y, m) { const c = calc(y, m); return c.rev > 0 || c.dep > 0; }
 function reculer(y, m) { return m > 1 ? [y, m - 1] : [y - 1, 12]; }
 // Mois terminés d'affilée dans le vert (reste ≥ 0)
 function serieVert() {
@@ -542,8 +554,7 @@ function okRemb() {
 }
 // ---- Report des livrets vers le fichier patrimoine (seulement si le script est relié à un fichier patrimoine) ----
 const courtLivret = n => String(n).replace(/\s+Banque Pop\.?$/i, '');
-function comptesDispo() { const d = S.data || {}; return d.comptes || (d.livrets || []).map(n => ({ nom: n, report: true })); }
-function livretsDispo() { return comptesDispo().map(c => c.nom); }
+function livretsDispo() { return (S.data && S.data.livrets) || []; }
 function livretPossible(f) {
   if (!livretsDispo().length || f.type !== 'Épargne' || !f.cat || statut(f.y, f.m) === 'futur') return false;
   const c = catMap()[f.cat]; return !!c && (c.type === 'Épargne' || c.type === 'Retrait') && !estAv(f.cat);
@@ -618,7 +629,8 @@ const ico = {
   cal: '<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;flex-shrink:0"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>'
 };
 function rendre(silencieux) {
-  memo = new Map();
+  memo = new Map(); S._jeu = null;
+  clearTimeout(S._ann); S._ann = setTimeout(() => { try { annoncerJeu(); } catch (e) {} }, 900);
   const st = statut(S.y, S.m);
   $('#mlabel').innerHTML = esc(moisLabel(S.y, S.m).toUpperCase()) + '<small>' + (st === 'cours' ? 'EN COURS' : st === 'passe' ? 'TERMINÉ' : 'PRÉVISION') + '</small>';
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.act === 'tab:' + S.tab));
@@ -637,6 +649,12 @@ function rendre(silencieux) {
 }
 
 function jaugeSVG(b) {
+  const sk = on('jeu') ? LS.get('skin', 'classique') : 'classique';
+  if (sk !== 'classique') {
+    const c0 = b.restant < 0 || b.frac < 0.15 ? 'var(--bad)' : b.frac < 0.35 ? 'var(--warn)' : 'var(--ok)';
+    const r = skinSVG(sk, b.frac, c0, b.st === 'cours' && on('reperes') ? 1 - now.getDate() / dim(S.y, S.m) : null);
+    if (r) { S.lastFrac = b.frac; return r; }
+  }
   const R = 118, L = Math.PI * R;
   const col = b.restant < 0 || b.frac < 0.15 ? 'var(--bad)' : b.frac < 0.35 ? 'var(--warn)' : 'var(--ok)';
   let ticks = '';
@@ -887,7 +905,7 @@ function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.rem
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
-  const R = { remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
+  const R = { wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
   if (R) return R();
   const fav = favoris(f.type), pins = LS.get('pins', []), futur = statut(f.y, f.m) === 'futur';
   if (f.cat && !fav.includes(f.cat) && typeDe(f.cat) === f.type) fav.unshift(f.cat);
@@ -913,7 +931,7 @@ function rendreForm() {
       <div style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px;white-space:nowrap">Ma part</span><input class="libin" id="ppart" inputmode="decimal" placeholder="auto" value="${esc(f.part || '')}" style="margin:0"></div>
       <div class="note" id="presume" style="display:block"></div></div>` : ''}` : ''}
     <div class="chips">${chips}</div>${tout}
-    ${livretPossible(f) ? `<div class="grp" style="margin:2px 0 4px">${(catMap()[f.cat] || {}).type === 'Retrait' ? 'RETIRÉ DE' : 'VERSÉ SUR'}</div><div class="chips" style="margin-bottom:4px">${comptesDispo().map(c => `<button class="chip ${f.livret === c.nom ? 'on' : ''}" data-act="livret" data-n="${esc(c.nom)}">${esc(courtLivret(c.nom))}</button>`).join('')}${f.mode === 'edit' && !f.livret ? `<button class="chip on" data-act="livret" data-n="">Aucun</button>` : ''}</div><div class="note" style="display:block;margin:0 0 8px">${(() => { const c = comptesDispo().find(x => x.nom === f.livret); return !f.livret ? 'Choisis le compte pour enregistrer.' : c && c.report ? 'Livret : aussi reporté dans ton patrimoine.' : 'Noté dans ton budget (pas de report vers le patrimoine).'; })()}</div>` : ''}
+    ${livretPossible(f) ? `<div class="grp" style="margin:2px 0 4px">${(catMap()[f.cat] || {}).type === 'Retrait' ? 'RETIRÉ DE' : 'VERSÉ SUR'} · REPORTÉ DANS TON PATRIMOINE</div><div class="chips" style="margin-bottom:8px">${livretsDispo().map(n => `<button class="chip ${f.livret === n ? 'on' : ''}" data-act="livret" data-n="${esc(n)}">${esc(courtLivret(n))}</button>`).join('')}<button class="chip ${!f.livret ? 'on' : ''}" data-act="livret" data-n="">Ne pas reporter</button></div>` : ''}
     <input class="libin" id="lib" placeholder="Libellé (facultatif)" value="${esc(f.lib)}" autocomplete="off" maxlength="80">
     ${sug.length ? `<div class="chips" style="margin:-4px 0 8px">${sug.map(s => `<button class="chip sug" data-act="libsug" data-l="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
     <div class="pad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-k="${k}">${k === '⌫' ? ico.back : k}</button>`).join('')}</div>
@@ -975,7 +993,6 @@ function enregistrer() {
   const ecart = /^Écart/.test((f.lib || '').trim());
   if (!(n > 0) && !((ecart || estAv(f.cat)) && n < 0)) { $('#ferr').textContent = 'Tape un montant'; return; }
   if (!f.cat) { $('#ferr').textContent = 'Choisis une catégorie'; return; }
-  if (f.mode === 'add' && livretPossible(f) && !f.livret) { $('#ferr').textContent = 'Choisis le compte'; return; }
   const mois = moisLabel(f.y, f.m), futur = statut(f.y, f.m) === 'futur';
   if (S.data.mois && S.data.mois.length && !S.data.mois.includes(mois)) { $('#ferr').textContent = mois + " n'existe pas dans ton fichier"; return; }
   const lib = (f.lib || '').trim() || f.cat;
@@ -1601,7 +1618,8 @@ function retirerDefi() {
 }
 function vueProgres() {
   const y = now.getFullYear(), m = now.getMonth() + 1, d = etatDefi(y, m);
-  let h = '';
+  const ej = on('jeu') ? etatJeu() : null;
+  let h = ej ? blocNiveau(ej) : '';
   if (on('defi')) { h += `<div class="sec"><span>DÉFI ${deMois(m)}</span></div>`;
   if (d) {
     const w = d.montant > 0 ? Math.min(100, d.dep / d.montant * 100) : 100;
@@ -1617,22 +1635,260 @@ function vueProgres() {
   h += `<div class="sec"><span>SÉRIES</span></div><div class="series">
     <div class="ser ${j >= 2 ? 'chaud' : ''}"><b>${j}</b><small>JOUR${j > 1 ? 'S' : ''} SANS DÉPENSE<br>${rec > j ? 'RECORD : ' + rec : j > 0 ? 'TON RECORD 🔥' : 'COURANTE'}</small></div>
     <div class="ser ${v >= 2 ? 'chaud' : ''}"><b>${v}</b><small>MOIS DANS LE VERT<br>${v ? "D'AFFILÉE" : 'À LANCER CE MOIS-CI'}</small></div></div>`;
-  if (sb.length) h += `<div class="ticket" style="margin-top:8px">${sb.map(x => `<div class="tl"><span>${esc(x.n.toUpperCase())}</span><span class="c-ok">${x.s} MOIS TENU${x.s > 1 ? 'S' : ''}</span></div>`).join('')}</div>`;
+  if (sb.length) h += `<div class="ticket" style="margin-top:8px">${sb.slice(0, 5).map(x => `<div class="tl"><span>${esc(x.n.toUpperCase())}</span><span class="c-ok">${x.s} MOIS TENU${x.s > 1 ? 'S' : ''}</span></div>`).join('')}</div>`;
   }
-  // Bilans
-  if (!on('bilan')) return h;
-  const L = []; let [yy, mm] = reculer(y, m);
-  while (L.length < 36 && moisActif(yy, mm)) { L.push([yy, mm]); [yy, mm] = reculer(yy, mm); }
-  h += `<div class="sec"><span>BILANS</span><span>${L.length ? L.length + ' MOIS' : ''}</span></div>`;
-  if (!L.length) h += `<div class="note">Le premier bilan apparaîtra le 1er du mois prochain.</div>`;
-  L.forEach(([a, b]) => {
-    const c = calc(a, b), bu = budgets(a, b).filter(x => !x.sa), ok = bu.filter(x => x.reste >= -0.5).length, df = etatDefi(a, b);
-    h += `<button class="bil" data-act="bilan-stats" data-y="${a}" data-m="${b}">
-      <div><b>${esc(MOIS[b - 1].toUpperCase())} ${a}</b><small>${ok}/${bu.length} budgets tenus${c.ep > 0.5 ? ' · ' + e0(c.ep) + ' épargnés' : ''}${df ? ' · défi ' + (df.ok ? '✓' : '✗') : ''}</small></div>
-      <span class="${c.restant < 0 ? 'c-bad' : 'c-ok'}">${c.restant >= 0 ? '+' : ''}${e0(c.restant)}</span></button>`;
-  });
+  if (ej) h += blocSucces(ej) + blocCollection(ej);
+  if (on('bilan')) h += blocBilans();
   return h;
 }
+// ================= JEU : niveaux, succès, collection, bilans annuels =================
+// Tout part de novembre 2026 : l'historique d'avant ne rapporte rien.
+const JEU_DEBUT = { y: 2026, m: 11, iso: '2026-11-01' };
+const ymNum = (y, m) => y * 12 + m;
+const DIFF = { facile: { l: 'FACILE', xp: 20, c: 'var(--ok)' }, moyen: { l: 'MOYEN', xp: 50, c: '#2B7FD8' }, difficile: { l: 'DIFFICILE', xp: 120, c: 'var(--warn)' }, extreme: { l: 'EXTRÊME', xp: 300, c: 'var(--bad)' } };
+const TITRES = ['Apprenti', 'Débutant', 'Économe', 'Prudent', 'Gestionnaire', 'Stratège', 'Comptable', 'Trésorier', 'Intendant', 'Argentier', 'Banquier', 'Gardien du budget', 'Expert', 'Virtuose', 'Maître', 'Grand maître', 'Légende', 'Mythe', 'Titan', 'Maître de la jauge'];
+const xpNiveau = n => 20 * (n - 1) * (n - 1) + 40 * (n - 1); // XP cumulée pour atteindre le niveau n
+// Cosmétiques : skins de jauge et couleurs d'accent, débloqués par niveau
+const SKINS = [
+  { id: 'classique', nom: 'Classique', niv: 1 }, { id: 'minimal', nom: 'Minimal', niv: 2 }, { id: 'reservoir', nom: 'Réservoir', niv: 4 },
+  { id: 'batterie', nom: 'Batterie', niv: 6 }, { id: 'tableau', nom: 'Tableau de bord', niv: 8 }, { id: 'chrono', nom: 'Chrono rétro', niv: 10 },
+  { id: 'neon', nom: 'Néon', niv: 12 }, { id: 'pixel', nom: 'Pixel', niv: 14 }, { id: 'lcd', nom: 'Écran LCD', niv: 16 }, { id: 'or', nom: 'Or', niv: 18 }];
+const ACCENTS = [
+  { id: 'foret', nom: 'Forêt', niv: 1, c: null }, { id: 'ocean', nom: 'Océan', niv: 3, c: ['#2B7FD8', '#1D5FA8', '#7FB6F0'] },
+  { id: 'rose', nom: 'Framboise', niv: 7, c: ['#D6457E', '#A82E5E', '#F08AB4'] }, { id: 'amethyste', nom: 'Améthyste', niv: 11, c: ['#7B5BD6', '#5A3FB0', '#B7A3F2'] },
+  { id: 'ormassif', nom: 'Or massif', niv: 20, c: ['#C9971C', '#8E6A0E', '#E8C25A'] }];
+function appliquerAccent() {
+  const a = ACCENTS.find(x => x.id === LS.get('accent', 'foret')) || ACCENTS[0], st = document.documentElement.style;
+  if (!a.c) { st.removeProperty('--ok'); st.removeProperty('--okInk'); return; }
+  const dark = document.documentElement.dataset.theme === 'dark';
+  st.setProperty('--ok', dark ? a.c[2] : a.c[0]); st.setProperty('--okInk', dark ? a.c[2] : a.c[1]);
+}
+// --- Faits mesurés depuis novembre 2026 ---
+function moisJeu() { // mois terminés depuis le début du jeu
+  const L = []; let y = JEU_DEBUT.y, m = JEU_DEBUT.m;
+  while (ymNum(y, m) < nowYM()) { L.push([y, m]); m++; if (m > 12) { m = 1; y++; } }
+  return L;
+}
+function joursJeu() { // [jour iso, sans dépense ?] du début du jeu à hier
+  // Un jour ne compte que si son mois contient au moins une dépense saisie depuis l'appli (preuve que l'appli est utilisée).
+  const dep = new Set(S.journal.filter(e => !e.deleted && e.date && e.montant > 0 && estCourante(e.cat)).map(e => e.date));
+  const moisVivants = new Set([...dep].map(k => k.slice(0, 7)));
+  const der = LS.get('derDep', null); if (der) dep.add(der);
+  const out = [], d = new Date(JEU_DEBUT.iso + 'T00:00:00'), fin = new Date(auj() + 'T00:00:00');
+  while (d < fin) { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); out.push([k, moisVivants.has(k.slice(0, 7)) && !dep.has(k)]); d.setDate(d.getDate() + 1); }
+  return out;
+}
+const maxSerie = arr => { let b = 0, c = 0; arr.forEach(v => { c = v ? c + 1 : 0; b = Math.max(b, c); }); return b; };
+function faitsJeu() {
+  if (S._jeu && S._jeu.k === memo && S._jeu.q === S.journal.length) return S._jeu.v;
+  const M = moisJeu().map(([y, m]) => {
+    const c = calc(y, m), bu = budgets(y, m).filter(x => !x.sa), nd = c.restant + c.av + c.ep;
+    const df = etatDefi(y, m);
+    return { y, m, vert: c.restant + c.av >= -0.5, zero: bu.length > 0 && bu.every(x => x.reste >= -0.5), taux: c.rev > 0 ? nd / c.rev : 0, defiOk: !!(df && df.ok), defiLance: !!df, bu };
+  });
+  const J = joursJeu(), apresDebut = e => e.y && ymNum(e.y, e.m) >= ymNum(JEU_DEBUT.y, JEU_DEBUT.m);
+  const coteL = S.journal.filter(e => !e.deleted && apresDebut(e) && /mis de côté/i.test(e.lib || '') && e.montant > 0);
+  const cote = coteL.reduce((t, e) => t + e.montant, 0);
+  const rembs = S.journal.filter(e => !e.deleted && apresDebut(e) && estAv(e.cat) && e.montant < 0).length;
+  const defisLances = Object.keys((S.data && S.data.defis) || {}).filter(k => { const [y, m] = k.split('-').map(Number); return ymNum(y, m) >= ymNum(JEU_DEBUT.y, JEU_DEBUT.m); }).length;
+  const budTenu3 = budgetsDefiables().some(c => maxSerie(M.map(x => { const b = x.bu.find(z => z.c.nom === c.nom); return !!b && b.reste >= -0.5; })) >= 3);
+  const v = {
+    M, J, cote, nCote: coteL.length, rembs, defisLances,
+    serieJours: maxSerie(J.map(x => x[1])), joursSans: J.filter(x => x[1]).length,
+    vertSerie: maxSerie(M.map(x => x.vert)), nVert: M.filter(x => x.vert).length,
+    zeroSerie: maxSerie(M.map(x => x.zero)), nZero: M.filter(x => x.zero).length,
+    defisOk: M.filter(x => x.defiOk).length, taux10: M.filter(x => x.taux >= 0.10).length, taux25: M.filter(x => x.taux >= 0.25).length,
+    budTenu3, skinChange: LS.get('skin', 'classique') !== 'classique' || LS.get('accent', 'foret') !== 'foret'
+  };
+  S._jeu = { k: memo, q: S.journal.length, v }; return v;
+}
+// --- Succès (une fois) ---
+const SUCCES = [
+  ['premier-mois', 'facile', 'Premier pas', 'Boucler ton premier mois', f => [f.M.length, 1]],
+  ['defi-lance', 'facile', 'Lanceur de défi', 'Lancer un défi du mois', f => [f.defisLances, 1]],
+  ['jours-3', 'facile', 'Trois jours au calme', '3 jours d\'affilée sans dépense courante', f => [f.serieJours, 3]],
+  ['coffre', 'facile', 'Coffre ouvert', 'Mettre de côté le reste d\'un mois', f => [f.nCote, 1]],
+  ['rembourse', 'facile', 'Remboursé !', 'Recevoir un remboursement d\'avance', f => [f.rembs, 1]],
+  ['style', 'facile', 'Style perso', 'Changer de skin ou de couleur', f => [f.skinChange ? 1 : 0, 1]],
+  ['vert-1', 'moyen', 'Dans le vert', 'Finir un mois au-dessus de 0', f => [f.nVert, 1]],
+  ['jours-7', 'moyen', 'Semaine zen', '7 jours d\'affilée sans dépense courante', f => [f.serieJours, 7]],
+  ['vert-3', 'moyen', 'Trio vert', '3 mois dans le vert d\'affilée', f => [f.vertSerie, 3]],
+  ['defis-3', 'moyen', 'Défieur', 'Réussir 3 défis', f => [f.defisOk, 3]],
+  ['fidele', 'moyen', 'Fidèle', 'Tenir un même budget 3 mois d\'affilée', f => [f.budTenu3 ? 1 : 0, 1]],
+  ['taux-10', 'moyen', 'Épargnant', 'Ne pas dépenser 10 % de tes revenus sur un mois', f => [f.taux10, 1]],
+  ['jours-14', 'difficile', 'Quinzaine monastique', '14 jours d\'affilée sans dépense courante', f => [f.serieJours, 14]],
+  ['zero-1', 'difficile', 'Sans faute', 'Un mois sans aucun budget dépassé', f => [f.nZero, 1]],
+  ['vert-6', 'difficile', 'Six mois verts', '6 mois dans le vert d\'affilée', f => [f.vertSerie, 6]],
+  ['defis-6', 'difficile', 'Collectionneur', 'Réussir 6 défis', f => [f.defisOk, 6]],
+  ['cote-500', 'difficile', 'Cagnotte', 'Mettre 500 € de côté au total', f => [Math.round(f.cote), 500]],
+  ['zero-3', 'difficile', 'Pilier', '3 mois d\'affilée sans budget dépassé', f => [f.zeroSerie, 3]],
+  ['jours-30', 'extreme', 'Moine du budget', '30 jours d\'affilée sans dépense courante', f => [f.serieJours, 30]],
+  ['vert-12', 'extreme', 'Année verte', '12 mois dans le vert d\'affilée', f => [f.vertSerie, 12]],
+  ['taux-25', 'extreme', 'Fourmi', 'Ne pas dépenser 25 % de tes revenus sur un mois', f => [f.taux25, 1]],
+  ['zero-6', 'extreme', 'Perfection', '6 mois d\'affilée sans budget dépassé', f => [f.zeroSerie, 6]],
+  ['cote-2000', 'extreme', 'Grand coffre', 'Mettre 2 000 € de côté au total', f => [Math.round(f.cote), 2000]],
+  ['defis-12', 'extreme', 'Défi ultime', 'Réussir 12 défis', f => [f.defisOk, 12]]
+].map(([id, d, nom, txt, fn]) => ({ id, d, nom, txt, fn }));
+function etatJeu() {
+  const f = faitsJeu();
+  const succes = SUCCES.map(s => { const [cur, max] = s.fn(f); return Object.assign({}, s, { cur: Math.min(cur, max), max, ok: cur >= max }); });
+  // XP récurrente (facile 5/jour sans dépense, 10/mois bouclé · moyen 25 · difficile 60 · extrême 150)
+  const rec = [
+    ['Jours sans dépense courante', 'facile', 5, f.joursSans], ['Mois bouclés', 'facile', 10, f.M.length], ['Mois dans le vert', 'moyen', 25, f.nVert],
+    ['Défis réussis', 'moyen', 25, f.defisOk], ['Restes mis de côté', 'moyen', 25, f.nCote], ['Mois sans budget dépassé', 'difficile', 60, f.nZero],
+    ['Mois à 10 % non dépensés', 'difficile', 60, f.taux10], ['Mois à 25 % non dépensés', 'extreme', 150, f.taux25]];
+  const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
+  let niv = 1; while (niv < 20 && xp >= xpNiveau(niv + 1)) niv++;
+  const debut = xpNiveau(niv), fin = niv < 20 ? xpNiveau(niv + 1) : debut;
+  return { f, succes, rec, xp, niv, titre: TITRES[niv - 1], frac: niv < 20 ? (xp - debut) / (fin - debut) : 1, reste: fin - xp };
+}
+const debloque = (o, niv) => niv >= o.niv;
+// Nouveautés : succès et cosmétiques débloqués depuis la dernière visite
+function nouveautes(e) {
+  const ids = e.succes.filter(s => s.ok).map(s => 's:' + s.id).concat(SKINS.concat(ACCENTS).filter(o => o.niv > 1 && debloque(o, e.niv)).map(o => 'c:' + o.id), ['n:' + e.niv]);
+  const vus = LS.get('jeuVus', null);
+  if (!vus) { LS.set('jeuVus', ids); return []; }
+  return ids.filter(i => !vus.includes(i));
+}
+function annoncerJeu() {
+  if (!on('jeu') || !S.data) return;
+  const e = etatJeu(), n = nouveautes(e); if (!n.length) return;
+  LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
+  const s = n.find(i => i[0] === 's'), c = n.find(i => i[0] === 'c'), lv = n.find(i => i[0] === 'n');
+  const nomC = c && (SKINS.concat(ACCENTS).find(o => 'c:' + o.id === c) || {}).nom;
+  const msg = s ? '🏆 Succès : ' + SUCCES.find(x => 's:' + x.id === s).nom : lv ? '⬆ Niveau ' + e.niv + ' · ' + e.titre : '';
+  toast((msg ? msg : '') + (nomC ? (msg ? ' · ' : '') + '🎨 ' + nomC + ' débloqué' : ''), 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; rendre(); scrollTo(0, 0); });
+  confettis();
+}
+function confettis() {
+  const cv = document.createElement('canvas'), W = innerWidth, H = innerHeight;
+  cv.width = W; cv.height = H; cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99';
+  document.body.appendChild(cv); const x = cv.getContext('2d');
+  const cols = ['#D85A30', '#E8A33A', '#1D9E75', '#2B7FD8', '#F1EFE8'];
+  const P = Array.from({ length: 90 }, () => ({ x: W / 2 + (Math.random() - .5) * 80, y: H * .35, vx: (Math.random() - .5) * 9, vy: -Math.random() * 9 - 3, r: Math.random() * 6 + 3, c: cols[Math.random() * cols.length | 0], a: Math.random() * 6 }));
+  let t = 0; const step = () => { x.clearRect(0, 0, W, H); P.forEach(p => { p.vy += .25; p.x += p.vx; p.y += p.vy; p.a += .2; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); x.restore(); }); if (++t < 110) requestAnimationFrame(step); else cv.remove(); };
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(step); else cv.remove();
+}
+// --- Skins de jauge ---
+function skinSVG(id, frac, col, rep) {
+  const P = (cx, cy, r, a) => [cx + r * Math.cos(a), cy - r * Math.sin(a)];
+  const ARC = (cx, cy, r, a0, a1) => { const [x0, y0] = P(cx, cy, r, a0), [x1, y1] = P(cx, cy, r, a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${Math.abs(a0 - a1) > Math.PI ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  const AIG = (cx, cy, len, a, w, c, q = 0) => { const [nx, ny] = P(cx, cy, len, a), [ax, ay] = P(cx, cy, w, a + Math.PI / 2), [bx, by] = P(cx, cy, w, a - Math.PI / 2), [tx, ty] = P(cx, cy, -q, a); return `<path d="M${ax.toFixed(1)} ${ay.toFixed(1)} L${nx.toFixed(1)} ${ny.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)} L${tx.toFixed(1)} ${ty.toFixed(1)} Z" fill="${c}"/>`; };
+  const f = Math.max(0, Math.min(1, frac)), a = Math.PI * (1 - f), D = Math.PI / 180, pct = Math.round(f * 100);
+  const repere = (cx, cy, r1, r2, c) => rep == null ? '' : (() => { const ar = Math.PI * (1 - rep), [x1, y1] = P(cx, cy, r1, ar), [x2, y2] = P(cx, cy, r2, ar); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`; })();
+  const vb = (bg, inner) => `<svg viewBox="0 0 300 178" role="img" aria-label="Jauge du mois">${bg ? `<rect x="6" y="2" width="288" height="174" rx="18" fill="${bg}"/>` : ''}${inner}</svg>`;
+  switch (id) {
+    case 'minimal': { const [dx, dy] = P(150, 150, 118, a); return vb('', `<path d="${ARC(150, 150, 118, Math.PI, 0)}" stroke="var(--track)" stroke-width="6" fill="none" stroke-linecap="round"/><path d="${ARC(150, 150, 118, Math.PI, a + 0.0001)}" stroke="${col}" stroke-width="6" fill="none" stroke-linecap="round"/>${repere(150, 150, 108, 128, 'var(--ink3)')}<circle cx="${dx}" cy="${dy}" r="11" fill="var(--paper)" stroke="${col}" stroke-width="5"/><text x="150" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="15" letter-spacing="3" fill="var(--ink3)">${pct} %</text>`); }
+    case 'reservoir': { const a2 = (150 - 120 * f) * D; let t = ''; [150, 120, 90, 60, 30].forEach((g, i) => { const [x1, y1] = P(150, 158, 100, g * D), [x2, y2] = P(150, 158, 118, g * D); t += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${i === 0 ? '#D85A30' : '#F1EFE8'}" stroke-width="${i % 2 ? 3 : 6}"/>`; });
+      return vb('#1B1B1A', `<path d="${ARC(150, 158, 110, 150 * D, 30 * D)}" stroke="#555" stroke-width="4" fill="none"/>${t}<text x="44" y="150" fill="#D85A30" font-family="Helvetica,Arial" font-weight="700" font-size="24">E</text><text x="238" y="150" fill="#F1EFE8" font-family="Helvetica,Arial" font-weight="700" font-size="24">F</text><text x="150" y="128" text-anchor="middle" font-size="22">⛽</text>${AIG(150, 158, 104, a2, 4, '#D85A30')}<circle cx="150" cy="158" r="12" fill="#F1EFE8"/>`); }
+    case 'batterie': return vb('', `<rect x="44" y="44" width="196" height="96" rx="20" fill="none" stroke="var(--ink)" stroke-width="9"/><rect x="246" y="74" width="16" height="36" rx="5" fill="var(--ink)"/><rect x="58" y="58" width="${Math.max(0, 168 * f).toFixed(1)}" height="68" rx="10" fill="${col}"/>${rep == null ? '' : `<line x1="${58 + 168 * rep}" y1="50" x2="${58 + 168 * rep}" y2="134" stroke="var(--ink)" stroke-width="3" stroke-dasharray="4 4"/>`}<text x="142" y="104" text-anchor="middle" font-family="Helvetica,Arial" font-weight="800" font-size="30" fill="var(--ink)">${pct} %</text>`);
+    case 'tableau': return vb('#2C2C2A', `<path d="${ARC(150, 152, 112, Math.PI, 124 * D)}" stroke="#1D9E75" stroke-width="30" fill="none"/><path d="${ARC(150, 152, 112, 120 * D, 62 * D)}" stroke="#E8A33A" stroke-width="30" fill="none"/><path d="${ARC(150, 152, 112, 58 * D, 0)}" stroke="#D85A30" stroke-width="30" fill="none"/>${repere(150, 152, 90, 134, '#F1EFE8')}${AIG(150, 152, 98, a, 9, '#F1EFE8')}<circle cx="150" cy="152" r="15" fill="#F1EFE8"/><circle cx="150" cy="152" r="5" fill="#2C2C2A"/>`);
+    case 'chrono': { let t = ''; for (let i = 0; i <= 20; i++) { const g = (225 - i * 13.5) * D, [x1, y1] = P(150, 92, 70, g), [x2, y2] = P(150, 92, i % 5 ? 62 : 54, g); t += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#3B3325" stroke-width="${i % 5 ? 2 : 4}"/>`; }
+      return vb('#E9E1CF', `<circle cx="150" cy="92" r="80" fill="#FBF7EC" stroke="#8C7B5A" stroke-width="7"/>${t}${AIG(150, 92, 62, (225 - 270 * f) * D, 3, '#B22D1E', 12)}<circle cx="150" cy="92" r="7" fill="#3B3325"/><text x="150" y="136" text-anchor="middle" font-family="Georgia,serif" font-size="12" fill="#3B3325">${pct} %</text>`); }
+    case 'neon': return vb('#0E1116', `<defs><filter id="glo"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#1d2a33" stroke-width="10" fill="none"/><path filter="url(#glo)" d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="#3CF0C5" stroke-width="10" fill="none" stroke-linecap="round"/>${repere(150, 150, 98, 126, '#FFE66D')}<g filter="url(#glo)">${AIG(150, 150, 100, a, 3, '#FF4FA3')}</g><circle cx="150" cy="150" r="7" fill="#FF4FA3"/>`);
+    case 'pixel': { let t = ''; const n = 14; for (let i = 0; i < n; i++) { const g = Math.PI * (1 - (i + .5) / n), [cx, cy] = P(150, 150, 110, g), on = (i + .5) / n <= f; t += `<rect x="${(cx - 11).toFixed(1)}" y="${(cy - 11).toFixed(1)}" width="22" height="22" fill="${on ? col : 'var(--track)'}" ${rep != null && Math.abs((i + .5) / n - rep) < .5 / n ? 'stroke="var(--ink)" stroke-width="3"' : ''}/>`; }
+      return vb('', t + `<text x="150" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="700" font-size="26" fill="var(--ink)">${'█'.repeat(Math.round(f * 5))}${'░'.repeat(5 - Math.round(f * 5))}</text>`); }
+    case 'lcd': { let t = ''; for (let i = 0; i < 20; i++) t += `<rect x="${26 + i * 12.5}" y="112" width="9" height="34" rx="1" fill="${i < Math.round(f * 20) ? '#9BE564' : '#24331F'}"/>`;
+      return vb('#141A12', `<text x="150" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="54" font-weight="700" fill="#9BE564" letter-spacing="4">${String(pct).padStart(3, ' ')}%</text>${t}${rep == null ? '' : `<line x1="${24 + rep * 250}" y1="104" x2="${24 + rep * 250}" y2="154" stroke="#E8F5D0" stroke-width="2"/>`}`); }
+    case 'or': return vb('#15120A', `<defs><linearGradient id="gold" x1="0" x2="1"><stop offset="0" stop-color="#8E6A0E"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#B8860B"/></linearGradient></defs><path d="${ARC(150, 150, 112, Math.PI, 0)}" stroke="#3A2F12" stroke-width="22" fill="none"/><path d="${ARC(150, 150, 112, Math.PI, a + 0.0001)}" stroke="url(#gold)" stroke-width="22" fill="none"/>${repere(150, 150, 96, 128, '#F3D27A')}${AIG(150, 150, 100, a, 6, '#F3D27A')}<circle cx="150" cy="150" r="13" fill="url(#gold)"/>`);
+  }
+  return null;
+}
+// --- Écran Progrès : niveau, succès, collection ---
+function blocNiveau(e) {
+  const prochain = SKINS.concat(ACCENTS).filter(o => o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
+  return `<div class="niv"><div class="nivh"><b>NIV. ${e.niv}</b><span>${esc(e.titre.toUpperCase())}</span><small>${e.xp} XP</small></div>
+    <div class="nivbar"><i style="width:${Math.round(e.frac * 100)}%"></i></div>
+    <div class="note" style="margin-top:6px;display:block">${e.niv < 20 ? `Encore <b>${e.reste} XP</b> pour le niveau ${e.niv + 1}` : 'Niveau maximum atteint'}${prochain ? ` · prochain déblocage au niveau ${prochain.niv} : <b>${esc(prochain.nom)}</b>` : ''}</div></div>`;
+}
+function blocSucces(e) {
+  const d = S.succesDiff || 'tous', L = e.succes.filter(s => d === 'tous' || s.d === d);
+  const enCours = L.filter(s => !s.ok).sort((a, b) => b.cur / b.max - a.cur / a.max), faits = L.filter(s => s.ok);
+  const liste = S.allSucces ? enCours.concat(faits) : enCours.slice(0, 3).concat(enCours.length < 3 ? faits.slice(0, 3 - enCours.length) : []);
+  let h = `<div class="sec"><span>SUCCÈS</span><span>${e.succes.filter(s => s.ok).length}/${e.succes.length}</span></div>
+    <div class="seg" style="margin:0 0 8px">${[['tous', 'TOUS'], ['facile', 'FACILE'], ['moyen', 'MOYEN'], ['difficile', 'DIFF.'], ['extreme', 'EXTRÊME']].map(([k, l]) => `<button class="${d === k ? 'on' : ''}" data-act="sdiff" data-t="${k}">${l}</button>`).join('')}</div>`;
+  liste.forEach(s => {
+    const D0 = DIFF[s.d];
+    h += `<div class="suc ${s.ok ? 'ok' : ''}"><span class="sico" style="border-color:${D0.c};${s.ok ? 'background:' + D0.c : ''}">${s.ok ? '✓' : '🔒'}</span>
+      <div class="sx"><b>${esc(s.nom)}</b><small>${esc(s.txt)}</small>${s.ok ? '' : `<div class="bar" style="margin-top:5px"><i style="width:${Math.round(s.cur / s.max * 100)}%;background:${D0.c}"></i></div>`}</div>
+      <span class="sxp" style="color:${D0.c}">${D0.l}<br>+${D0.xp} XP${s.ok ? '' : `<br><span class="muted">${s.cur}/${s.max}</span>`}</span></div>`;
+  });
+  if (L.length > 3) h += `<button class="chip" style="margin-top:8px" data-act="allsucces">${S.allSucces ? 'Moins ▴' : 'Voir les ' + L.length + ' succès ▾'}</button>`;
+  h += `<details class="note" style="display:block;margin-top:10px"><summary>Comment gagner de l'XP</summary>${e.rec.map(r => `${esc(r[0])} : +${r[2]} XP (${DIFF[r[1]].l.toLowerCase()}) · ${r[3]} fois`).join('<br>')}<br>Chaque succès rapporte aussi son bonus. Tout est compté depuis le 1er novembre 2026.</details>`;
+  return h;
+}
+function blocCollection(e) {
+  const sk = LS.get('skin', 'classique'), ac = LS.get('accent', 'foret');
+  const n = SKINS.concat(ACCENTS).filter(o => debloque(o, e.niv)).length, tot = SKINS.length + ACCENTS.length;
+  let h = `<div class="sec"><span>COLLECTION</span><span>${n}/${tot}</span></div><div class="grp" style="margin:0 0 6px">JAUGES</div><div class="coll">`;
+  SKINS.forEach(o => { const u = debloque(o, e.niv); h += `<button class="cit ${sk === o.id ? 'on' : ''} ${u ? '' : 'verr'}" data-act="${u ? 'skin' : 'lock'}" data-id="${o.id}" data-niv="${o.niv}"><span class="cprev">${o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null)}</span><b>${esc(o.nom)}</b><small>${u ? (sk === o.id ? 'ACTIVE' : 'CHOISIR') : '🔒 NIV. ' + o.niv}</small></button>`; });
+  h += `</div><div class="grp" style="margin:12px 0 6px">COULEUR DE L'APPLI</div><div class="chips">`;
+  ACCENTS.forEach(o => { const u = debloque(o, e.niv); h += `<button class="chip ${ac === o.id ? 'on' : ''}" data-act="${u ? 'accent' : 'lock'}" data-id="${o.id}" data-niv="${o.niv}" style="${u ? '' : 'opacity:.45'}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${o.c ? o.c[0] : '#1D9E75'};margin-right:6px"></span>${esc(o.nom)}${u ? '' : ' · niv. ' + o.niv}</button>`; });
+  return h + '</div>';
+}
+function skinClassiqueMini(f) {
+  const R = 118, L = Math.PI * R;
+  return `<svg viewBox="0 0 300 178"><path d="M32 150 A118 118 0 0 1 268 150" fill="none" stroke="var(--track)" stroke-width="20"/><path d="M32 150 A118 118 0 0 1 268 150" fill="none" stroke="var(--ok)" stroke-width="20" stroke-dasharray="${L}" stroke-dashoffset="${L * (1 - f)}"/><g style="transform-origin:150px 150px;transform:rotate(${f * 180}deg)"><path d="M150 146 L44 150 L150 154 Z" fill="var(--bad)"/></g><circle cx="150" cy="150" r="10" fill="var(--ink)"/></svg>`;
+}
+// --- Bilans : mois et années (« Wrapped ») ---
+function bilanAnnee(y) {
+  const L = []; for (let m = 1; m <= 12; m++) { if (ymNum(y, m) >= nowYM()) break; if (moisActif(y, m)) L.push(m); }
+  if (!L.length) return null;
+  const R = L.map(m => { const c = calc(y, m); return { m, c, res: c.restant + c.av, bu: budgets(y, m).filter(x => !x.sa) }; });
+  const rev = R.reduce((t, x) => t + x.c.rev, 0), dep = R.reduce((t, x) => t + x.c.dep, 0), ep = R.reduce((t, x) => t + x.c.ep, 0);
+  const nd = rev - dep, best = R.slice().sort((a, b) => b.res - a.res)[0], worst = R.slice().sort((a, b) => a.res - b.res)[0];
+  const cats0 = {}, cm = catMap(); R.forEach(x => Object.keys(x.c.par).forEach(n => { if (estCourante(n)) cats0[n] = (cats0[n] || 0) + x.c.par[n].j + x.c.par[n].e; }));
+  const top = Object.entries(cats0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const abos = R.reduce((t, x) => t + Object.keys(x.c.par).filter(n => cm[n] && cm[n].groupe === 'Abonnements').reduce((s, n) => s + x.c.par[n].j + x.c.par[n].e, 0), 0);
+  const tenus = {}; R.forEach(x => x.bu.forEach(b => { tenus[b.c.nom] = (tenus[b.c.nom] || 0) + (b.reste >= -0.5 ? 1 : 0); }));
+  const champion = Object.entries(tenus).sort((a, b) => b[1] - a[1])[0];
+  const defis = R.filter(x => { const d = etatDefi(y, x.m); return d && d.ok; }).length;
+  return { y, n: L.length, enCours: y === now.getFullYear(), rev, dep, ep, nd, taux: rev ? nd / rev : 0, best, worst, top, abos, champion, defis, verts: R.filter(x => x.res >= -0.5).length, serie: maxSerie(R.map(x => x.res >= -0.5)) };
+}
+function blocBilans() {
+  const v = S.bilVue || 'mois', all = !!S.bilAll, y0 = now.getFullYear(), m0 = now.getMonth() + 1;
+  let h = `<div class="sec"><span>BILANS</span></div><div class="seg" style="margin:0 0 6px">${[['mois', 'MOIS'], ['annees', 'ANNÉES']].map(([k, l]) => `<button class="${v === k ? 'on' : ''}" data-act="bilvue" data-t="${k}">${l}</button>`).join('')}</div>`;
+  if (v === 'mois') {
+    const L = []; let [yy, mm] = reculer(y0, m0);
+    while (L.length < 36 && moisActif(yy, mm)) { L.push([yy, mm]); [yy, mm] = reculer(yy, mm); }
+    if (!L.length) return h + `<div class="note">Le premier bilan apparaîtra le 1er du mois prochain.</div>`;
+    (all ? L : L.slice(0, 2)).forEach(([a, b]) => {
+      const c = calc(a, b), bu = budgets(a, b).filter(x => !x.sa), ok = bu.filter(x => x.reste >= -0.5).length, df = etatDefi(a, b), r = c.restant;
+      h += `<button class="bil" data-act="bilan-stats" data-y="${a}" data-m="${b}"><div><b>${esc(MOIS[b - 1].toUpperCase())} ${a}</b><small>${ok}/${bu.length} budgets tenus${c.ep > 0.5 ? ' · ' + e0(c.ep) + ' épargnés' : ''}${df ? ' · défi ' + (df.ok ? '✓' : '✗') : ''}</small></div>
+        <span class="${r <= -0.5 ? 'c-bad' : r >= 0.5 ? 'c-ok' : ''}">${Math.abs(r) < 0.5 ? '0 €' : (r > 0 ? '+' : '') + e0(r)}</span></button>`;
+    });
+    if (L.length > 2) h += `<button class="chip" style="margin-top:8px" data-act="bilall">${all ? 'Moins ▴' : 'Voir plus (' + L.length + ' mois) ▾'}</button>`;
+  } else {
+    const A = []; for (let y = y0; y >= y0 - 5; y--) { const b = bilanAnnee(y); if (b) A.push(b); }
+    if (!A.length) return h + `<div class="note">Pas encore d'année à résumer.</div>`;
+    (all ? A : A.slice(0, 2)).forEach(b => {
+      h += `<button class="bil wr" data-act="wrapped" data-y="${b.y}"><div><b>${b.y}${b.enCours ? ' · EN COURS' : ''}</b><small>${b.verts}/${b.n} mois dans le vert · ${Math.round(b.taux * 100)} % non dépensé</small></div><span class="${b.nd < 0 ? 'c-bad' : 'c-ok'}">${b.nd >= 0 ? '+' : ''}${e0(b.nd)} ›</span></button>`;
+    });
+    if (A.length > 2) h += `<button class="chip" style="margin-top:8px" data-act="bilall">${all ? 'Moins ▴' : 'Voir plus (' + A.length + ' ans) ▾'}</button>`;
+  }
+  return h;
+}
+function rendreWrapped() {
+  const b = bilanAnnee(S.form.y); if (!b) return fermer();
+  const tile = (k, v, s) => `<div class="wt"><small>${k}</small><b>${v}</b>${s ? `<span>${s}</span>` : ''}</div>`;
+  $('#sheetIn').innerHTML = `<div class="grab"></div><div class="shead"><span>MON ANNÉE ${b.y}${b.enCours ? ' (EN COURS)' : ''}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
+    <div class="wrap">
+      <div class="whero"><small>NON DÉPENSÉ SUR ${b.n} MOIS</small><b class="${b.nd < 0 ? 'c-bad' : ''}">${b.nd >= 0 ? '+' : ''}${e0(b.nd)}</b><span>soit ${Math.round(b.taux * 100)} % de tes revenus</span></div>
+      <div class="wgrid">
+        ${tile('MOIS DANS LE VERT', b.verts + '/' + b.n, b.serie > 1 ? 'meilleure série : ' + b.serie : '')}
+        ${tile('MEILLEUR MOIS', esc(MOIS[b.best.m - 1]), (b.best.res >= 0 ? '+' : '') + e0(b.best.res))}
+        ${tile('MOIS LE PLUS DUR', esc(MOIS[b.worst.m - 1]), (b.worst.res >= 0 ? '+' : '') + e0(b.worst.res))}
+        ${tile('ÉPARGNE VERSÉE', e0(b.ep))}
+        ${tile('ABONNEMENTS', e0(b.abos), e0(b.abos / b.n) + '/mois')}
+        ${tile('DÉFIS RÉUSSIS', b.defis)}
+      </div>
+      ${b.champion ? `<div class="wline">🏅 Budget le mieux tenu : <b>${esc(b.champion[0])}</b> (${b.champion[1]}/${b.n} mois)</div>` : ''}
+      ${b.top.length ? `<div class="wline">💸 Là où l'argent est parti : ${b.top.map((t, i) => `<b>${i + 1}. ${esc(t[0])}</b> ${e0(t[1])}`).join(' · ')}</div>` : ''}
+      <div class="wline">Revenus ${e0(b.rev)} · dépenses ${e0(b.dep)}</div>
+    </div>`;
+}
+
+appliquerAccent();
 function vueStats() {
   const v = S.statsVue === 'progres' && !progresVisible() ? 'annee' : S.statsVue || 'annee';
   let h = `<div class="seg" style="margin-top:4px">${[['annee', 'ANNÉE ' + S.y], ['mois', MOIS[S.m - 1].toUpperCase()], ...(progresVisible() ? [['progres', 'PROGRÈS']] : [])].map(([k, l]) => `<button class="${v === k ? 'on' : ''}" data-act="sv:${k}">${l}</button>`).join('')}</div>`;
@@ -1739,7 +1995,7 @@ function statsMois(y, m) {
 /* ================= VERROU ================= */
 const URL_OK = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]+\/exec\/?$/.test(u);
 function oublierCompte() {
-  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans'].forEach(k => LS.del(k));
+  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent'].forEach(k => LS.del(k));
   Object.assign(S, { key: '', api: '', data: null, journal: [], queue: [], lastBig: null, lastFrac: 0 });
 }
 // Écran de connexion : chacun branche SON script et SA clé. Rien n'est stocké ailleurs que sur ce téléphone.
@@ -1826,12 +2082,18 @@ document.addEventListener('click', ev => {
     case 'budget': S.filtre.cat = el.dataset.cat; S.filtre.q = ''; S.filtre.grp = null; S.tab = 'journal'; rendre(); scrollTo(0, 0); break;
     case 'clearcat': S.filtre.cat = null; S.filtre.grp = null; rendre(true); break;
     case 'edit': { const e = trouver(el.dataset.id); if (e) ouvrirSaisie(e); break; }
-    case 'type': S.form.type = el.dataset.t; if (S.form.cat && typeDe(S.form.cat) !== S.form.type) S.form.cat = null;
-      if (!S.form.cat && S.form.type === 'Épargne' && livretsDispo().length) { const c = catsDuType('Épargne').find(x => x.type === 'Épargne'); if (c) S.form.cat = c.nom; }
-      rendreForm(); break;
-    case 'cat': if (S.form.cat !== el.dataset.cat) S.form.livret = null; S.form.cat = el.dataset.cat; if (livretsDispo().length && S.form.type === 'Épargne') { S.form.all = false; rendreForm(); break; } if (S.form.all) { S.form.all = false; rendreForm(); break; } document.querySelectorAll('#sheetIn [data-act=cat]').forEach(c => c.classList.toggle('on', c.dataset.cat === S.form.cat)); majHint(); break;
+    case 'type': S.form.type = el.dataset.t; if (S.form.cat && typeDe(S.form.cat) !== S.form.type) S.form.cat = null; rendreForm(); break;
+    case 'cat': S.form.cat = el.dataset.cat; if (livretsDispo().length && S.form.type === 'Épargne') { S.form.all = false; rendreForm(); break; } if (S.form.all) { S.form.all = false; rendreForm(); break; } document.querySelectorAll('#sheetIn [data-act=cat]').forEach(c => c.classList.toggle('on', c.dataset.cat === S.form.cat)); majHint(); break;
     case 'all': S.form.all = !S.form.all; rendreForm(); break;
     case 'save': enregistrer(); break;
+    case 'sdiff': S.succesDiff = el.dataset.t; rendre(true); break;
+    case 'allsucces': S.allSucces = !S.allSucces; rendre(true); break;
+    case 'skin': LS.set('skin', el.dataset.id); vibrer(); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
+    case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); vibrer(); rendre(true); break;
+    case 'lock': toast('Se débloque au niveau ' + el.dataset.niv); break;
+    case 'bilvue': S.bilVue = el.dataset.t; S.bilAll = false; rendre(true); break;
+    case 'bilall': S.bilAll = !S.bilAll; rendre(true); break;
+    case 'wrapped': S.form = { mode: 'wrapped', y: +el.dataset.y }; rendreForm(); ouvrirSheet(); break;
     case 'livret': S.form.livret = el.dataset.n || null; rendreForm(); break;
     case 'partage': S.form.partage = !S.form.partage; rendreForm(); break;
     case 'pnom': { const f = S.form, n = el.dataset.n; f.noms = f.noms || []; f.noms = f.noms.includes(n) ? f.noms.filter(x => x !== n) : [...f.noms, n]; rendreForm(); break; }
