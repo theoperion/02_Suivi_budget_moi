@@ -640,6 +640,15 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 /* Nébuleuse */
 :root[data-amb=nebuleuse]{--paper:#0B0718;--card:rgba(22,15,44,.8);--soft:#1B1336;--track:#251A46;--ink:#EEE8FF;--ink2:#C7BBEE;--ink3:#8D80B8;--rule:#3A2C66;--nav:#05030C;--navInk:#8D80B8;--navOn:#EEE8FF;--ok:#6BFFC8;--okInk:#6BFFC8;--acc:#B18CFF;--glow:#C9AEFF;--glowS:rgba(177,140,255,.7)}
 :root[data-amb=nebuleuse] body{--dx:-500px;--dy:-300px;background:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1.5px 1.5px at 60% 70%,#fffc,transparent),radial-gradient(1px 1px at 85% 35%,#fffa,transparent),radial-gradient(ellipse at 20% 15%,rgba(214,69,126,.28),transparent 45%) fixed,radial-gradient(ellipse at 85% 60%,rgba(43,127,216,.3),transparent 50%) fixed,linear-gradient(180deg,#120A26,#06040E) fixed;background-size:250px 300px,250px 300px,250px 300px,100% 100%,100% 100%,100% 100%;animation:ambDrift 120s linear infinite}
+/* Ambiances de saison (offertes par les événements) */
+:root[data-amb=halloween]{--paper:#140A1C;--card:rgba(32,16,42,.82);--soft:#24122F;--track:#33193F;--ink:#FFE9D6;--ink2:#E8C2A6;--ink3:#A8836E;--rule:#4A2A4A;--nav:#0A0410;--navInk:#A8836E;--navOn:#FFE9D6;--ok:#9BE15D;--okInk:#9BE15D;--bad:#FF5F5F;--acc:#FF8A2B;--glow:#FF9A3D;--glowS:rgba(255,138,43,.7)}
+:root[data-amb=halloween] body{--dx:260px;--dy:-40px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='200'%3E%3Cpath d='M40 60q6-6 12 0q6-6 12 0q-6 2-12 8q-6-6-12-8z' fill='%23000' opacity='.55'/%3E%3Cpath d='M180 130q4-4 8 0q4-4 8 0q-4 1.5-8 5q-4-3.5-8-5z' fill='%23000' opacity='.45'/%3E%3C/svg%3E"),radial-gradient(circle at 85% 8%,rgba(255,138,43,.35),transparent 35%) fixed,linear-gradient(180deg,#1A0B2E,#0E0614) fixed;background-size:260px 200px,100% 100%,100% 100%;animation:ambDrift 30s linear infinite}
+:root[data-amb=paques]{--paper:#FBF4FF;--card:rgba(255,255,255,.82);--soft:#F0E4FA;--track:#E4D4F2;--ink:#3A2A5A;--ink2:#5E4C80;--ink3:#8D80B0;--rule:#D2C2EA;--nav:#3A2A5A;--navInk:#D2C2EA;--navOn:#FBF4FF;--acc:#9B6BFF;--glow:#9B6BFF;--glowS:rgba(155,107,255,.35)}
+:root[data-amb=paques] body{--dx:0px;--dy:300px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='300'%3E%3Cellipse cx='40' cy='60' rx='7' ry='9' fill='%23FF9EC4' opacity='.45'/%3E%3Cellipse cx='160' cy='170' rx='6' ry='8' fill='%237FE3C4' opacity='.45'/%3E%3Cellipse cx='100' cy='260' rx='6' ry='8' fill='%239FD8FF' opacity='.45'/%3E%3C/svg%3E"),linear-gradient(160deg,#FFF0F8,#EEF2FF 50%,#EEFFF7) fixed;background-size:220px 300px,100% 100%;animation:ambDrift 40s linear infinite}
+:root[data-amb=ete]{--paper:#FFF1E0;--card:rgba(255,250,242,.84);--soft:#FFE0C2;--track:#F6CFA8;--ink:#4A1E0A;--ink2:#7A3E1E;--ink3:#B0704A;--rule:#EBB48A;--nav:#4A1E0A;--navInk:#EBB48A;--navOn:#FFF1E0;--acc:#E8603C;--glow:#E8603C;--glowS:rgba(232,96,60,.4)}
+:root[data-amb=ete] body{background:radial-gradient(circle at 50% 108%,rgba(255,241,176,.9),transparent 40%) fixed,linear-gradient(180deg,#FFD3B0,#FFE9C2 60%,#FFF4DC) fixed}
+:root[data-amb=noel]{--paper:#071430;--card:rgba(14,30,64,.8);--soft:#0E2148;--track:#162C58;--ink:#EAF2FF;--ink2:#B8CCEE;--ink3:#7F92B8;--rule:#24407A;--nav:#030A1C;--navInk:#7F92B8;--navOn:#EAF2FF;--ok:#7FE3A0;--okInk:#7FE3A0;--bad:#FF6B6B;--acc:#FFD36B;--glow:#FFD36B;--glowS:rgba(255,211,107,.6)}
+:root[data-amb=noel] body{--dx:20px;--dy:300px;background:radial-gradient(1.6px 1.6px at 20% 30%,#fff,transparent),radial-gradient(1.2px 1.2px at 70% 60%,#fffd,transparent),radial-gradient(2px 2px at 45% 85%,#fff,transparent),linear-gradient(180deg,#0A1A3E,#050C22) fixed;background-size:180px 300px,180px 300px,180px 300px,100% 100%;animation:ambDrift 18s linear infinite}
 @media (prefers-reduced-motion:reduce){:root[data-amb] body,:root[data-amb] .sec>span,:root[data-amb] .mlabel{animation:none!important}}
 .aprev{height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;font-weight:600}
 /* 6.8 · carte niveau : paliers, liens XP, récompenses à venir */
@@ -682,6 +691,15 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 .pbpt{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;box-shadow:0 0 0 1.5px var(--paper)}
 .pbcur{position:absolute;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:var(--paper);border:2.5px solid var(--acc,var(--ok))}
 .pbauj{position:absolute;top:-13px;font-family:var(--mono);font-size:8.5px;letter-spacing:.6px;background:var(--acc,var(--ok));color:#fff;border-radius:4px;padding:0 4px;line-height:12px;white-space:nowrap}
+/* 7.0 · affiches et écussons */
+.badge2{display:inline-block;flex:none;line-height:0;vertical-align:middle;filter:drop-shadow(0 2px 2px rgba(0,0,0,.28))}.badge2 svg{display:block;overflow:visible}
+.badge2.n2{filter:drop-shadow(0 0 5px rgba(255,214,110,.55)) drop-shadow(0 2px 2px rgba(0,0,0,.3))}.badge2.n3{filter:drop-shadow(0 0 8px rgba(177,140,255,.7))}.badge2.bl{filter:none}
+.vitr{gap:8px}
+.vidban{display:block;width:100%;text-align:left;border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;margin-top:12px;background:linear-gradient(135deg,#141210,#2A2420);color:#F1EFE8}
+.vidh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11px;letter-spacing:1.2px}.vidh span{color:#C9C6BC;font-size:10px;letter-spacing:.4px}
+.vidrow{display:flex;gap:10px;margin-top:10px;justify-content:space-between}
+.vidgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px;margin-top:12px}.vidgrid>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px}.vidgrid small{font-size:10.5px;line-height:1.2}.vidgrid em{font-style:normal;font-family:var(--mono);font-size:8.5px;color:var(--ink3);letter-spacing:.6px}
+.evgrid>div{display:flex;flex-direction:column;align-items:center}
 </style>
 </head>
 <body>
@@ -712,7 +730,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '6.9';
+const VERSION = '7.0';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -1454,7 +1472,7 @@ function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.rem
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
-  const R = { vitrine: rendreVitrine, xplog: rendreXpLog, xpinfo: rendreXpInfo, tuto: rendreTuto, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, esccfg: rendreEscCfg, tiredit: rendreTirEdit, voyedit: rendreVoyEdit, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
+  const R = { videotheque: rendreVideotheque, vitrine: rendreVitrine, xplog: rendreXpLog, xpinfo: rendreXpInfo, tuto: rendreTuto, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, esccfg: rendreEscCfg, tiredit: rendreTirEdit, voyedit: rendreVoyEdit, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
   if (R) return R();
   const fav = favoris(f.type), pins = LS.get('pins', []), futur = statut(f.y, f.m) === 'futur';
   if (f.cat && !fav.includes(f.cat) && typeDe(f.cat) === f.type) fav.unshift(f.cat);
@@ -2187,7 +2205,7 @@ function vueProgres() {
   h += blocCoupDoeil();
   { const evs = [], sa = ouvert('saison') ? saisonActuelle() : null;
     if (ouvert('saison')) evEnCours().forEach(x => evs.push(carteEvMini(x)));
-    if (sa && !sa.avent && !sa.wrapped) evs.push(dcard({ tag: 'SAISON', xp: sa.xp, titre: sa.nom.charAt(0) + sa.nom.slice(1).toLowerCase(), sous: `${sa.cur}/${sa.max} · ${sa.txt}`, pct: sa.cur / sa.max * 100, etat: sa.cur >= sa.max ? 'ok' : '' }));
+    if (sa && !sa.avent && !sa.wrapped) evs.push(dcard({ med: ecusson(sa.ev || 'novsobre', sa.nom, RAR[(SAISONS_EV.find(x => x.id === sa.ev) || { rar: 'rare' }).rar].n, 30, sa.cur < sa.max), tag: 'ÉDITION LIMITÉE', xp: sa.xp, titre: sa.nom.charAt(0) + sa.nom.slice(1).toLowerCase(), sous: `${sa.cur}/${sa.max} · ${sa.txt}`, pct: sa.cur / sa.max * 100, etat: sa.cur >= sa.max ? 'ok' : '' }));
     if (evs.length) h += `<div class="sec"><span>ÉVÉNEMENTS</span><span>EN COURS</span></div><div class="dgrid">${evs.join('')}</div>`;
     if (sa && (sa.avent || sa.wrapped)) h += blocSaison(); }
   { const cards = [];
@@ -2201,7 +2219,7 @@ function vueProgres() {
   // PROJETS
   { let h = ''; T.projets = [h, ['objectif', 'tirelires', 'voyage']]; }
   // SUCCÈS et STYLE
-  T.succes = [ej ? blocNiveau(ej) + `<button class="note" data-act="vitrine" style="display:block;width:100%;text-align:left">📌 Choisis jusqu'à 3 badges à afficher à côté de ta jauge (ou aucun) ›</button>` + blocSucces(ej) + blocBadgesEv(ej) : '', []];
+  T.succes = [ej ? blocNiveau(ej) + `<button class="note" data-act="vitrine" style="display:block;width:100%;text-align:left">📌 Choisis jusqu'à 3 badges à afficher à côté de ta jauge (ou aucun) ›</button>` + blocVideotheque(ej) + blocSucces(ej) + blocBadgesEv(ej) : '', []];
   T.style = [ej ? blocCollection(ej) : '', ['cosmetiques']];
   const NOMS = [['bilans', 'BILANS'], ['defis', 'DÉFIS'], ['succes', 'SUCCÈS'], ['style', 'STYLE']];
   const vis = NOMS.filter(([k]) => T[k][0] || T[k][1].some(f => !dispo(f)));
@@ -2293,6 +2311,7 @@ function faitsJeu() {
     maxJoursMois: Math.max(0, ...[...new Set(J.map(x => x[0].slice(0, 7)))].map(k => J.filter(x => x[0].startsWith(k) && x[1] === true).length)),
     defiSerie: maxSerie(M.map(x => x.defiOk)), chelem: M.filter(x => x.vert && x.defiOk && x.zero).length,
     defiLarge: M.filter(x => x.defiOk && x.defiMarge >= 0.2).length,
+    saisonsOk: (() => { try { return ouvert('saison') ? saisonsGagnees() : []; } catch (err) { return []; } })(),
     evOk: (() => { try { return ouvert('saison') ? planEvenements().map(etatEv).filter(x => x.statut === 'reussi') : []; } catch (err) { return []; } })(),
     missions: moisJeu().concat([[now.getFullYear(), now.getMonth() + 1]]).filter(([y, m]) => { const e = etatMission(y, m); return e && e.ok; }).length,
     skinChange: LS.get('skin', 'classique') !== 'classique' || LS.get('accent', 'foret') !== 'foret'
@@ -2375,7 +2394,8 @@ function etatJeu() {
     ['Défis de la semaine réussis', 'moyen', 30, f.semOk],
     ['Novembre sobre', 'moyen', 150, f.novOk], ['Missions du mois réussies', 'moyen', 60, f.missions], ['Week-ends sans dépense', 'facile', 15, f.weekends],
     ['Événements communs réussis', 'facile', RAR.commune.xp, f.evOk.filter(x => x.def.rar === 'commune').length], ['Événements rares réussis', 'moyen', RAR.rare.xp, f.evOk.filter(x => x.def.rar === 'rare').length],
-    ['Événements épiques réussis', 'difficile', RAR.epique.xp, f.evOk.filter(x => x.def.rar === 'epique').length], ['Événements légendaires réussis', 'extreme', RAR.legendaire.xp, f.evOk.filter(x => x.def.rar === 'legendaire').length], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
+    ['Événements épiques réussis', 'difficile', RAR.epique.xp, f.evOk.filter(x => x.def.rar === 'epique').length], ['Événements légendaires réussis', 'extreme', RAR.legendaire.xp, f.evOk.filter(x => x.def.rar === 'legendaire').length],
+    ['La Nuit des citrouilles (Halloween)', 'difficile', 150, f.saisonsOk.filter(x => x.d.id === 'halloween').length], ["Les Œufs d'Andromède (Pâques)", 'difficile', 150, f.saisonsOk.filter(x => x.d.id === 'paques').length], ["Le Blockbuster de l'été", 'extreme', 250, f.saisonsOk.filter(x => x.d.id === 'ete').length], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
   return Object.assign({ f, succes, rec, xp }, niveauDe(xp));
 }
@@ -2391,7 +2411,7 @@ function niveauDe(xp) {
   return o;
 }
 const etoilesTxt = n => n <= 0 ? '' : n <= 5 ? '★'.repeat(n) : '★×' + n;
-const debloque = (o, niv) => o.suc ? succesFait(o.suc) : o.prest ? etoilesPrestige() >= o.prest : niv >= o.niv;
+const debloque = (o, niv) => o.saison ? saisonObtenue(o.saison) : o.suc ? succesFait(o.suc) : o.prest ? etoilesPrestige() >= o.prest : niv >= o.niv;
 const etoilesPrestige = () => { try { return etatJeu().prest || 0; } catch (e) { return 0; } };
 // Nouveautés : succès et cosmétiques débloqués depuis la dernière visite
 function nouveautes(e) {
@@ -2545,7 +2565,7 @@ function blocSucces(e) {
     <div class="seg" style="margin:0 0 8px">${[['tous', 'TOUS'], ['facile', 'FACILE'], ['moyen', 'MOYEN'], ['difficile', 'DIFF.'], ['extreme', 'EXTRÊME']].map(([k, l]) => `<button class="${d === k ? 'on' : ''}" data-act="sdiff" data-t="${k}">${l}</button>`).join('')}</div>`;
   liste.forEach(s => {
     const D0 = DIFF[s.d];
-    h += `<div class="suc ${s.ok ? 'ok' : ''}">${medaille(icoSucces(s.id), DN[s.d], 36, !s.ok)}
+    h += `<div class="suc ${s.ok ? 'ok' : ''}">${affiche(s.id, DN[s.d], 40, !s.ok)}
       <div class="sx">${(() => { const r = tousCosm().filter(o => o.suc === s.id)[0]; return r ? `<button class="sucrew ${s.ok ? 'ok' : ''}" data-act="colt-go" data-t="${r.t}"><span class="cprev">${apercuCosm(r)}</span>🎁 ${esc(r.nom)}</button>` : ''; })()}<b>${esc(s.nom)}${!s.ok && s.enCours !== null && s.cur > s.enCours ? ` <span class="muted" style="font-size:11px;font-weight:400">· record ${s.cur}</span>` : ''}</b><small>${esc(s.txt)}</small>${s.ok ? '' : `<div class="bar" style="margin-top:5px"><i style="width:${Math.round((s.enCours !== null ? s.enCours : s.cur) / s.max * 100)}%;background:${D0.c}"></i></div>`}</div>
       <span class="sxp" style="color:${D0.c}">${D0.l}<br>+${D0.xp} XP${s.ok ? `<br><button class="lnk" data-act="vit" data-id="s:${s.id}" style="font-size:9px">${epingle('s:' + s.id) ? '📌 ÉPINGLÉ' : 'ÉPINGLER'}</button>` : `<br><span class="muted">${s.enCours !== null ? s.enCours : s.cur}/${s.max}</span>`}</span></div>`;
   });
@@ -2803,11 +2823,164 @@ function medaille(ico, niv, taille, lock) {
   }
   return `<span class="med2 n${niv}${lock ? ' mlock' : ''}" style="width:${t}px;height:${t}px"><svg viewBox="0 0 64 64" width="${t}" height="${t}" aria-hidden="true">${c}</svg></span>`;
 }
+// ================= 7.0 · BADGES « CINÉ-SF » =================
+// Succès = AFFICHES de films d'une saga de SF inventée (« ORBITE »), format de projection selon la difficulté :
+//   facile 35 mm (kraft) · moyen Grand écran (argent) · difficile Laser (or + ampoules de fronton) · extrême 70 mm (holographique + reflet de projecteur)
+// Événements = ÉCUSSONS de mission brodés : commun fil coton · rare argent · épique or (étoiles) · légendaire holographique.
+const lg = (k, id, a, b) => `<linearGradient id="${k}${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+const rg = (k, id, a, b) => `<radialGradient id="${k}${id}" cx="35%" cy="30%"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></radialGradient>`;
+const etoilesSc = (n, seed, h) => Array.from({ length: n }, (_, i) => `<circle cx="${(i * 37 + seed * 13) % 100}" cy="${(i * 53 + seed * 7) % (h || 140)}" r="${i % 4 ? .6 : 1.1}" fill="#fff" opacity="${(.35 + (i % 5) / 8).toFixed(2)}"/>`).join('');
+const anim = (an, s) => an ? s : '';
+// Chaque scène dessine dans un cadre 100 × 140 ; p = variante de couleurs (0, 1, 2)
+const SCENES = {
+  dunes(k, p, an) { const c = [['#2A1640', '#E8915F', '#FFE7B8', '#D98A3D', '#C9772E', '#A65A1F', '#7E4214'], ['#1B1036', '#7A4FB0', '#FFD6F0', '#B05A9A', '#6B3F8E', '#4E2C6E', '#331B4E'], ['#2B0F0A', '#D9542F', '#FFE0A0', '#E8603C', '#A8401E', '#7E2E14', '#541C0A']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}${rg(k, 'p', c[2], c[3])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(10, p, 70)}<circle cx="66" cy="44" r="22" fill="url(#${k}p)"/><ellipse cx="66" cy="44" rx="36" ry="7" fill="none" stroke="${c[2]}" stroke-opacity=".7" stroke-width="2" transform="rotate(-14 66 44)"/><path d="M0 98 Q25 84 48 96 T100 90 V140 H0z" fill="${c[4]}"/><path d="M0 110 Q30 96 60 108 T100 104 V140 H0z" fill="${c[5]}"/><path d="M0 122 Q40 110 70 120 T100 118 V140 H0z" fill="${c[6]}"/><path d="M30 104 l3 -9 l3 9 z" fill="#1A0E06"/><circle cx="33" cy="94" r="1.4" fill="#1A0E06"/>`; },
+  orbite(k, p, an) { const c = [['#05101F', '#123A66', '#5FB0FF', '#123A66'], ['#140818', '#4A1A3A', '#FF8A6B', '#6B1E2E'], ['#03140F', '#0E4A3A', '#6BFFC8', '#0E4A3A']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}${rg(k, 'p', c[2], c[3])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(22, p)}<circle cx="50" cy="150" r="70" fill="url(#${k}p)"/><path d="M-10 92 Q50 70 110 92" fill="none" stroke="${c[2]}" stroke-opacity=".5" stroke-width="1.5"/>
+      <g transform="translate(58 46) rotate(-25)"><path d="M0 -10 C5 -6 6 2 4 9 H-4 C-6 2 -5 -6 0 -10z" fill="#E8EEF8"/><path d="M-4 5 L-9 11 H-4z M4 5 L9 11 H4z" fill="#9FB4D0"/><circle cx="0" cy="-2" r="2" fill="#2B7FD8"/><path d="M-2.5 9 L0 18 L2.5 9z" fill="#FFB347">${anim(an, '<animate attributeName="opacity" values="1;.4;1" dur=".6s" repeatCount="indefinite"/>')}</path></g>`; },
+  station(k, p, an) { const c = [['#070B1A', '#1B2B4A', '#C8643C'], ['#120A1E', '#3A1B4A', '#3CB4C8'], ['#0A0F0A', '#1E3A2A', '#E8B931']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(26, p + 3)}<g transform="translate(50 62)"><g><ellipse rx="34" ry="12" fill="none" stroke="#D6E2F2" stroke-width="5"/><ellipse rx="34" ry="12" fill="none" stroke="#7F92B0" stroke-width="1" stroke-dasharray="3 3"/>
+      <rect x="-3" y="-30" width="6" height="60" rx="2" fill="#B8C6DC"/><circle r="8" fill="#E8EEF8"/><circle r="3" fill="#F3C24A"/><rect x="-46" y="-3" width="9" height="6" fill="#2B5FA8"/><rect x="37" y="-3" width="9" height="6" fill="#2B5FA8"/>${anim(an, '<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="40s" repeatCount="indefinite"/>')}</g></g><circle cx="18" cy="112" r="10" fill="${c[2]}"/><circle cx="15" cy="109" r="3" fill="#fff" opacity=".25"/>`; },
+  nebuleuse(k, p, an) { const c = [['#D6457E', '#2B7FD8', '#FFD36B'], ['#7B5BD6', '#1D9E75', '#FF9EC4'], ['#E8603C', '#7B5BD6', '#6BC8FF']][p];
+    return `<defs><filter id="${k}b" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="6"/></filter></defs><rect width="100" height="140" fill="#0B0718"/><ellipse cx="38" cy="50" rx="40" ry="26" fill="${c[0]}" opacity=".5" filter="url(#${k}b)"/><ellipse cx="66" cy="80" rx="38" ry="24" fill="${c[1]}" opacity=".55" filter="url(#${k}b)"/><ellipse cx="52" cy="64" rx="18" ry="12" fill="${c[2]}" opacity=".55" filter="url(#${k}b)"/>
+      ${Array.from({ length: 30 }, (_, i) => `<circle cx="${(i * 37) % 100}" cy="${(i * 61) % 140}" r="${i % 5 ? .6 : 1.2}" fill="#fff">${anim(an && i % 3 === 0, `<animate attributeName="opacity" values=".2;1;.2" dur="${2 + i % 3}s" begin="${(i % 7) / 3}s" repeatCount="indefinite"/>`)}</circle>`).join('')}<path d="M50 58 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" fill="#fff"/>`; },
+  lune(k, p, an) { const c = [['#04060E', '#1B2340', '#5FB0FF'], ['#0E0614', '#2E1A40', '#FF8A6B'], ['#050A08', '#14302A', '#9BE15D']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}${rg(k, 'p', '#fff', c[2])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(24, p + 5, 90)}<circle cx="72" cy="34" r="14" fill="url(#${k}p)" opacity=".9"/>
+      <path d="M0 96 Q50 80 100 96 V140 H0z" fill="#9A9AA8"/><ellipse cx="24" cy="112" rx="10" ry="3" fill="#7A7A88"/><ellipse cx="70" cy="122" rx="14" ry="4" fill="#7A7A88"/><ellipse cx="52" cy="104" rx="6" ry="2" fill="#7A7A88"/>
+      <path d="M36 96 a12 12 0 0 1 24 0z" fill="#D6E2F2" fill-opacity=".85" stroke="#fff" stroke-width=".6"/><rect x="58" y="90" width="2" height="8" fill="#D6E2F2"/><path d="M60 90 l6 2 -6 2z" fill="${c[2]}"/><circle cx="48" cy="92" r="1.3" fill="#FFD36B">${anim(an, '<animate attributeName="opacity" values="1;.3;1" dur="1.6s" repeatCount="indefinite"/>')}</circle>`; },
+  comete(k, p, an) { const c = [['#060818', '#2A1A4A', '#9FD8FF'], ['#1A0606', '#4A1A1A', '#FF9E6B'], ['#04140E', '#123A30', '#B8FFD9']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}<linearGradient id="${k}t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[2]}" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient></defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(26, p + 2)}
+      <path d="M8 14 L70 54 L66 58z" fill="url(#${k}t)" opacity=".9">${anim(an, '<animate attributeName="opacity" values=".9;.6;.9" dur="2s" repeatCount="indefinite"/>')}</path><circle cx="69" cy="56" r="3.5" fill="#fff"/><circle cx="69" cy="56" r="7" fill="${c[2]}" opacity=".3"/>
+      <path d="M0 112 L22 88 L36 102 L54 80 L74 104 L88 92 L100 104 V140 H0z" fill="#1A1430"/><path d="M0 124 L30 106 L60 120 L100 110 V140 H0z" fill="#0E0A1C"/>`; },
+  ville(k, p, an) { const c = [['#0E0420', '#3A0E5A', '#FF4FD8', '#3CF0C5'], ['#020A18', '#0E2A4A', '#4FD8FF', '#FFD36B'], ['#140A02', '#4A2A0A', '#FFB347', '#FF5F8F']][p];
+    const imm = [[0, 70, 14], [14, 54, 12], [26, 82, 10], [36, 44, 14], [50, 66, 12], [62, 36, 10], [72, 60, 14], [86, 76, 14]];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(12, p, 50)}<circle cx="78" cy="22" r="9" fill="${c[2]}" opacity=".85"/>
+      ${imm.map(([x, y, w], i) => `<rect x="${x}" y="${y}" width="${w}" height="${140 - y}" fill="#0A0414"/>${Array.from({ length: 5 }, (_, j) => `<rect x="${x + 2 + (j % 2) * (w / 2 - 1)}" y="${y + 5 + j * 9}" width="2.5" height="2" fill="${(i + j) % 3 ? c[2] : c[3]}" opacity=".8"/>`).join('')}`).join('')}
+      <g>${anim(an, '<animateTransform attributeName="transform" type="translate" values="-30 0;130 0" dur="5s" repeatCount="indefinite"/>')}<rect x="0" y="48" width="8" height="2.5" rx="1.2" fill="${c[3]}"/><rect x="-6" y="48.8" width="6" height="1" fill="${c[3]}" opacity=".4"/></g><rect y="128" width="100" height="12" fill="${c[2]}" opacity=".15"/>`; },
+  trounoir(k, p, an) { const c = [['#FFB347', '#FF5F8F'], ['#6BC8FF', '#B18CFF'], ['#FFF1B0', '#E8603C']][p];
+    return `<defs><linearGradient id="${k}d" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${c[1]}"/><stop offset=".5" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient><filter id="${k}b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter></defs><rect width="100" height="140" fill="#030208"/>${etoilesSc(30, p + 4)}
+      <g transform="translate(50 64)"><ellipse rx="40" ry="10" fill="none" stroke="url(#${k}d)" stroke-width="6" filter="url(#${k}b)"/><path d="M-22 0 a22 22 0 0 1 44 0" fill="none" stroke="${c[0]}" stroke-width="3" opacity=".8" filter="url(#${k}b)"/><circle r="15" fill="#000"/><circle r="15.5" fill="none" stroke="${c[0]}" stroke-width=".8" opacity=".9"/>
+      <path d="M-40 0 a40 10 0 0 0 80 0" fill="none" stroke="url(#${k}d)" stroke-width="4"/>${anim(an, '<animateTransform attributeName="transform" type="rotate" additive="sum" values="-3;3;-3" dur="6s" repeatCount="indefinite"/>')}</g>`; },
+  aurore(k, p, an) { const c = [['#7FE3C4', '#6BC8FF'], ['#FF9EC4', '#B18CFF'], ['#C8F56A', '#7FE3C4']][p];
+    return `<defs><filter id="${k}b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>${lg(k, 's', '#020814', '#0E2440')}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(24, p + 1, 80)}
+      <path d="M-10 40 Q20 20 50 40 T110 34" fill="none" stroke="${c[0]}" stroke-width="10" opacity=".55" filter="url(#${k}b)">${anim(an, '<animate attributeName="d" values="M-10 40 Q20 20 50 40 T110 34;M-10 34 Q20 44 50 30 T110 42;M-10 40 Q20 20 50 40 T110 34" dur="7s" repeatCount="indefinite"/>')}</path>
+      <path d="M-10 56 Q30 40 60 54 T110 50" fill="none" stroke="${c[1]}" stroke-width="7" opacity=".45" filter="url(#${k}b)"/>
+      <path d="M0 104 L18 78 L30 92 L48 66 L64 90 L78 76 L100 100 V140 H0z" fill="#DDEAF5"/><path d="M48 66 L54 76 L44 76z M18 78 L22 84 L14 84z" fill="#fff"/><path d="M0 116 Q50 104 100 118 V140 H0z" fill="#B8CCE0"/>`; },
+  ocean(k, p, an) { const c = [['#0A2A4A', '#E8915F', '#1D6E8A', '#0E4A66'], ['#1A0A30', '#B05A9A', '#3A2A8A', '#241A5A'], ['#04201A', '#7FE3C4', '#0E6E5A', '#084A3E']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(8, p, 40)}<circle cx="30" cy="40" r="12" fill="#FFE7C9" opacity=".9"/><circle cx="72" cy="26" r="6" fill="#FFE7C9" opacity=".7"/>
+      <rect y="82" width="100" height="58" fill="${c[2]}"/>${[0, 1, 2, 3].map(i => `<path d="M0 ${90 + i * 12} q12.5 -4 25 0 t25 0 t25 0 t25 0" fill="none" stroke="#fff" stroke-opacity="${.35 - i * .06}" stroke-width="1.2">${anim(an, `<animateTransform attributeName="transform" type="translate" values="0 0;-25 0;0 0" dur="${4 + i}s" repeatCount="indefinite"/>`)}</path>`).join('')}
+      <rect x="78" y="62" width="6" height="22" fill="#F1EFE8"/><rect x="78" y="68" width="6" height="3" fill="#D85A30"/><path d="M76 62 h10 l-2 -4 h-6z" fill="#2C2C2A"/><path d="M84 59 L100 52 L100 60z" fill="#FFE7A0" opacity=".5">${anim(an, '<animate attributeName="opacity" values=".6;.1;.6" dur="2.4s" repeatCount="indefinite"/>')}</path>`; },
+  foret(k, p, an) { const c = [['#04140C', '#123A24', '#6BFFC8', '#2E8B57'], ['#0E0618', '#2E1440', '#FF9EC4', '#7B5BD6'], ['#02101A', '#0E3040', '#6BC8FF', '#1D6E8A']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(14, p, 60)}
+      ${[[14, 70, 16], [40, 58, 20], [70, 66, 18], [90, 80, 12]].map(([x, y, r]) => `<rect x="${x - 1.5}" y="${y}" width="3" height="${140 - y}" fill="#06120A"/><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * .6}" fill="${c[3]}" opacity=".9"/>`).join('')}
+      ${Array.from({ length: 9 }, (_, i) => `<circle cx="${8 + i * 11}" cy="${74 + (i * 17) % 40}" r="1.3" fill="${c[2]}">${anim(an, `<animate attributeName="opacity" values="0;1;0" dur="${1.8 + (i % 3) * .5}s" begin="${i * .3}s" repeatCount="indefinite"/>`)}</circle>`).join('')}
+      <path d="M0 124 Q50 114 100 126 V140 H0z" fill="#030A06"/>`; },
+  canyon(k, p, an) { const c = [['#3A1A0A', '#E8915F', '#B5501E', '#7E3412'], ['#0A1A2A', '#6BC8FF', '#4A6E8A', '#2A4A66'], ['#2A0A1A', '#FFB347', '#A8401E', '#6B1E2E']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/><circle cx="50" cy="34" r="12" fill="#FFE7C9" opacity=".8"/>
+      <path d="M0 50 L18 50 L22 140 H0z M100 44 L80 44 L74 140 H100z" fill="${c[2]}"/><path d="M18 74 Q50 52 82 74 L80 84 Q50 64 20 84z" fill="${c[2]}"/><path d="M0 50 h18 v6 h-18z M80 44 h20 v6 h-20z" fill="${c[3]}"/>
+      <path d="M0 140 L30 112 L70 112 L100 140z" fill="${c[3]}"/><g transform="translate(46 110)"><rect x="-6" y="-4" width="12" height="4" rx="1" fill="#D6E2F2"/><circle cx="-4" cy="1" r="2" fill="#2C2C2A"/><circle cx="4" cy="1" r="2" fill="#2C2C2A"/><path d="M2 -4 v-4 h3" stroke="#D6E2F2" stroke-width="1" fill="none"/>${anim(an, '<animateTransform attributeName="transform" type="translate" additive="sum" values="-6 0;6 0;-6 0" dur="8s" repeatCount="indefinite"/>')}</g>
+      ${[[40, 96], [58, 100], [30, 104]].map(([x, y]) => `<path d="M${x} ${y} l2 -5 2 5z" fill="#9FD8FF" opacity=".9"/>`).join('')}`; },
+  vaisseau(k, p, an) { const c = [['#0A0E1A', '#3A4A6A', '#FFD36B'], ['#160A0A', '#5A2A2A', '#FF6A2B'], ['#060E12', '#1E4A4A', '#6BFFC8']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(18, p + 6, 60)}
+      <g><path d="M-10 46 Q50 22 110 46 L96 58 H4z" fill="#1A1E2A"/><path d="M4 58 H96 L86 64 H14z" fill="#262C3C"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${10 + i * 7.3}" cy="61" r="1" fill="${c[2]}">${anim(an, `<animate attributeName="opacity" values="1;.2;1" dur="1.5s" begin="${i * .12}s" repeatCount="indefinite"/>`)}</circle>`).join('')}<path d="M44 64 L56 64 L66 140 H34z" fill="${c[2]}" opacity=".15"/>${anim(an, '<animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="5s" repeatCount="indefinite"/>')}</g>
+      <path d="M0 118 Q20 110 40 116 Q70 106 100 116 V140 H0z" fill="#0A0C14"/>`; },
+  portail(k, p, an) { const c = [['#0A0618', '#2A1A4A', '#B18CFF', '#6BC8FF'], ['#120806', '#3A1A0E', '#FFB347', '#FF5F8F'], ['#04120E', '#123A30', '#6BFFC8', '#9BE15D']][p];
+    return `<defs>${lg(k, 's', c[0], c[1])}<radialGradient id="${k}r"><stop offset=".55" stop-color="${c[3]}" stop-opacity=".15"/><stop offset="1" stop-color="${c[2]}" stop-opacity=".9"/></radialGradient></defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(20, p)}
+      <ellipse cx="50" cy="66" rx="22" ry="30" fill="url(#${k}r)">${anim(an, '<animate attributeName="rx" values="22;24;22" dur="3s" repeatCount="indefinite"/>')}</ellipse><ellipse cx="50" cy="66" rx="22" ry="30" fill="none" stroke="#D6E2F2" stroke-width="3"/>
+      <path d="M0 112 L30 98 H70 L100 112 V140 H0z" fill="#14101E"/><path d="M48 98 l2 -6 2 6z" fill="#000"/>`; },
+  feuilles(k, p, an) { return `<defs>${lg(k, 's', '#3A1A0A', '#E8915F')}</defs><rect width="100" height="140" fill="url(#${k}s)"/><circle cx="70" cy="40" r="14" fill="#FFE0A0" opacity=".85"/><path d="M0 100 Q30 84 60 96 T100 92 V140 H0z" fill="#7E3412"/><path d="M0 118 Q40 104 100 116 V140 H0z" fill="#4A1E0A"/>
+      ${Array.from({ length: 8 }, (_, i) => `<path d="M${10 + i * 12} ${20 + (i * 23) % 60} q4 -4 8 0 q-4 4 -8 0z" fill="${['#E8603C', '#F3C24A', '#C8643C'][i % 3]}">${anim(an, `<animateTransform attributeName="transform" type="translate" values="0 -20;6 60" dur="${5 + i % 3}s" begin="${i * .5}s" repeatCount="indefinite"/>`)}</path>`).join('')}`; },
+  neige(k, p, an) { return `<defs>${lg(k, 's', '#06102A', '#1E3A6A')}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(14, p, 50)}<circle cx="74" cy="26" r="8" fill="#F1EFE8"/>
+      <path d="M0 104 Q50 92 100 104 V140 H0z" fill="#E8EEF8"/>${[[20, 90], [46, 84], [72, 92]].map(([x, y]) => `<path d="M${x} ${y} l-8 0 l8 -8 l8 8z" fill="#2A3A5A"/><rect x="${x - 6}" y="${y}" width="12" height="10" fill="#3A4A6A"/><rect x="${x - 2}" y="${y + 3}" width="4" height="4" fill="#FFD36B"/>`).join('')}
+      <path d="M88 104 l-6 0 l6 -12 l6 12z M88 96 l-5 0 l5 -10 l5 10z" fill="#1E6E4A"/>${Array.from({ length: 16 }, (_, i) => `<circle cx="${(i * 37) % 100}" cy="${(i * 29) % 100}" r="1" fill="#fff">${anim(an, `<animateTransform attributeName="transform" type="translate" values="0 -20;3 120" dur="${6 + i % 4}s" begin="${i * .4}s" repeatCount="indefinite"/>`)}</circle>`).join('')}`; },
+  plage(k, p, an) { return `<defs>${lg(k, 's', '#FF8A6B', '#FFD36B')}</defs><rect width="100" height="140" fill="url(#${k}s)"/><circle cx="50" cy="76" r="22" fill="#FFF1B0"/><rect y="82" width="100" height="58" fill="#E8603C" opacity=".85"/>${[0, 1, 2].map(i => `<rect x="${20 + i * 6}" y="${88 + i * 8}" width="${60 - i * 12}" height="1.5" fill="#FFF1B0" opacity=".7"/>`).join('')}
+      <path d="M0 116 Q50 106 100 120 V140 H0z" fill="#F6D9A8"/><path d="M80 116 Q76 90 84 64" stroke="#3A1A0A" stroke-width="3" fill="none"/>${[-60, -20, 20, 60, 100].map(r => `<path d="M84 64 q12 -2 18 6" stroke="#1E4A2A" stroke-width="3" fill="none" transform="rotate(${r} 84 64)"/>`).join('')}`; },
+  citrouille(k, p, an) { return `<defs>${lg(k, 's', '#1A0B2E', '#6B2A3A')}</defs><rect width="100" height="140" fill="url(#${k}s)"/>
+      <circle cx="50" cy="48" r="26" fill="#FF8A2B"/><path d="M50 22 v-6" stroke="#3B6E2A" stroke-width="3" stroke-linecap="round"/><path d="M38 22 Q32 48 38 74 M62 22 Q68 48 62 74 M50 22 V74" stroke="#D9661A" stroke-width="1.5" fill="none"/>
+      <path d="M38 42 l6 -5 2 7z M62 42 l-6 -5 -2 7z" fill="#3A1405"/><path d="M38 58 q12 10 24 0 l-4 3 -3 -3 -3 4 -3 -4 -3 3 z" fill="#3A1405"/>
+      <path d="M0 108 Q20 94 40 104 Q60 92 100 102 V140 H0z" fill="#1B0E26"/><path d="M70 96 v-14 l5 -4 5 4 v14z" fill="#1B0E26"/><rect x="73" y="86" width="4" height="4" fill="#FFB347"/>
+      ${[[18, 26], [80, 18], [86, 34]].map(([x, y], i) => `<path d="M${x} ${y} q3 -3 6 0 q3 -3 6 0 q-3 1 -6 4 q-3 -3 -6 -4z" fill="#140A1C">${anim(an, `<animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur="${1.4 + i * .3}s" repeatCount="indefinite"/>`)}</path>`).join('')}`; },
+  oeufs(k, p, an) { return `<defs>${lg(k, 's', '#1B1438', '#4A3A8A')}</defs><rect width="100" height="140" fill="url(#${k}s)"/>${etoilesSc(18, 3)}
+      ${[[30, 50, '#FF9EC4', '#FFD36B', -12], [62, 40, '#7FE3C4', '#B18CFF', 10], [48, 82, '#9FD8FF', '#FF9EC4', -4]].map(([x, y, a, b, r], i) => `<g transform="translate(${x} ${y}) rotate(${r})"><g><ellipse rx="11" ry="14" fill="${a}"/><path d="M-11 0 q5.5 -5 11 0 t11 0" stroke="${b}" stroke-width="3" fill="none"/><circle cx="-4" cy="-7" r="2" fill="#fff" opacity=".6"/>${anim(an, `<animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur="${2 + i * .5}s" repeatCount="indefinite"/>`)}</g></g>`).join('')}`; }
+};
+// Affiche de chaque succès : [scène, variante de couleurs, titre du film]
+const AFFICHES = {
+  'premier-mois': ['orbite', 0, 'LE PREMIER PAS'], 'defi-lance': ['orbite', 1, 'DÉCOLLAGE'], 'jours-3': ['dunes', 0, 'LES DUNES DE KESSA'], 'coffre': ['canyon', 0, 'LE COFFRE DU CANYON'],
+  'rembourse': ['station', 1, "LE RETOUR DE L'ÉQUIPAGE"], 'style': ['ville', 0, 'NÉON CITY'], 'vert-1': ['foret', 0, "LA FORÊT D'ÉMERAUDE"], 'jours-7': ['lune', 0, 'SEPT NUITS SUR SÉLÈNE'],
+  'vert-3': ['foret', 2, 'LE JARDIN SUSPENDU'], 'defis-3': ['comete', 1, 'LA COMÈTE ROUGE'], 'fidele': ['portail', 0, 'LE GARDIEN DU PORTAIL'], 'taux-10': ['ocean', 0, "L'OCÉAN DE TALYS"],
+  'jours-14': ['aurore', 0, "L'AURORE SILENCIEUSE"], 'zero-1': ['station', 0, 'STATION HÉLIOS'], 'vert-6': ['foret', 1, 'LA CANOPÉE'], 'defis-6': ['comete', 0, "LA PLUIE D'ÉTOILES"],
+  'cote-500': ['canyon', 1, 'LES MINES DE CRISTAL'], 'zero-3': ['vaisseau', 0, 'LE VAISSEAU-MÈRE'], 'jours-30': ['dunes', 2, 'LE MOINE DES SABLES'], 'vert-12': ['aurore', 2, "L'ANNÉE VERTE"],
+  'taux-25': ['trounoir', 0, "L'HORIZON DES ÉVÉNEMENTS"], 'zero-6': ['vaisseau', 1, "L'ARMADA"], 'cote-2000': ['trounoir', 2, 'LE TRÉSOR DU VIDE'], 'defis-12': ['nebuleuse', 0, 'LA NÉBULEUSE'],
+  'semaine-1': ['lune', 1, 'LA BASE LUNAIRE'], 'nov': ['feuilles', 0, "L'AUTOMNE D'OR"], 'semaines-8': ['ville', 1, 'RYTHME NOCTURNE'], 'avent': ['neige', 0, "LE RÉVEILLON D'ANDROMÈDE"],
+  'objectif-an': ['portail', 1, "LA LIGNE D'ARRIVÉE"], 'weekend': ['ocean', 1, 'WEEK-END SUR TALYS'], 'mission-1': ['comete', 2, 'MISSION SECRÈTE'], 'mois-10': ['lune', 2, 'LA MER TRANQUILLE'],
+  'weekends-4': ['ocean', 2, 'LES QUATRE MARÉES'], 'defi-large': ['canyon', 2, 'LA GRANDE ARCHE'], 'missions-3': ['ville', 2, "AGENT D'ORBITE"], 'mois-15': ['aurore', 1, 'LE SILENCE DES GLACES'],
+  'defis-suite-3': ['station', 2, "L'ENCHAÎNEMENT"], 'chelem': ['vaisseau', 2, 'LE GRAND CHELEM'], 'missions-6': ['nebuleuse', 1, 'AGENT SPÉCIAL'], 'chelem-3': ['trounoir', 1, 'LA TRILOGIE'],
+  'ev-5': ['comete', 0, "CHASSEURS D'ÉCLAIRS"], 'jours-tot-50': ['dunes', 1, 'CINQUANTE SOLEILS'], 'ev-leg': ['portail', 2, 'LA LÉGENDE'], 'ev-tous': ['nebuleuse', 2, 'LA COLLECTION'],
+  'jours-tot-200': ['lune', 0, "L'ASCÈTE"], 'missions-12': ['vaisseau', 0, 'DOUBLE ZÉRO'], 'taux-25-3': ['foret', 0, 'LA FOURMILIÈRE'], 'semaines-25': ['ville', 0, 'MÉTRONOME'],
+  'vert-24': ['foret', 2, 'LA SAGA VERTE'], 'cote-1000': ['canyon', 0, "LA RUÉE VERS L'OR"] };
+const afficheDe = id => AFFICHES[id] || ['orbite', 0, 'ORBITE'];
+// Écusson de chaque événement éclair : scène + variante
+const ECUSSONS = { blanche: ['lune', 0], cochon: ['canyon', 0], chrono: ['comete', 0], trois5: ['nebuleuse', 2], cocon: ['ocean', 1], maison: ['foret', 0], folie: ['aurore', 0], sobre: ['dunes', 0],
+  panier: ['station', 0], sourdine: ['ville', 0], poche: ['trounoir', 2], marathon: ['vaisseau', 1], halloween: ['citrouille', 0], paques: ['oeufs', 0], ete: ['plage', 0], noel: ['neige', 0], novsobre: ['feuilles', 0] };
+let BADN = 0;
+const animOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CADRES = { a: ['35 MM', 'GRAND ÉCRAN', 'LASER', '70 MM'], e: ['FIL COTON', 'FIL ARGENT', 'FIL OR', 'HOLO'] };
+function defsCadre(k) {
+  return `<linearGradient id="${k}gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF4B8"/><stop offset=".5" stop-color="#E8B931"/><stop offset="1" stop-color="#9A6E0C"/></linearGradient>
+    <linearGradient id="${k}silver" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#BFC5D0"/><stop offset="1" stop-color="#6E7686"/></linearGradient>
+    <linearGradient id="${k}holo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5f8f"/><stop offset=".25" stop-color="#ffd36b"/><stop offset=".5" stop-color="#6bffb8"/><stop offset=".75" stop-color="#6bc8ff"/><stop offset="1" stop-color="#b18cff"/>${animOK() ? '<animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="5s" repeatCount="indefinite"/>' : ''}</linearGradient>`;
+}
+const matiere = (k, t) => [t === 'a' ? '#B08A5E' : '#B9773E', `url(#${k}silver)`, `url(#${k}gold)`, `url(#${k}holo)`];
+// Affiche de film (succès). w = largeur en px ; anime seulement si assez grand pour être vu.
+function affiche(id, niv, w, lock) {
+  const [sc, p, titre] = afficheDe(id), k = 'af' + (++BADN), an = !lock && w >= 44 && animOK(), H = 148, W = 110;
+  let s = `<svg viewBox="-8 -8 116 156" width="${w}" height="${Math.round(w * H / W)}" aria-hidden="true"><defs>${defsCadre(k)}<clipPath id="${k}c"><rect x="8" y="8" width="84" height="108" rx="2"/></clipPath></defs>`;
+  s += `<rect x="0" y="0" width="100" height="140" rx="5" fill="${lock ? 'var(--soft)' : matiere(k, 'a')[niv]}" ${lock ? 'stroke="var(--rule)" stroke-width="2"' : ''}/>`;
+  s += `<g clip-path="url(#${k}c)">${lock ? `<rect x="8" y="8" width="84" height="108" fill="var(--track)"/><g transform="translate(8 8) scale(.84 .7715)" style="filter:grayscale(1) blur(1.4px)" opacity=".4">${SCENES[sc](k, p, false)}</g><text x="50" y="70" text-anchor="middle" font-size="22" fill="var(--ink3)" font-family="var(--mono)" opacity=".8">?</text>` : `<g transform="translate(8 8) scale(.84 .7715)">${SCENES[sc](k, p, an)}</g>`}
+    ${!lock && niv === 3 ? `<rect x="-40" y="0" width="30" height="140" fill="#fff" opacity=".22" transform="skewX(-20)">${an ? '<animate attributeName="x" values="-60;-60;140" keyTimes="0;.5;1" dur="3.5s" repeatCount="indefinite"/>' : ''}</rect>` : ''}</g>`;
+  for (let i = 0; i < 9; i++) s += `<rect x="2" y="${10 + i * 12}" width="4" height="6" rx="1" fill="${lock ? 'var(--paper)' : '#141210'}" opacity=".85"/><rect x="94" y="${10 + i * 12}" width="4" height="6" rx="1" fill="${lock ? 'var(--paper)' : '#141210'}" opacity=".85"/>`;
+  const tt = lock ? '???' : titre;
+  s += `<text x="50" y="127" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-weight="700" font-size="9" ${tt.length > 14 ? 'textLength="80" lengthAdjust="spacingAndGlyphs"' : ''} fill="${lock ? 'var(--ink3)' : '#141210'}">${esc(tt)}</text>`;
+  s += `<text x="50" y="135.5" text-anchor="middle" font-family="monospace" font-size="5" letter-spacing="1.5" fill="${lock ? 'var(--ink3)' : '#2A2724'}">${CADRES.a[niv]}</text>`;
+  if (!lock && niv === 2) { const pts = []; for (let x = 6; x <= 94; x += 8) pts.push([x, -4], [x, 144]); for (let y = 4; y <= 136; y += 8) pts.push([-4, y], [104, y]);
+    s += pts.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#FFE9A8">${an ? `<animate attributeName="opacity" values="1;.25;1" dur="1.2s" begin="${(i % 3) * .4}s" repeatCount="indefinite"/>` : ''}</circle>`).join(''); }
+  return `<span class="badge2 af n${niv}${lock ? ' bl' : ''}">${s}</svg></span>`;
+}
+// Écusson brodé (événements). cle = id de l'événement.
+function ecusson(cle, nom, niv, w, lock, cache) {
+  const [sc, p] = ECUSSONS[cle] || ['orbite', 0], k = 'ec' + (++BADN), an = !lock && w >= 40 && animOK(), th = lock ? 'var(--soft)' : matiere(k, 'e')[niv];
+  let s = `<svg viewBox="-6 -6 112 120" width="${w}" height="${Math.round(w * 120 / 112)}" aria-hidden="true"><defs>${defsCadre(k)}<clipPath id="${k}c"><circle cx="50" cy="48" r="38"/></clipPath></defs>`;
+  s += `<circle cx="50" cy="48" r="47" fill="${th}" ${lock ? 'stroke="var(--rule)" stroke-width="2"' : ''}/><circle cx="50" cy="48" r="44" fill="none" stroke="${lock ? 'var(--rule)' : '#fff'}" stroke-opacity=".7" stroke-width="1" stroke-dasharray="2 1.6"/><circle cx="50" cy="48" r="40" fill="${lock ? 'var(--track)' : '#141210'}"/>`;
+  s += lock ? `<text x="50" y="58" text-anchor="middle" font-size="28" fill="var(--ink3)" opacity=".6" font-family="var(--mono)">${cache ? '?' : ''}</text>` : `<g clip-path="url(#${k}c)"><g transform="translate(12 6) scale(.76 .62)">${SCENES[sc](k, p, an)}</g></g>`;
+  if (lock && !cache) s += `<g clip-path="url(#${k}c)" opacity=".35" style="filter:grayscale(1)"><g transform="translate(12 6) scale(.76 .62)">${SCENES[sc](k, p, false)}</g></g>`;
+  if (!lock && niv >= 2) s += [[18, 22], [82, 22], [50, 3]].map(([x, y], i) => `<path d="M${x} ${y - 3}l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="#FFF1B0">${an ? `<animate attributeName="opacity" values=".3;1;.3" dur="1.8s" begin="${i * .5}s" repeatCount="indefinite"/>` : ''}</path>`).join('');
+  const tt = cache ? '???' : String(nom || '').toUpperCase();
+  s += `<path d="M4 82 Q50 98 96 82 L92 98 Q50 112 8 98z" fill="${th}" ${lock ? 'stroke="var(--rule)" stroke-width="1.5"' : ''}/><path d="M8 86 Q50 101 92 86" fill="none" stroke="${lock ? 'var(--rule)' : '#fff'}" stroke-opacity=".5" stroke-dasharray="2 1.5" stroke-width=".8"/>`;
+  s += `<text x="50" y="98" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-weight="700" font-size="8.5" ${tt.length > 13 ? 'textLength="70" lengthAdjust="spacingAndGlyphs"' : ''} fill="${lock ? 'var(--ink3)' : '#141210'}">${esc(tt)}</text>`;
+  return `<span class="badge2 ec n${niv}${lock ? ' bl' : ''}">${s}</svg></span>`;
+}
+
+// ---- Événements de saison (édition limitée) : écusson + ambiance offerte si réussi ----
+function paques(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return isoJ(new Date(y, mo - 1, da)); }
+const SAISONS_EV = [
+  { id: 'halloween', nom: 'La Nuit des citrouilles', rar: 'epique', max: 4, xp: 150, amb: 'halloween', fen: y => [y + '-10-24', y + '-10-31'], txt: '4 jours sans dépense courante du 24 au 31 octobre' },
+  { id: 'paques', nom: "Les Œufs d'Andromède", rar: 'epique', max: 5, xp: 150, amb: 'paques', fen: y => { const p = paques(y); return [addJ(p, -6), addJ(p, 1)]; }, txt: '5 jours sans dépense courante pendant la semaine de Pâques' },
+  { id: 'ete', nom: "Le Blockbuster de l'été", rar: 'legendaire', max: 12, xp: 250, amb: 'ete', fen: y => [y + '-07-01', y + '-07-31'], txt: '12 jours sans dépense courante en juillet' }];
+const SAISONS_FIXES = [{ id: 'novsobre', nom: 'Novembre sobre', rar: 'rare', cle: 'novOk' }, { id: 'noel', nom: "L'Avent", rar: 'legendaire', amb: 'noel', cle: 'aventOk' }];
+function etatSaisonEv(d, y, J) {
+  const [a, b] = d.fen(y), A = auj(); let cur = 0, restant = 0;
+  for (let k = a; k <= b; k = addJ(k, 1)) { const v = J.get(k); if (v === true) cur++; else if (k >= A) restant++; }
+  const ok = cur >= d.max; return { d, y, a, b, cur, ok, rate: !ok && cur + restant < d.max, enCours: A >= a && A <= addJ(b, 3) };
+}
+function saisonsGagnees() { const J = new Map(joursJeu()), L = []; for (let y = 2026; y <= now.getFullYear(); y++) SAISONS_EV.forEach(d => { const e = etatSaisonEv(d, y, J); if (e.ok) L.push(e); }); return L; }
+function saisonObtenue(id) { const f = etatJeu().f; const fx = SAISONS_FIXES.find(x => x.id === id); return fx ? (f[fx.cle] || 0) > 0 : (f.saisonsOk || []).some(e => e.d.id === id); }
+const nomSaison = id => (SAISONS_EV.concat(SAISONS_FIXES).find(x => x.id === id) || { nom: id }).nom;
 function badgesGagnes() {
   if (!on('jeu') || !S.data) return [];
-  const e = etatJeu(), L = e.succes.filter(x => x.ok).map(x => ({ id: 's:' + x.id, ico: icoSucces(x.id), niv: DN[x.d], nom: x.nom }));
+  const e = etatJeu(), L = e.succes.filter(x => x.ok).map(x => ({ id: 's:' + x.id, niv: DN[x.d], nom: x.nom, r: t => affiche(x.id, DN[x.d], t) }));
   const n = {}; (e.f.evOk || []).forEach(o => { n[o.def.id] = (n[o.def.id] || 0) + 1; });
-  EVENEMENTS.filter(d => n[d.id]).forEach(d => L.push({ id: 'e:' + d.id, ico: d.ico, niv: RAR[d.rar].n, nom: d.nom, n: n[d.id] }));
+  EVENEMENTS.filter(d => n[d.id]).forEach(d => L.push({ id: 'e:' + d.id, niv: RAR[d.rar].n, nom: d.nom, n: n[d.id], r: t => ecusson(d.id, d.nom, RAR[d.rar].n, t) }));
+  SAISONS_FIXES.concat(SAISONS_EV).filter(d => saisonObtenue(d.id)).forEach(d => L.push({ id: 'e:' + d.id, niv: RAR[d.rar].n, nom: d.nom, amb: d.amb, r: t => ecusson(d.id, d.nom, RAR[d.rar].n, t) }));
   return L;
 }
 function vitrine() { const p = getPref('jeu', {}) || {}; return Array.isArray(p.vitrine) ? p.vitrine : null; }
@@ -2822,15 +2995,24 @@ function basculerVitrine(id) {
   setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: v })); rendre(true); if (S.form && S.form.mode === 'vitrine') rendreVitrine();
 }
 const epingle = id => (vitrine() || []).includes(id);
+function rendreVideotheque() {
+  const e = etatJeu(), L = e.succes.slice().sort((a, b) => (b.ok - a.ok) || (DN[a.d] - DN[b.d]));
+  $('#sheetIn').innerHTML = enteteSheet('TA VIDÉOTHÈQUE · ' + e.succes.filter(s => s.ok).length + '/' + e.succes.length, null) + `<div class="note" style="display:block;margin-top:8px">Chaque succès débloque l'affiche d'un film de la saga ORBITE. Plus il est difficile, plus le format est beau : 35 mm, Grand écran, Laser, 70 mm.</div>
+    <div class="vidgrid">${L.map(s => `<div>${affiche(s.id, DN[s.d], 72, !s.ok)}<small>${esc(s.nom)}</small><em>${s.ok ? CADRES.a[DN[s.d]] : s.cur + '/' + s.max}</em></div>`).join('')}</div>`;
+}
+function blocVideotheque(e) {
+  const ok = e.succes.filter(s => s.ok), der = ok.slice(-4).reverse(), prochains = e.succes.filter(s => !s.ok).sort((a, b) => b.cur / b.max - a.cur / a.max).slice(0, 4 - der.length);
+  return `<button class="vidban" data-act="videotheque"><div class="vidh"><b>🎬 TA VIDÉOTHÈQUE</b><span>${ok.length}/${e.succes.length} affiches ›</span></div><div class="vidrow">${der.map(s => affiche(s.id, DN[s.d], 58)).join('')}${prochains.map(s => affiche(s.id, DN[s.d], 58, true)).join('')}</div></button>`;
+}
 function rendreVitrine() {
   const G = badgesGagnes(), v = vitrine() || [];
   $('#sheetIn').innerHTML = enteteSheet('BADGES À CÔTÉ DE LA JAUGE', null) + `<div class="note" style="display:block;margin-top:10px">Touche un badge pour l'afficher ou le retirer (3 maximum).</div>
-    ${G.length ? `<div class="vitgrid">${G.map(b => `<button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${medaille(b.ico, b.niv, 46)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button>`).join('')}</div>` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
+    ${G.length ? `<div class="vitgrid">${G.map(b => `<button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${b.r(60)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button>`).join('')}</div>${G.filter(b => b.amb).map(b => `<button class="ghost" data-act="amb-go" data-a="${b.amb}" style="margin-top:8px">🎨 APPLIQUER L'AMBIANCE « ${esc(b.nom.toUpperCase())} »</button>`).join('')}` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
     ${v.length ? `<button class="ghost" data-act="vit-vider" style="margin-top:12px">NE PLUS RIEN AFFICHER</button>` : ''}`;
 }
 function blocVitrine() {
   const L = vitrineAffichee(); if (!L.length) return '';
-  return `<button class="vitr" data-act="vitrine" aria-label="Mes badges affichés">${L.map(b => medaille(b.ico, b.niv, 34)).join('')}</button>`;
+  return `<button class="vitr" data-act="vitrine" aria-label="Mes badges affichés">${L.map(b => b.r(38)).join('')}</button>`;
 }
 
 // ================= 6.4 · ÉVÉNEMENTS ÉCLAIR =================
@@ -2908,7 +3090,7 @@ function carteEv(x) {
   const R0 = RAR[x.def.rar], win = x.statut === 'reussi', lost = x.statut === 'rate';
   const pct = x.def.type === 'plafond' ? (x.max > 0 ? Math.min(100, x.cur / x.max * 100) : (x.cur > 0 ? 100 : 0)) : x.def.type === 'unique' ? (lost ? 100 : 0) : Math.min(100, x.cur / x.max * 100);
   const col = lost ? 'var(--bad)' : x.def.type === 'plafond' || x.def.type === 'unique' ? (pct >= 85 ? 'var(--warn)' : 'var(--ok)') : 'var(--ok)';
-  return `<div class="evcard ${win ? 'win' : lost ? 'lost' : ''}">${medaille(x.def.ico, R0.n, 46, !win)}<div style="flex:1;min-width:0">
+  return `<div class="evcard ${win ? 'win' : lost ? 'lost' : ''}">${ecusson(x.def.id, x.def.nom, R0.n, 50, !win)}<div style="flex:1;min-width:0">
     <span class="evrar">${R0.l} · +${R0.xp} XP</span><b>${esc(x.def.nom)}</b><small>${esc(x.txt)}</small>
     <div class="bar" style="margin-top:6px"><i style="width:${pct}%;background:${col}"></i></div>
     <div class="bsub">${esc(x.info)} · ${win ? '<b class="c-ok">réussi : badge gagné ✓</b>' : lost ? '<b class="c-bad">raté, pas de badge cette fois</b>' : x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</div></div></div>`;
@@ -2919,13 +3101,15 @@ function blocEvenement() {
 }
 function banniereEv() {
   const cach = LS.get('evBanCaches', []), x = evEnCours().find(e => e.statut === 'cours' && !cach.includes(e.cle)); if (!x) return '';
-  return `<button class="evban" data-act="ev-ban" data-k="${esc(x.cle)}">${medaille(x.def.ico, RAR[x.def.rar].n, 34)}<span style="flex:1"><b>⚡ ÉVÉNEMENT · ${esc(x.def.nom.toUpperCase())}</b>${esc(x.info)} · ${x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</span><span class="muted" style="font-size:16px">×</span></button>`;
+  return `<button class="evban" data-act="ev-ban" data-k="${esc(x.cle)}">${ecusson(x.def.id, x.def.nom, RAR[x.def.rar].n, 36)}<span style="flex:1"><b>⚡ ÉVÉNEMENT · ${esc(x.def.nom.toUpperCase())}</b>${esc(x.info)} · ${x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</span><span class="muted" style="font-size:16px">×</span></button>`;
 }
 function blocBadgesEv(e) {
   if (!ouvert('saison')) return '';
   const n = {}; (e.f.evOk || []).forEach(o => { n[o.def.id] = (n[o.def.id] || 0) + 1; });
   return `<div class="sec"><span>BADGES D'ÉVÉNEMENTS</span><span>${Object.keys(n).length}/${EVENEMENTS.length}</span></div>
-    <div class="evgrid">${EVENEMENTS.slice().sort((a, b) => RAR[a.rar].n - RAR[b.rar].n).map(d => { const k = n[d.id] || 0; return `<div>${medaille(k ? d.ico : '?', RAR[d.rar].n, 44, !k)}<div>${k ? esc(d.nom) + (k > 1 ? ' ×' + k : '') : '???'}</div><small>${RAR[d.rar].l}</small>${k ? `<button class="lnk" data-act="vit" data-id="e:${d.id}" style="font-size:9px">${epingle('e:' + d.id) ? '📌 ÉPINGLÉ' : 'ÉPINGLER'}</button>` : ''}</div>`; }).join('')}</div>
+    <div class="evgrid">${EVENEMENTS.slice().sort((a, b) => RAR[a.rar].n - RAR[b.rar].n).map(d => { const k = n[d.id] || 0; return `<div>${ecusson(d.id, d.nom, RAR[d.rar].n, 60, !k)}<div>${k ? esc(d.nom) + (k > 1 ? ' ×' + k : '') : '???'}</div><small>${RAR[d.rar].l}</small>${k ? `<button class="lnk" data-act="vit" data-id="e:${d.id}" style="font-size:9px">${epingle('e:' + d.id) ? '📌 ÉPINGLÉ' : 'ÉPINGLER'}</button>` : ''}</div>`; }).join('')}</div>
+    <div class="grp" style="margin-top:14px">ÉDITIONS LIMITÉES · CHAQUE SAISON</div>
+    <div class="evgrid">${SAISONS_FIXES.concat(SAISONS_EV).map(d => { const k = saisonObtenue(d.id); return `<div>${ecusson(d.id, d.nom, RAR[d.rar].n, 60, !k)}<div>${esc(d.nom)}</div><small>${d.amb ? '+ AMBIANCE' : RAR[d.rar].l}</small>${k && d.amb ? `<button class="lnk" data-act="amb-go" data-a="${d.amb}" style="font-size:9px">APPLIQUER</button>` : ''}${k ? `<button class="lnk" data-act="vit" data-id="e:${d.id}" style="font-size:9px">${epingle('e:' + d.id) ? '📌 ÉPINGLÉ' : 'ÉPINGLER'}</button>` : ''}</div>`; }).join('')}</div>
     <div class="note" style="display:block;margin-top:8px">Les événements éclair apparaissent certaines semaines, sans prévenir. Réussi : le badge est à toi (et compte en double si tu le regagnes). Raté : rien, il faudra attendre qu'il revienne.</div>`;
 }
 function annoncerEv() {
@@ -2977,7 +3161,7 @@ function carteEvMini(x) {
   const R0 = RAR[x.def.rar], win = x.statut === 'reussi', lost = x.statut === 'rate';
   const pct = x.def.type === 'plafond' ? (x.max > 0 ? x.cur / x.max * 100 : (x.cur > 0 ? 100 : 0)) : x.def.type === 'unique' ? (lost ? 100 : 0) : x.cur / x.max * 100;
   const etat = win ? 'ok' : lost ? 'rate' : (x.def.type === 'plafond' && pct >= 85) ? 'warn' : '';
-  return dcard({ med: medaille(x.def.ico, R0.n, 26, !win), tag: 'ÉCLAIR · ' + R0.l, xp: R0.xp, titre: x.def.nom, pct, etat, msg: x.txt,
+  return dcard({ med: ecusson(x.def.id, x.def.nom, R0.n, 30, !win), tag: 'ÉCLAIR · ' + R0.l, xp: R0.xp, titre: x.def.nom, pct, etat, msg: x.txt,
     sous: `${esc(x.info)} · ${win ? '<b class="c-ok">badge gagné</b>' : lost ? '<b class="c-bad">raté</b>' : x.reste > 1 ? x.reste + ' j restants' : 'dernier jour'}` });
 }
 function carteSemaineMini() {
@@ -3021,6 +3205,7 @@ function blocMission() {
 // --- Défis saisonniers ---
 function saisonActuelle() {
   const m = now.getMonth() + 1, y = now.getFullYear();
+  { const J = new Map(joursJeu()); for (const d of SAISONS_EV) { const e = etatSaisonEv(d, y, J); if (e.enCours) return { id: d.id + y, ev: d.id, nom: d.nom.toUpperCase(), txt: d.txt, cur: Math.min(e.cur, d.max), max: d.max, xp: d.xp }; } }
   if (m === 11) { const j = joursJeu().filter(x => x[0].startsWith(y + '-11') && x[1] === true).length; return { id: 'nov' + y, nom: 'NOVEMBRE SOBRE', txt: '10 jours sans dépense courante en novembre', cur: Math.min(j, 10), max: 10, xp: 150 }; }
   if (m === 12 && now.getDate() <= 26) { const J = joursJeu().filter(x => x[0].startsWith(y + '-12')).slice(0, 24); return { id: 'avent' + y, nom: "CALENDRIER DE L'AVENT", avent: J, cur: J.filter(x => x[1] === true).length, max: 15, xp: 250, txt: 'Chaque jour sans dépense courante ouvre une case. 15 cases = récompense.' }; }
   if (m === 1 && now.getDate() <= 15) return { id: 'wrap' + (y - 1), nom: 'TON WRAPPED ' + (y - 1) + ' EST PRÊT', wrapped: y - 1 };
@@ -3303,6 +3488,8 @@ const COSM_EXTRA = [
   { t: 'ambiance', id: 'sakura', nom: 'Sakura', niv: 6 }, { t: 'ambiance', id: 'foret', nom: 'Forêt enchantée', niv: 8 }, { t: 'ambiance', id: 'givre', nom: 'Givre', niv: 10 },
   { t: 'ambiance', id: 'brume', nom: 'Brume', niv: 99, suc: 'mois-10' }, { t: 'ambiance', id: 'synthwave', nom: 'Synthwave', niv: 12 }, { t: 'ambiance', id: 'lave', nom: 'Volcan', niv: 15 },
   { t: 'ambiance', id: 'or', nom: 'Salle des coffres', niv: 18 }, { t: 'ambiance', id: 'arcenciel', nom: 'Arc-en-ciel', niv: 21 }, { t: 'ambiance', id: 'nebuleuse', nom: 'Nébuleuse', niv: 26 },
+  { t: 'ambiance', id: 'halloween', nom: 'Halloween', niv: 99, saison: 'halloween' }, { t: 'ambiance', id: 'paques', nom: 'Pâques cosmique', niv: 99, saison: 'paques' },
+  { t: 'ambiance', id: 'ete', nom: 'Été blockbuster', niv: 99, saison: 'ete' }, { t: 'ambiance', id: 'noel', nom: 'Nuit de Noël', niv: 99, saison: 'noel' },
   { t: 'mascotte', id: 'licorne', nom: 'Licorne', niv: 5 }, { t: 'mascotte', id: 'ocean', nom: 'Océan', niv: 9 }, { t: 'mascotte', id: 'abeille', nom: 'Abeille', niv: 13 },
   { t: 'mascotte', id: 'chien', nom: 'Chien', niv: 16 }, { t: 'mascotte', id: 'cafe', nom: 'Café', niv: 20 }, { t: 'mascotte', id: 'robot', nom: 'Robot', niv: 25 },
   { t: 'mascotte', id: 'phenix', nom: 'Phénix', niv: 99, suc: 'chelem' },
@@ -3420,15 +3607,15 @@ function blocCollection(e) {
   if (T === 'ui' || T === 'texte' || T === 'theme' || T === 'ambiance') h += `<div class="note" style="display:block;margin:0 0 8px">Touche un style verrouillé pour l'essayer 4 secondes.</div>`;
   h += `<div class="coll ${T === 'skin' ? 'c3' : ''}">`;
   L.filter(o => o.t === T).forEach(o => { const u = debloque(o, e.niv), nv = nouveaux.includes(o), proche = !u && o.niv === e.niv + 1;
-    h += `<button class="cit ${sel === o.id ? 'on' : ''} ${u ? '' : 'verr'} ${proche ? 'proche' : ''}" data-act="${u ? 'cosm' : 'lock'}" data-t="${o.t}" data-id="${o.id}" data-niv="${o.niv}" data-suc="${o.suc || ''}" data-prest="${o.prest || ''}">${nv ? '<em class="nbadge">NOUVEAU</em>' : ''}<span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b><small>${u ? (sel === o.id ? 'ACTIF' : 'CHOISIR') : o.suc ? '🏆 ' + esc(nomSucces(o.suc)) : o.prest ? '★ ' + o.prest + ' ÉTOILE' + (o.prest > 1 ? 'S' : '') : '🔒 NIV. ' + o.niv}</small></button>`; });
+    h += `<button class="cit ${sel === o.id ? 'on' : ''} ${u ? '' : 'verr'} ${proche ? 'proche' : ''}" data-act="${u ? 'cosm' : 'lock'}" data-t="${o.t}" data-id="${o.id}" data-niv="${o.niv}" data-suc="${o.suc || ''}" data-sais="${o.saison || ''}" data-prest="${o.prest || ''}">${nv ? '<em class="nbadge">NOUVEAU</em>' : ''}<span class="cprev">${apercuCosm(o)}</span><b>${esc(o.nom)}</b><small>${u ? (sel === o.id ? 'ACTIF' : 'CHOISIR') : o.saison ? '🎟️ ' + esc(nomSaison(o.saison)) : o.suc ? '🏆 ' + esc(nomSucces(o.suc)) : o.prest ? '★ ' + o.prest + ' ÉTOILE' + (o.prest > 1 ? 'S' : '') : '🔒 NIV. ' + o.niv}</small></button>`; });
   return h + '</div>';
 }
-const AMB_PREV = { aucune: ['var(--card)', 'var(--ink3)'], coucher: ['linear-gradient(180deg,#FFE7C9,#EBC0DA)', '#D9542F'], ocean: ['linear-gradient(180deg,#0A4466,#041826)', '#7FE6FF'],
+const AMB_PREV = { halloween: ['radial-gradient(circle at 75% 25%,rgba(255,138,43,.6),transparent 40%),#140A1C', '#FF8A2B'], paques: ['linear-gradient(160deg,#FFE9F6,#E6F0FF,#E9FFF4)', '#9B6BFF'], ete: ['linear-gradient(180deg,#FFB38A,#FFE3A0)', '#E8603C'], noel: ['radial-gradient(1.5px 1.5px at 30% 30%,#fff,transparent),radial-gradient(1.5px 1.5px at 70% 60%,#fff,transparent),linear-gradient(180deg,#071430,#1E3A6A)', '#FFD36B'], aucune: ['var(--card)', 'var(--ink3)'], coucher: ['linear-gradient(180deg,#FFE7C9,#EBC0DA)', '#D9542F'], ocean: ['linear-gradient(180deg,#0A4466,#041826)', '#7FE6FF'],
   sakura: ['radial-gradient(4px 3px at 30% 30%,#F7A8C0 60%,transparent 62%),radial-gradient(4px 3px at 70% 70%,#F49AB6 60%,transparent 62%),#FFF1F5', '#D84D7E'], foret: ['radial-gradient(2px 2px at 25% 30%,#EAFF9A,transparent),radial-gradient(2px 2px at 75% 70%,#EAFF9A,transparent),#0C1E14', '#D9FF7A'],
   givre: ['linear-gradient(160deg,#F6FBFF,#D3E7F6)', '#2C8FD0'], brume: ['linear-gradient(180deg,#F2F4F1,#DCE2DB)', '#5D8272'], synthwave: ['linear-gradient(rgba(255,79,216,.25) 1px,transparent 1px) 0 0/100% 10px,linear-gradient(180deg,#1A0B2E,#4A1366)', '#FF6AE0'],
   lave: ['radial-gradient(ellipse at 50% 120%,rgba(255,90,30,.6),transparent 60%),#150806', '#FF8A3D'], or: ['radial-gradient(ellipse at 50% 0,rgba(243,194,74,.35),transparent 60%),#0F0C06', '#F3C24A'],
   arcenciel: ['linear-gradient(120deg,#FFE9F1,#FFF6DA,#E3FFF1,#E2F1FF,#F0E6FF)', '#7B5BD6'], nebuleuse: ['radial-gradient(ellipse at 20% 20%,rgba(214,69,126,.45),transparent 50%),radial-gradient(ellipse at 80% 70%,rgba(43,127,216,.45),transparent 50%),#0B0718', '#C9AEFF'] };
-const AMB_SOMBRES = ['ocean', 'foret', 'synthwave', 'lave', 'or', 'nebuleuse'];
+const AMB_SOMBRES = ['ocean', 'foret', 'synthwave', 'lave', 'or', 'nebuleuse', 'halloween', 'noel'];
 function apercuCosm(o) {
   switch (o.t) {
     case 'skin': return o.id === 'classique' ? skinClassiqueMini(.62) : skinSVG(o.id, .62, 'var(--ok)', null);
@@ -3797,6 +3984,8 @@ document.addEventListener('click', ev => {
     case 'tuto-ok': LS.set('tutoVu', true); if (S.retourSaisie) { S.form = S.retourSaisie; S.retourSaisie = null; rendreForm(); } else fermer(); break;
     case 'vit': basculerVitrine(el.dataset.id); break;
     case 'dmsg': if (el.dataset.m) toast(el.dataset.m); break;
+    case 'amb-go': LS.set(cleCos('ambiance'), el.dataset.a); appliquerCosmetiques(); rendre(true); toast('Ambiance appliquée · change-la dans Progrès › Style'); break;
+    case 'videotheque': S.form = { mode: 'videotheque' }; rendreForm(); ouvrirSheet(); break;
     case 'vitrine': S.form = { mode: 'vitrine' }; rendreForm(); ouvrirSheet(); break;
     case 'vit-vider': setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: [] })); rendre(true); rendreVitrine(); break;
     case 'ev-ban': { const L = LS.get('evBanCaches', []); LS.set('evBanCaches', L.concat(el.dataset.k).slice(-50)); rendre(true); toast('Bannière masquée · l\'événement reste dans Défis', 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; rendre(); scrollTo(0, 0); }); break; }
@@ -3809,7 +3998,7 @@ document.addEventListener('click', ev => {
     case 'retrait-rev': { const f = S.form; f.type = 'Revenu'; f.cat = catAutreRevenu(); if (!f.lib) f.lib = 'Retrait livret A'; rendreForm(); break; }
     case 'skin': LS.set('skin', el.dataset.id); vibrer(); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
     case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); vibrer(); rendre(true); break;
-    case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme', 'ambiance'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme', 'ambiance'].includes(t) ? 'Aperçu · ' : '') + (sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : el.dataset.prest ? 'se débloque à l\'étoile de prestige ' + el.dataset.prest : 'se débloque au niveau ' + el.dataset.niv)); break; }
+    case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme', 'ambiance'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme', 'ambiance'].includes(t) ? 'Aperçu · ' : '') + (el.dataset.sais ? 'se débloque en réussissant l\'événement « ' + nomSaison(el.dataset.sais) + ' »' : sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : el.dataset.prest ? 'se débloque à l\'étoile de prestige ' + el.dataset.prest : 'se débloque au niveau ' + el.dataset.niv)); break; }
     case 'bilvue': S.bilVue = el.dataset.t; S.bilAll = false; rendre(true); break;
     case 'bilall': S.bilAll = !S.bilAll; rendre(true); break;
     case 'wrapped': S.form = { mode: 'wrapped', y: +el.dataset.y }; rendreForm(); ouvrirSheet(); break;
