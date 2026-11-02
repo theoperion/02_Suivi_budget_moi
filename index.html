@@ -662,6 +662,26 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 .pbg{position:relative;margin-top:8px}.pbg svg{display:block}
 .pbl{position:absolute;font-family:var(--mono);font-size:9px;white-space:nowrap;transform:translateX(-50%);padding:0 3px;border-radius:4px;background:color-mix(in srgb,var(--paper) 85%,transparent);line-height:1.35}
 .pbleg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-family:var(--mono);font-size:9.5px;color:var(--ink3)}.pbleg i{display:inline-block;width:12px;height:2px;background:var(--ink);vertical-align:middle;margin-right:4px}
+/* 6.9 · médailles vectorielles */
+.xpcompact .ticket{font-size:11.5px;padding:8px 12px}.xpcompact .tl{padding:2px 0}.xpcompact .sec{margin:12px 0 6px}.xpcompact .note{font-size:12px}
+.vitgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.vitgrid button{border:1.5px solid var(--rule);border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.vitgrid button.on{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.vitgrid small{font-size:11px;line-height:1.2;text-align:center}.vitgrid em{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.8px;color:var(--ink3)}.vitgrid button.on em{color:var(--ok)}
+.med2{display:inline-block;flex:none;vertical-align:middle;line-height:0;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.22))}.med2 svg{display:block;overflow:visible}
+.med2.n2{filter:drop-shadow(0 0 5px rgba(242,197,65,.5)) drop-shadow(0 1.5px 1.5px rgba(0,0,0,.25))}.med2.n3{filter:drop-shadow(0 0 7px rgba(177,140,255,.75))}
+.med2.mlock{filter:none;opacity:.9}
+/* 6.9 · onglet Défis compact */
+.glance{display:grid;gap:6px;margin-top:4px}.gl{border:1.5px dashed var(--rule);border-radius:10px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:var(--mono);min-width:0;text-align:center}
+.gl.chaud{border-style:solid;border-color:var(--ok)}.gl b{font-size:22px;font-weight:600;line-height:1.1}.gl small{font-size:8.5px;letter-spacing:.6px;color:var(--ink2);line-height:1.2}.gl em{font-style:normal;font-size:9px;color:var(--ink3)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dgrid>:only-child{grid-column:1/-1}
+.dcard{border:1.5px solid var(--rule);border-radius:10px;padding:8px 9px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--card)}
+.dcard.ok{border-color:var(--ok)}.dcard.rate{border-color:var(--bad);opacity:.7}.dcard.warn{border-color:var(--warn)}.dcard.offre{border-style:dashed;background:transparent}
+.dch{display:flex;align-items:center;gap:5px;min-width:0}.dtag{font-family:var(--mono);font-size:8.5px;letter-spacing:.8px;color:var(--ink3);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dxp{font-family:var(--mono);font-size:9px;color:var(--ok);font-weight:600}
+.dcard>b{font-size:13.5px;line-height:1.25}.dcard>small{font-size:11px;color:var(--ink3);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.dcard .bar{margin:2px 0 0}
+.drow{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;border:1px solid var(--rule);border-radius:8px;padding:6px 9px;font-size:12px;text-align:left}.drow .dtag{flex:none}.drow>span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drow>i.bar{width:48px;flex:none;margin:0}.drow.rate{border-color:var(--bad)}
+.pbpt{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;box-shadow:0 0 0 1.5px var(--paper)}
+.pbcur{position:absolute;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:var(--paper);border:2.5px solid var(--acc,var(--ok))}
+.pbauj{position:absolute;top:-13px;font-family:var(--mono);font-size:8.5px;letter-spacing:.6px;background:var(--acc,var(--ok));color:#fff;border-radius:4px;padding:0 4px;line-height:12px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -692,7 +712,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '6.8';
+const VERSION = '6.9';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -1207,7 +1227,15 @@ function carteBilanMois() {
 function courbeSolde() {
   const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
   let s = soldeCalcule(y, m); if (s == null) return null;
-  const cm = catMap(), pts = [{ y, m, j: d, s }];
+  const cm = catMap(), oc0 = occurrences(y, m), iso = j => y + '-' + String(m).padStart(2, '0') + '-' + String(j).padStart(2, '0');
+  // Passé du mois : on remonte depuis le solde d'aujourd'hui (échéancier + lignes datées), pour voir le chemin parcouru
+  const pts = []; let t = s;
+  for (let j = d; j >= 1; j--) {
+    const ev = oc0.filter(o => o.jour === j).map(o => ({ lib: o.lib, v: signe(o.type) * o.v }));
+    pts.unshift({ y, m, j, s: t, ev, passe: true });
+    t -= ev.reduce((a, e) => a + e.v, 0) + S.journal.filter(e => !e.deleted && e.date === iso(j) && e.montant && cm[e.cat]).reduce((a, e) => a + signe(cm[e.cat].type) * e.montant, 0);
+  }
+  s = pts[pts.length - 1].s;
   [[y, m], [m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1]].forEach(([yy, mm], k) => {
     const b = bilan(yy, mm), nbj = dim(yy, mm), j0 = k === 0 ? d : 0, reste = nbj - j0;
     const parJour = reste > 0 ? Math.max(0, k === 0 ? b.resteBud : b.prevVar) / reste : 0;
@@ -1220,7 +1248,7 @@ function courbeSolde() {
       pts.push({ y: yy, m: mm, j, s, ev });
     }
   });
-  return pts;
+  pts.auj = d - 1; return pts;
 }
 // Graduations « rondes » (3 à 5 repères) couvrant [mn, mx], 0 inclus.
 function graduations(mn, mx) {
@@ -1234,44 +1262,41 @@ function cartePointBas() {
   const pts = courbeSolde();
   if (!pts) return `<button class="pbas" data-act="ctrl"><div class="pbh"><span>POINT BAS PRÉVU</span><b>—</b></div><div class="pbs">Indisponible : l'appli ne connaît pas encore ton solde. Touche ici et tape ce qu'il y a sur ton compte.</div></button>`;
   if (pts.length < 3) return '';
-  const bas = pts.reduce((a, p) => p.s < a.s ? p : a, pts[0]);
-  const cls = bas.s < 0 ? 'c-bad' : bas.s < 100 ? 'c-warn' : 'c-ok', col = bas.s < 0 ? 'var(--bad)' : bas.s < 100 ? 'var(--warn)' : 'var(--ok)';
-  const W = 320, H = 120, PT = 16, PB = 16; // marges haut/bas pour les étiquettes
+  const it = pts.auj, fut = pts.slice(it), bas = fut.reduce((a, p) => p.s < a.s ? p : a, fut[0]);
+  const cls = bas.s < 0 ? 'c-bad' : bas.s < 100 ? 'c-warn' : 'c-ok';
+  const W = 320, H = 116, PT = 10, PB = 8;
   const vmn = Math.min(...pts.map(p => p.s)), vmx = Math.max(...pts.map(p => p.s));
   const gr = vmn < 0.3 * vmx ? graduations(Math.min(vmn, 0), Math.max(vmx, 0)) : graduations(vmn, vmx), mx = gr[gr.length - 1], mn = gr[0];
   const X = i => i / (pts.length - 1) * W, Y = v => PT + (mx - v) / ((mx - mn) || 1) * (H - PT - PB);
   const kEu = v => Math.abs(v) >= 1000 ? (Math.round(v / 100) / 10).toString().replace('.', ',') + ' k' : String(Math.round(v));
-  const ib = pts.indexOf(bas), ligne = pts.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(p.s).toFixed(1)}`).join(' ');
-  const aire = ligne + ` L${W} ${H - PB} L0 ${H - PB} Z`;
-  const fin = pts.findIndex(p => p.m !== pts[0].m);
-  // Repères de dates : aujourd'hui, le 1er, 8, 15 et 22 de chaque mois
-  const ticks = pts.map((p, i) => ({ p, i })).filter(({ p, i }) => i === 0 || [1, 15].includes(p.j));
-  // Étiquettes des plus gros mouvements (salaire, loyer…), sans chevauchement
-  const mv = pts.map((p, i) => ({ i, p, v: (p.ev || []).reduce((t, e) => t + e.v, 0), lib: (p.ev || []).slice().sort((a, b) => Math.abs(b.v) - Math.abs(a.v))[0] })).filter(x => x.lib && Math.abs(x.v) >= 100).sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
-  const pris = []; mv.forEach(x => { if (pris.length < 5 && pris.every(y => (y.v > 0) !== (x.v > 0) || Math.abs(y.i - x.i) / pts.length > 0.22)) pris.push(x); });
-  const pct = i => (X(i) / W * 100).toFixed(1) + '%';
-  const court = t => { t = String(t || ''); return t.length > 11 ? t.slice(0, 10) + '…' : t; };
+  const chemin = L => L.map(({ p, i }, k) => `${k ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(p.s).toFixed(1)}`).join(' ');
+  const idx = pts.map((p, i) => ({ p, i }));
+  const aire = chemin(idx) + ` L${W} ${H - PB} L0 ${H - PB} Z`;
+  const ticks = idx.filter(({ p }) => p.j === 1 || p.j === 15);
+  const pct = i => (X(i) / W * 100).toFixed(2) + '%';
+  const points = idx.map(({ p, i }) => ({ i, p, v: (p.ev || []).reduce((t, e) => t + e.v, 0) })).filter(x => Math.abs(x.v) >= 1);
   return `<button class="pbas" data-act="tab:prevu">
     <div class="pbh"><span>SOLDE PRÉVU · POINT BAS</span><b class="${cls}">${e0(bas.s)}</b></div>
     <div class="pbs">le ${bas.j} ${MC[bas.m - 1]}${bas.s < 0 ? ' · risque de découvert' : ''} · si tu tiens tes budgets</div>
-    <div style="display:flex;gap:6px">
-      <div style="position:relative;width:40px;height:${H}px;flex-shrink:0;font-size:9px;color:var(--ink3);text-align:right;margin-top:8px">${gr.map(t => `<span style="position:absolute;right:0;top:${(Y(t) / H * 100).toFixed(1)}%;transform:translateY(-50%);white-space:nowrap" class="${t < 0 ? 'c-bad' : ''}">${kEu(t)} €</span>`).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:14px">
+      <div style="position:relative;width:40px;height:${H}px;flex-shrink:0;font-size:9px;color:var(--ink3);text-align:right">${gr.map(t => `<span style="position:absolute;right:0;top:${(Y(t) / H * 100).toFixed(1)}%;transform:translateY(-50%);white-space:nowrap" class="${t < 0 ? 'c-bad' : ''}">${kEu(t)} €</span>`).join('')}</div>
       <div class="pbg" style="flex:1;min-width:0;height:${H}px">
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px" preserveAspectRatio="none" role="img" aria-label="Solde prévu jour par jour">
-          <defs><linearGradient id="pbgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity=".28"/><stop offset="1" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity="0"/></linearGradient></defs>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px" preserveAspectRatio="none" role="img" aria-label="Solde du mois : estimé jusqu'à aujourd'hui, prévu ensuite">
+          <defs><linearGradient id="pbgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity=".24"/><stop offset="1" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity="0"/></linearGradient></defs>
           ${gr.map(t => `<line x1="0" x2="${W}" y1="${Y(t)}" y2="${Y(t)}" stroke="${t === 0 && mn < 0 ? 'var(--bad)' : 'var(--rule)'}" stroke-opacity="${t === 0 ? 1 : .4}" ${t === 0 ? 'stroke-dasharray="4 3"' : ''} stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
-          ${ticks.map(({ i }) => `<line x1="${X(i)}" x2="${X(i)}" y1="${PT - 4}" y2="${H - PB}" stroke="var(--rule)" stroke-opacity="${i === fin ? .9 : .3}" stroke-width="1" ${i === fin ? '' : 'stroke-dasharray="2 3"'} vector-effect="non-scaling-stroke"/>`).join('')}
+          ${ticks.map(({ p, i }) => `<line x1="${X(i)}" x2="${X(i)}" y1="0" y2="${H - PB}" stroke="var(--rule)" stroke-opacity="${p.j === 1 ? .8 : .3}" stroke-width="1" ${p.j === 1 ? '' : 'stroke-dasharray="2 3"'} vector-effect="non-scaling-stroke"/>`).join('')}
           <path d="${aire}" fill="url(#pbgrad)"/>
-          <path d="${ligne}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-          ${pris.map(x => `<line x1="${X(x.i)}" x2="${X(x.i)}" y1="${Y(x.p.s)}" y2="${x.v > 0 ? PT - 2 : H - PB + 2}" stroke="${x.v > 0 ? 'var(--ok)' : 'var(--bad)'}" stroke-width="1" stroke-dasharray="1 2" vector-effect="non-scaling-stroke"/>`).join('')}
+          <path d="${chemin(idx.slice(0, it + 1))}" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <path d="${chemin(idx.slice(it))}" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          <line x1="${X(it)}" x2="${X(it)}" y1="0" y2="${H - PB}" stroke="var(--acc,var(--ok))" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
         </svg>
-        ${pris.map(x => `<span style="position:absolute;left:${pct(x.i)};top:${(Y(x.p.s) / H * 100).toFixed(1)}%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:${x.v > 0 ? 'var(--ok)' : 'var(--bad)'}"></span>`).join('')}
-        <span style="position:absolute;left:${pct(ib)};top:${(Y(bas.s) / H * 100).toFixed(1)}%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:${col};box-shadow:0 0 0 3px color-mix(in srgb,${col} 30%,transparent)"></span>
-        ${pris.map(x => `<span class="pbl ${x.v > 0 ? 'c-ok' : 'c-bad'}" style="left:${pct(x.i)};transform:translateX(${X(x.i) / W > 0.72 ? '-100%' : X(x.i) / W < 0.25 ? '-10%' : '-50%'});${x.v > 0 ? 'top:-6px' : 'bottom:-8px'}">${x.v > 0 ? '▲' : '▼'} ${esc(court(x.lib.lib))} ${x.v > 0 ? '+' : '−'}${kEu(Math.abs(x.v))}</span>`).join('')}
+        ${points.map(x => `<span class="pbpt" style="left:${pct(x.i)};top:${(Y(x.p.s) / H * 100).toFixed(1)}%;background:${x.v > 0 ? 'var(--ok)' : 'var(--bad)'}"></span>`).join('')}
+        <span class="pbcur" style="left:${pct(it)};top:${(Y(pts[it].s) / H * 100).toFixed(1)}%"></span>
+        <span class="pbauj" style="left:${pct(it)};transform:translateX(${X(it) / W < 0.08 ? '-10%' : X(it) / W > 0.9 ? '-90%' : '-50%'})">AUJ. ${now.getDate()}</span>
       </div>
     </div>
-    <div class="pbs" style="position:relative;height:14px;margin:8px 0 0 46px">${ticks.filter(({ i }, k, A) => k === 0 || (X(i) - X(A[k - 1].i)) / W > 0.15).map(({ p, i }) => `<span style="position:absolute;left:${pct(i)};transform:translateX(${i === 0 ? '0' : X(i) / W > 0.9 ? '-100%' : '-50%'});white-space:nowrap;${i === fin ? 'font-weight:600;color:var(--ink2)' : ''}">${i === 0 ? "auj." : p.j + ' ' + MC[p.m - 1]}</span>`).join('')}</div>
-    <div class="pbleg"><span><i></i>solde prévu</span><span style="color:${col}">● point bas</span><span class="c-ok">▲ rentrée</span><span class="c-bad">▼ prélèvement</span></div></button>`;
+    <div class="pbs" style="position:relative;height:14px;margin:6px 0 0 46px">${ticks.filter(({ i }, k, A) => k === 0 || (X(i) - X(A[k - 1].i)) / W > 0.17).map(({ p, i }) => `<span style="position:absolute;left:${pct(i)};transform:translateX(${X(i) / W < 0.04 ? '0' : X(i) / W > 0.92 ? '-100%' : '-50%'});white-space:nowrap;${p.j === 1 ? 'font-weight:600;color:var(--ink2)' : ''}">${p.j === 1 ? '1er ' : p.j + ' '}${MC[p.m - 1]}</span>`).join('')}</div>
+    <div class="pbleg"><span><i></i>estimé</span><span><i style="background:repeating-linear-gradient(90deg,var(--ink2) 0 4px,transparent 4px 7px)"></i>prévu</span><span><i style="width:2px;height:10px;background:var(--acc,var(--ok))"></i>aujourd'hui</span><span class="c-ok">● entrée</span><span class="c-bad">● sortie</span></div></button>`;
 }
 function alerteVersion() {
   if (IN_GAS || !S.data || parseFloat(S.data.apiVersion) >= parseFloat(API_ATTENDUE)) return '';
@@ -1429,7 +1454,7 @@ function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.rem
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
-  const R = { xpinfo: rendreXpInfo, tuto: rendreTuto, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, esccfg: rendreEscCfg, tiredit: rendreTirEdit, voyedit: rendreVoyEdit, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
+  const R = { vitrine: rendreVitrine, xplog: rendreXpLog, xpinfo: rendreXpInfo, tuto: rendreTuto, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, esccfg: rendreEscCfg, tiredit: rendreTirEdit, voyedit: rendreVoyEdit, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
   if (R) return R();
   const fav = favoris(f.type), pins = LS.get('pins', []), futur = statut(f.y, f.m) === 'futur';
   if (f.cat && !fav.includes(f.cat) && typeDe(f.cat) === f.type) fav.unshift(f.cat);
@@ -1610,7 +1635,7 @@ function prochainPassage(e) {
 function vuePrevu() {
   const vue = S.prevuVue || 'mois';
   let h = `<div class="seg" style="margin-top:4px">${[['mois', 'CE MOIS-CI'], ['tout', "TOUT L'ÉCHÉANCIER"]].map(([k, l]) => `<button class="${vue === k ? 'on' : ''}" data-act="pv:${k}">${l}</button>`).join('')}</div>`;
-  h += `<button class="go" data-act="ech-new" style="margin-top:10px">+ AJOUTER UN PRÉLÈVEMENT OU UN REVENU</button>`;
+  h += `<button class="add" data-act="ech-new" style="margin-top:10px;background:var(--soft);border-color:color-mix(in srgb,#fff 80%,var(--rule));color:var(--ink);font-weight:600">+ AJOUTER UN PRÉLÈVEMENT OU UN REVENU</button>`;
   h += vue === 'mois' ? prevuMois() : prevuTout();
   return h;
 }
@@ -2157,32 +2182,26 @@ function vueProgres() {
   const T = {};
   // BILANS
   { let h = ''; if (on('bilan')) h += blocBilans(); if (ouvert('resume')) h += `<div class="sec"><span>SEMAINE</span></div>` + resumeRow(); T.bilans = [h, ['resume', 'alertes']]; }
-  // DÉFIS (fusionné avec Projets) : séries › événement éclair › défi du mois › mission et saison › défi de la semaine › objectif d'épargne
+  // DÉFIS : coup d'œil (séries + objectif) › ÉVÉNEMENTS › DÉFIS › OBJECTIF D'ÉPARGNE (détail)
   { let h = '';
-  if (on('series')) {
-    const j = joursSansDepense(), rec = recordSans(), v = serieVert();
-    h += `<div class="series" style="margin-top:4px">
-    <div class="ser ${j >= 2 ? 'chaud' : ''}"><b>${j}</b><small>JOUR${j > 1 ? 'S' : ''} SANS DÉPENSE<br>${rec > j ? 'RECORD : ' + rec : j > 0 ? 'TON RECORD 🔥' : 'COURANTE'}</small></div>
-    <div class="ser ${v >= 2 ? 'chaud' : ''}"><b>${v}</b><small>MOIS DANS LE VERT<br>${v ? "D'AFFILÉE" : 'À LANCER CE MOIS-CI'}</small></div></div>
-    <button class="note" data-act="exclus" style="display:block;width:100%;text-align:left;margin-top:8px">Ne cassent pas un jour sans dépense : <b>${exclusSerie().length ? esc(exclusSerie().join(', ')) : 'aucune catégorie'}</b> · modifier ›</button>`;
-  }
-  if (ouvert('saison')) h += blocEvenement();
-  if (on('defi')) { h += `<div class="sec"><span>DÉFI ${deMois(m)}</span></div>`;
-  if (d) {
-    const w = d.montant > 0 ? Math.min(100, d.dep / d.montant * 100) : 100;
-    h += `<button class="brow" data-act="defi-go" style="border:1.5px solid ${d.ok ? 'var(--ok)' : 'var(--bad)'};border-radius:10px;padding:12px">
-      <div class="bhead"><span class="bname">${esc(d.cat)} ≤ ${e0(d.montant)}</span><span class="stamp s-${d.ok ? 'ok' : 'bad'}">${d.ok ? 'EN COURS' : 'RATÉ'}</span></div>
-      <div class="bar mk"><i style="width:${w}%;background:${d.ok ? 'var(--ok)' : 'var(--bad)'}"></i><b style="left:${now.getDate() / dim(y, m) * 100}%"></b></div>
-      <div class="bsub">${e0(d.dep)} dépensés · ${d.ok ? 'encore ' + e0(d.reste) + ' possibles' : 'dépassé de ' + e0(-d.reste)} · touche pour modifier</div></button>`;
-  } else h += `<div class="note" style="margin-top:0">Pas de défi ce mois-ci. Un plafond serré sur un seul budget, verdict à la fin du mois.</div><button class="go" data-act="defi-go" style="margin-top:10px">CHOISIR UN DÉFI</button>`; }
-  if (ouvert('saison')) h += blocMission() + blocSaison();
-  if (ouvert('semaine')) h += blocSemaine();
-  if (ouvert('objectif')) h += blocObjectif();
+  h += blocCoupDoeil();
+  { const evs = [], sa = ouvert('saison') ? saisonActuelle() : null;
+    if (ouvert('saison')) evEnCours().forEach(x => evs.push(carteEvMini(x)));
+    if (sa && !sa.avent && !sa.wrapped) evs.push(dcard({ tag: 'SAISON', xp: sa.xp, titre: sa.nom.charAt(0) + sa.nom.slice(1).toLowerCase(), sous: `${sa.cur}/${sa.max} · ${sa.txt}`, pct: sa.cur / sa.max * 100, etat: sa.cur >= sa.max ? 'ok' : '' }));
+    if (evs.length) h += `<div class="sec"><span>ÉVÉNEMENTS</span><span>EN COURS</span></div><div class="dgrid">${evs.join('')}</div>`;
+    if (sa && (sa.avent || sa.wrapped)) h += blocSaison(); }
+  { const cards = [];
+    if (ouvert('semaine')) cards.push(carteSemaineMini());
+    if (ouvert('saison')) { const mi = etatMission(y, m); if (mi) cards.push(carteSurpriseMini(mi)); }
+    const own = on('defi') ? ligneDefiPerso(d, m) : '';
+    if (cards.filter(Boolean).length || own) h += `<div class="sec"><span>DÉFIS</span></div>${cards.filter(Boolean).length ? `<div class="dgrid">${cards.filter(Boolean).join('')}</div>` : ''}${own}`; }
+  if (ouvert('objectif')) h += `<div id="objectif"></div>` + blocObjectif();
+  if (on('series')) h += `<button class="note" data-act="exclus" style="display:block;width:100%;text-align:left;margin-top:12px;font-size:12px">Ne cassent pas un jour sans dépense : <b>${exclusSerie().length ? esc(exclusSerie().join(', ')) : 'aucune catégorie'}</b> · modifier ›</button>`;
   T.defis = [h, ['saison', 'semaine', 'objectif']]; }
   // PROJETS
   { let h = ''; T.projets = [h, ['objectif', 'tirelires', 'voyage']]; }
   // SUCCÈS et STYLE
-  T.succes = [ej ? blocNiveau(ej) + `<div class="note" style="display:block">📌 Épingle jusqu'à 3 badges : ils s'affichent à côté de ta jauge. Plus le badge est difficile, plus il brille.</div>` + blocSucces(ej) + blocBadgesEv(ej) + blocDetailXP(ej) : '', []];
+  T.succes = [ej ? blocNiveau(ej) + `<button class="note" data-act="vitrine" style="display:block;width:100%;text-align:left">📌 Choisis jusqu'à 3 badges à afficher à côté de ta jauge (ou aucun) ›</button>` + blocSucces(ej) + blocBadgesEv(ej) : '', []];
   T.style = [ej ? blocCollection(ej) : '', ['cosmetiques']];
   const NOMS = [['bilans', 'BILANS'], ['defis', 'DÉFIS'], ['succes', 'SUCCÈS'], ['style', 'STYLE']];
   const vis = NOMS.filter(([k]) => T[k][0] || T[k][1].some(f => !dispo(f)));
@@ -2426,6 +2445,7 @@ function rendreXpInfo() {
     + `<div class="note" style="display:block;margin-top:14px">Ne rapportent rien par eux-mêmes : saisir un revenu, un retrait d'épargne ou un versement. Tout est compté depuis le 1er novembre 2026, et recalculé si tu corriges une ligne (l'XP peut donc aussi baisser).</div>
     <button class="go" data-act="xpjournal" style="margin-top:12px">📜 VOIR MON JOURNAL D'XP</button>`;
 }
+function rendreXpLog() { $('#sheetIn').innerHTML = enteteSheet("JOURNAL D'XP", null) + `<div class="xpcompact">${blocDetailXP(etatJeu())}</div>`; }
 function blocDetailXP(e) {
   const rec = e.rec.filter(r => r[3] > 0), suc = e.succes.filter(s => s.ok), totSuc = suc.reduce((t, s) => t + DIFF[s.d].xp, 0);
   let h = `<div class="sec"><span>D'OÙ VIENT TON XP</span><span>${e.xp} XP</span></div><div class="ticket">`;
@@ -2717,12 +2737,72 @@ function blocSemaine() {
 }
 // ================= 6.4 · MÉDAILLES ET VITRINE =================
 const DN = { facile: 0, moyen: 1, difficile: 2, extreme: 3 };
-const ICO_SUC = [[/^premier/, '👣'], [/^defi-lance/, '🚀'], [/^jours/, '🌙'], [/^coffre|^cote/, '💰'], [/^rembourse/, '🤝'], [/^style/, '🎨'], [/^vert/, '🌿'],
-  [/^defis-suite/, '⛓️'], [/^ev-/, '⚡'], [/^defi/, '🎯'], [/^fidele/, '🤞'], [/^taux-10/, '🌱'], [/^taux/, '🐜'], [/^zero/, '🛡️'], [/^semaine/, '📅'], [/^tirelire/, '🐷'],
-  [/^nov/, '🍂'], [/^voyage/, '✈️'], [/^avent/, '🎄'], [/^objectif/, '🏁'], [/^weekend/, '🛋️'], [/^mission/, '🕵️'], [/^mois-/, '🧘'], [/^chelem/, '👑']];
-const icoSucces = id => (ICO_SUC.find(x => x[0].test(id)) || [0, '⭐'])[1];
-// niv : 0 bronze, 1 argent, 2 or brillant, 3 holographique animé
-const medaille = (ico, niv, taille, lock) => `<span class="med m${niv}${lock ? ' lock' : ''}" style="--s:${taille || 30}px"><i>${ico}</i></span>`;
+// Icônes des badges : tracés vectoriels (24×24), pas d'emojis
+const ICONS = {
+  lune: 'M20 14.5A8.5 8.5 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z',
+  cible: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
+  couronne: 'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',
+  feuille: 'M5 19C5 10 11 5 20 5c0 9-5 14-14 14M5 19l8-8',
+  bouclier: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5',
+  piece: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM14.5 8.5h-3.5a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4H9M12 6.5v2M12 16.5v1.5',
+  calendrier: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2',
+  eclair: 'M13 2L4 14h7l-1 8 9-12h-7z',
+  etoile: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+  fusee: 'M12 2c4 3 5.5 8 3.5 13h-7C6.5 10 8 5 12 2zM8.5 15L6 19h4M15.5 15L18 19h-4M12 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z',
+  drapeau: 'M5 21V4M5 4h12l-2.5 4L17 12H5',
+  echange: 'M4 9h13l-3-3M20 15H7l3 3',
+  pinceau: 'M14.5 4.5l5 5L10 19H5v-5zM12 7l5 5',
+  pousse: 'M12 21v-8M12 13C12 9 9 7 5 7c0 4 3 6 7 6zM12 11c0-4 3-7 7.5-7 0 4.5-3 7-7.5 7',
+  chaine: 'M10 14a4 4 0 0 1 0-5.7l2.3-2.3a4 4 0 0 1 5.7 5.7l-1.2 1.2M14 10a4 4 0 0 1 0 5.7l-2.3 2.3a4 4 0 0 1-5.7-5.7l1.2-1.2',
+  montagne: 'M2 20L9 8l4 6 3-4 6 10zM9 8l1.5 2.5',
+  sapin: 'M12 3l5 6h-3l4 6h-5v5h-2v-5H6l4-6H7z',
+  canape: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M3 11h3v3h12v-3h3v6H3zM5 17v2M19 17v2',
+  loupe: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5',
+  lotus: 'M12 19c-5 0-9-2.5-9-5.5 3 0 6 1.5 9 4.5 3-3 6-4.5 9-4.5 0 3-4 5.5-9 5.5zM12 17c-2.5-3-2.5-7.5 0-12 2.5 4.5 2.5 9 0 12z',
+  sablier: 'M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9',
+  des: 'M4 4h16v16H4zM8.5 8.5h.01M15.5 15.5h.01M12 12h.01M15.5 8.5h.01M8.5 15.5h.01',
+  maison: 'M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6',
+  flocon: 'M12 2v20M4 6.5l16 11M20 6.5l-16 11M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5',
+  panier: 'M3 9h18l-2 11H5zM8 9l4-6 4 6M9 13v3M15 13v3M12 13v3',
+  note: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+  flamme: 'M12 21c-4 0-7-3-7-7 0-5 5-7 5-11 3 2 4 4 4 6 1-1 2-2 2-4 2 2 3 5 3 9 0 4-3 7-7 7z',
+  soleil: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  chrono: 'M12 8v5l3 2M12 4a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM10 2h4',
+  trophee: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M10 17h4' };
+const ICO_SUC = [[/^premier/, 'etoile'], [/^defi-lance/, 'fusee'], [/^jours/, 'lune'], [/^coffre|^cote/, 'piece'], [/^rembourse/, 'echange'], [/^style/, 'pinceau'], [/^vert/, 'feuille'],
+  [/^defis-suite/, 'chaine'], [/^ev-/, 'eclair'], [/^defi/, 'cible'], [/^fidele/, 'sablier'], [/^taux-10/, 'pousse'], [/^taux/, 'montagne'], [/^zero/, 'bouclier'], [/^semaine/, 'calendrier'],
+  [/^nov/, 'feuille'], [/^avent/, 'sapin'], [/^objectif/, 'drapeau'], [/^weekend/, 'canape'], [/^mission/, 'loupe'], [/^mois-/, 'lotus'], [/^chelem/, 'couronne']];
+const icoSucces = id => (ICO_SUC.find(x => x[0].test(id)) || [0, 'etoile'])[1];
+// Médailles vectorielles : bronze rond › argent hexagonal à rubans › or en blason avec lauriers et reflet animé › holographique à rayons tournants et étincelles
+let MEDN = 0;
+const MED_P = [['#F6C795', '#C47D3C', '#7A4318', '#5E3212'], ['#FFFFFF', '#CDD2DB', '#7D8594', '#4E5666'], ['#FFF6C2', '#F2C541', '#A8760A', '#6E4C05']];
+const MED_SH = ['M32 5a27 27 0 1 0 0 54 27 27 0 0 0 0-54z', 'M32 4l24 14v28L32 60 8 46V18z', 'M32 4l22 8v18c0 15-10 25-22 30C20 55 10 45 10 30V12z'];
+function medaille(ico, niv, taille, lock) {
+  const k = 'md' + (++MEDN), t = taille || 30, an = !lock && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const icone = (col, sh) => ico === '?' ? `<text x="32" y="40" text-anchor="middle" font-family="var(--mono)" font-size="22" font-weight="700" fill="${col}">?</text>`
+    : `${sh ? `<g transform="translate(32.8 33.4) scale(1.05) translate(-12 -12)" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[ico] || ICONS.etoile}"/></g>` : ''}<g transform="translate(32 32.5) scale(1.05) translate(-12 -12)" fill="none" stroke="${col}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[ico] || ICONS.etoile}"/></g>`;
+  let c = '';
+  if (lock) {
+    const sh = MED_SH[Math.min(niv, 2)];
+    c = `<path d="${sh}" fill="var(--soft)" stroke="var(--rule)" stroke-width="2"/><path d="${sh}" transform="translate(32 32) scale(.78) translate(-32 -32)" fill="none" stroke="var(--rule)" stroke-opacity=".6" stroke-dasharray="2 3"/>${icone('var(--ink3)')}`;
+  } else if (niv <= 2) {
+    const p = MED_P[niv];
+    c = `<defs><radialGradient id="${k}g" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="${p[0]}"/><stop offset=".5" stop-color="${p[1]}"/><stop offset="1" stop-color="${p[2]}"/></radialGradient>${niv === 2 ? `<clipPath id="${k}c"><path d="${MED_SH[2]}"/></clipPath>` : ''}</defs>`;
+    if (niv === 1) c += `<path d="M21 44l-6 16 7-3 4 6 5-16z" fill="#2F6FD0"/><path d="M43 44l6 16-7-3-4 6-5-16z" fill="#2459A8"/>`;
+    if (niv === 2) c += [[12, 48, -40], [8.5, 39, -20], [7.5, 30, 0], [8.5, 21, 20], [12, 13, 40]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="2.8" ry="5.4" transform="rotate(${r} ${x} ${y})" fill="#D9A520" stroke="#6E4C05" stroke-width=".7"/><ellipse cx="${64 - x}" cy="${y}" rx="2.8" ry="5.4" transform="rotate(${-r} ${64 - x} ${y})" fill="#D9A520" stroke="#6E4C05" stroke-width=".7"/>`).join('');
+    const sh = MED_SH[niv];
+    c += `<path d="${sh}" fill="url(#${k}g)" stroke="${p[3]}" stroke-width="2.4"/><path d="${sh}" transform="translate(32 32) scale(.8) translate(-32 -32)" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1.2"/>`;
+    if (niv === 2) c += `<g clip-path="url(#${k}c)"><rect x="-40" y="-10" width="14" height="90" fill="#fff" opacity=".55" transform="rotate(20)">${an ? `<animate attributeName="x" values="-40;-40;90" keyTimes="0;.55;1" dur="3.4s" repeatCount="indefinite"/>` : ''}</rect></g>`;
+    c += icone('#fff', true);
+  } else {
+    c = `<defs><linearGradient id="${k}h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5f8f"/><stop offset=".25" stop-color="#ffd36b"/><stop offset=".5" stop-color="#6bffb8"/><stop offset=".75" stop-color="#6bc8ff"/><stop offset="1" stop-color="#b18cff"/>${an ? `<animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="6s" repeatCount="indefinite"/>` : ''}</linearGradient></defs>
+      <g opacity=".85">${Array.from({ length: 12 }, (_, i) => `<path d="M32 32L30.2 1h3.6z" fill="url(#${k}h)" transform="rotate(${i * 30} 32 32)"/>`).join('')}${an ? `<animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="14s" repeatCount="indefinite"/>` : ''}</g>
+      <circle cx="32" cy="32" r="22" fill="url(#${k}h)" stroke="#fff" stroke-width="2.4"/><circle cx="32" cy="32" r="17.5" fill="#1b1030" fill-opacity=".55"/>
+      ${icone('#fff', false)}
+      ${[[10, 12, 0], [55, 15, .7], [50, 56, 1.3]].map(([x, y, d]) => `<path d="M${x} ${y - 4}l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#fff">${an ? `<animate attributeName="opacity" values="0;1;0" dur="2s" begin="${d}s" repeatCount="indefinite"/>` : ''}</path>`).join('')}`;
+  }
+  return `<span class="med2 n${niv}${lock ? ' mlock' : ''}" style="width:${t}px;height:${t}px"><svg viewBox="0 0 64 64" width="${t}" height="${t}" aria-hidden="true">${c}</svg></span>`;
+}
 function badgesGagnes() {
   if (!on('jeu') || !S.data) return [];
   const e = etatJeu(), L = e.succes.filter(x => x.ok).map(x => ({ id: 's:' + x.id, ico: icoSucces(x.id), niv: DN[x.d], nom: x.nom }));
@@ -2733,18 +2813,24 @@ function badgesGagnes() {
 function vitrine() { const p = getPref('jeu', {}) || {}; return Array.isArray(p.vitrine) ? p.vitrine : null; }
 function vitrineAffichee() {
   const G = badgesGagnes(), v = vitrine();
-  return v ? v.map(id => G.find(b => b.id === id)).filter(Boolean).slice(0, 3) : G.slice().sort((a, b) => b.niv - a.niv).slice(0, 3);
+  return (v || []).map(id => G.find(b => b.id === id)).filter(Boolean).slice(0, 3); // rien d'affiché tant que tu n'as rien épinglé
 }
 function basculerVitrine(id) {
-  let v = vitrine() || vitrineAffichee().map(b => b.id);
+  let v = (vitrine() || []).slice();
   v = v.includes(id) ? v.filter(x => x !== id) : v.concat(id);
   if (v.length > 3) { toast('3 badges maximum à côté de la jauge : retire-en un d\'abord'); return; }
-  setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: v })); rendre(true);
+  setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: v })); rendre(true); if (S.form && S.form.mode === 'vitrine') rendreVitrine();
 }
-const epingle = id => (vitrine() || vitrineAffichee().map(b => b.id)).includes(id);
+const epingle = id => (vitrine() || []).includes(id);
+function rendreVitrine() {
+  const G = badgesGagnes(), v = vitrine() || [];
+  $('#sheetIn').innerHTML = enteteSheet('BADGES À CÔTÉ DE LA JAUGE', null) + `<div class="note" style="display:block;margin-top:10px">Touche un badge pour l'afficher ou le retirer (3 maximum).</div>
+    ${G.length ? `<div class="vitgrid">${G.map(b => `<button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${medaille(b.ico, b.niv, 46)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button>`).join('')}</div>` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
+    ${v.length ? `<button class="ghost" data-act="vit-vider" style="margin-top:12px">NE PLUS RIEN AFFICHER</button>` : ''}`;
+}
 function blocVitrine() {
   const L = vitrineAffichee(); if (!L.length) return '';
-  return `<button class="vitr" data-act="go-succes" aria-label="Mes badges">${L.map(b => medaille(b.ico, b.niv, 34)).join('')}</button>`;
+  return `<button class="vitr" data-act="vitrine" aria-label="Mes badges affichés">${L.map(b => medaille(b.ico, b.niv, 34)).join('')}</button>`;
 }
 
 // ================= 6.4 · ÉVÉNEMENTS ÉCLAIR =================
@@ -2768,18 +2854,18 @@ function moyHebdo(c, debut, f) {
 }
 const fCoursesEv = c => e => c.ex.includes(e.cat), fLoisirsEv = () => e => estCourante(e.cat) && (catMap()[e.cat] || {}).groupe === 'Loisirs';
 const EVENEMENTS = [
-  { id: 'blanche', nom: 'Journée blanche', ico: '🕊️', rar: 'commune', duree: 2, type: 'jours', max: 1, txt: () => 'Une journée entière sans dépense courante.' },
-  { id: 'cochon', nom: 'Petit cochon', ico: '🐖', rar: 'commune', duree: 7, type: 'min', lim: () => 20, filtre: () => e => (catMap()[e.cat] || {}).type === 'Épargne', txt: () => 'Verser au moins 20 € sur ton épargne (saisi depuis l\'appli).' },
-  { id: 'chrono', nom: '48 h chrono', ico: '⏱️', rar: 'rare', duree: 4, type: 'serie', max: 2, txt: () => "Deux jours d'affilée sans dépense courante." },
-  { id: 'trois5', nom: 'Trois sur cinq', ico: '🎲', rar: 'rare', duree: 5, type: 'jours', max: 3, txt: () => '3 jours sans dépense courante sur 5.' },
-  { id: 'cocon', nom: 'Week-end cocooning', ico: '🛋️', rar: 'rare', duree: 2, samedi: true, type: 'serie', max: 2, txt: () => 'Samedi et dimanche sans aucune dépense courante.' },
-  { id: 'maison', nom: 'Cuisine maison', ico: '🍳', rar: 'rare', duree: 7, type: 'plafond', si: c => c.resto.length > 0, lim: () => 0, filtre: c => e => c.resto.includes(e.cat), txt: c => `Zéro dépense en ${c.resto.join(', ')} pendant 7 jours.` },
-  { id: 'folie', nom: 'Pas de folie', ico: '🧊', rar: 'rare', duree: 7, type: 'unique', seuil: 40, filtre: () => e => estCourante(e.cat), txt: () => 'Aucune dépense courante de plus de 40 € pendant 7 jours.' },
-  { id: 'sobre', nom: 'Semaine sobre', ico: '🌿', rar: 'epique', duree: 7, type: 'jours', max: 4, txt: () => '4 jours sans dépense courante sur 7.' },
-  { id: 'panier', nom: 'Petit panier', ico: '🧺', rar: 'epique', duree: 7, type: 'plafond', si: (c, o) => c.ex.length > 0 && moyHebdo(c, o.debut, fCoursesEv(c)) >= 20, lim: (c, o) => Math.round(moyHebdo(c, o.debut, fCoursesEv(c)) * 0.75), filtre: fCoursesEv, txt: (c, o) => `Courses sous ${e0(Math.round(moyHebdo(c, o.debut, fCoursesEv(c)) * 0.75))} cette semaine (25 % de moins que d'habitude).` },
-  { id: 'sourdine', nom: 'Loisirs en sourdine', ico: '🎭', rar: 'epique', duree: 7, type: 'plafond', si: (c, o) => moyHebdo(c, o.debut, fLoisirsEv()) >= 20, lim: (c, o) => Math.round(moyHebdo(c, o.debut, fLoisirsEv()) * 0.5), filtre: fLoisirsEv, txt: (c, o) => `Loisirs sous ${e0(Math.round(moyHebdo(c, o.debut, fLoisirsEv()) * 0.5))} cette semaine (moitié de d'habitude).` },
-  { id: 'poche', nom: 'Argent de poche', ico: '🪙', rar: 'legendaire', duree: 5, type: 'plafond', lim: () => 30, filtre: () => e => estCourante(e.cat), txt: () => 'Pas plus de 30 € de dépenses courantes (courses comprises) en 5 jours.' },
-  { id: 'marathon', nom: 'Marathon', ico: '🏅', rar: 'legendaire', duree: 10, type: 'jours', max: 7, txt: () => '7 jours sans dépense courante sur 10.' }];
+  { id: 'blanche', nom: 'Journée blanche', ico: 'soleil', rar: 'commune', duree: 2, type: 'jours', max: 1, txt: () => 'Une journée entière sans dépense courante.' },
+  { id: 'cochon', nom: 'Petit cochon', ico: 'piece', rar: 'commune', duree: 7, type: 'min', lim: () => 20, filtre: () => e => (catMap()[e.cat] || {}).type === 'Épargne', txt: () => 'Verser au moins 20 € sur ton épargne (saisi depuis l\'appli).' },
+  { id: 'chrono', nom: '48 h chrono', ico: 'chrono', rar: 'rare', duree: 4, type: 'serie', max: 2, txt: () => "Deux jours d'affilée sans dépense courante." },
+  { id: 'trois5', nom: 'Trois sur cinq', ico: 'des', rar: 'rare', duree: 5, type: 'jours', max: 3, txt: () => '3 jours sans dépense courante sur 5.' },
+  { id: 'cocon', nom: 'Week-end cocooning', ico: 'canape', rar: 'rare', duree: 2, samedi: true, type: 'serie', max: 2, txt: () => 'Samedi et dimanche sans aucune dépense courante.' },
+  { id: 'maison', nom: 'Cuisine maison', ico: 'maison', rar: 'rare', duree: 7, type: 'plafond', si: c => c.resto.length > 0, lim: () => 0, filtre: c => e => c.resto.includes(e.cat), txt: c => `Zéro dépense en ${c.resto.join(', ')} pendant 7 jours.` },
+  { id: 'folie', nom: 'Pas de folie', ico: 'flocon', rar: 'rare', duree: 7, type: 'unique', seuil: 40, filtre: () => e => estCourante(e.cat), txt: () => 'Aucune dépense courante de plus de 40 € pendant 7 jours.' },
+  { id: 'sobre', nom: 'Semaine sobre', ico: 'feuille', rar: 'epique', duree: 7, type: 'jours', max: 4, txt: () => '4 jours sans dépense courante sur 7.' },
+  { id: 'panier', nom: 'Petit panier', ico: 'panier', rar: 'epique', duree: 7, type: 'plafond', si: (c, o) => c.ex.length > 0 && moyHebdo(c, o.debut, fCoursesEv(c)) >= 20, lim: (c, o) => Math.round(moyHebdo(c, o.debut, fCoursesEv(c)) * 0.75), filtre: fCoursesEv, txt: (c, o) => `Courses sous ${e0(Math.round(moyHebdo(c, o.debut, fCoursesEv(c)) * 0.75))} cette semaine (25 % de moins que d'habitude).` },
+  { id: 'sourdine', nom: 'Loisirs en sourdine', ico: 'note', rar: 'epique', duree: 7, type: 'plafond', si: (c, o) => moyHebdo(c, o.debut, fLoisirsEv()) >= 20, lim: (c, o) => Math.round(moyHebdo(c, o.debut, fLoisirsEv()) * 0.5), filtre: fLoisirsEv, txt: (c, o) => `Loisirs sous ${e0(Math.round(moyHebdo(c, o.debut, fLoisirsEv()) * 0.5))} cette semaine (moitié de d'habitude).` },
+  { id: 'poche', nom: 'Argent de poche', ico: 'sablier', rar: 'legendaire', duree: 5, type: 'plafond', lim: () => 30, filtre: () => e => estCourante(e.cat), txt: () => 'Pas plus de 30 € de dépenses courantes (courses comprises) en 5 jours.' },
+  { id: 'marathon', nom: 'Marathon', ico: 'flamme', rar: 'legendaire', duree: 10, type: 'jours', max: 7, txt: () => '7 jours sans dépense courante sur 10.' }];
 const JEU_EV = '2026-11-02'; // premier lundi du jeu : un événement démarre forcément cette semaine-là
 function planEvenements() {
   const c = ctxEv(); if (S._plan && S._plan.k === c) return S._plan.v;
@@ -2832,8 +2918,8 @@ function blocEvenement() {
   return `<div class="sec"><span>⚡ ÉVÉNEMENT ÉCLAIR</span><span>BADGE À GAGNER</span></div>` + L.map(carteEv).join('<div style="height:8px"></div>');
 }
 function banniereEv() {
-  const x = evEnCours().find(e => e.statut === 'cours'); if (!x) return '';
-  return `<button class="evban" data-act="ev-voir">${medaille(x.def.ico, RAR[x.def.rar].n, 34)}<span><b>⚡ ÉVÉNEMENT · ${esc(x.def.nom.toUpperCase())}</b>${esc(x.info)} · ${x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</span></button>`;
+  const cach = LS.get('evBanCaches', []), x = evEnCours().find(e => e.statut === 'cours' && !cach.includes(e.cle)); if (!x) return '';
+  return `<button class="evban" data-act="ev-ban" data-k="${esc(x.cle)}">${medaille(x.def.ico, RAR[x.def.rar].n, 34)}<span style="flex:1"><b>⚡ ÉVÉNEMENT · ${esc(x.def.nom.toUpperCase())}</b>${esc(x.info)} · ${x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</span><span class="muted" style="font-size:16px">×</span></button>`;
 }
 function blocBadgesEv(e) {
   if (!ouvert('saison')) return '';
@@ -2881,6 +2967,47 @@ function etatMission(y, m) {
   else if (mi.id === 'baisse') { mi.dep = depenseMois(mi.cat, y, m); cur = st === 'passe' && mi.dep < mi.ref - 0.005 ? 1 : 0; }
   const ok = cur >= mi.max;
   return Object.assign(mi, { cur: Math.min(cur, mi.max), ok, rate: !ok && st === 'passe', y, m });
+}
+// ---- Composants compacts de l'onglet Défis ----
+function dcard(o) {
+  const col = o.etat === 'rate' ? 'var(--bad)' : o.etat === 'warn' ? 'var(--warn)' : 'var(--ok)';
+  return `<button class="dcard ${o.etat || ''}" data-act="${o.act || 'dmsg'}" ${o.attrs || ''} ${o.msg ? `data-m="${esc(o.msg)}"` : ''}><div class="dch">${o.med || ''}<span class="dtag">${o.tag}</span>${o.xp ? `<span class="dxp">+${o.xp}</span>` : ''}</div><b>${esc(o.titre)}</b>${o.pct != null ? `<div class="bar"><i style="width:${Math.max(0, Math.min(100, o.pct))}%;background:${col}"></i></div>` : ''}<small>${o.sous}</small></button>`;
+}
+function carteEvMini(x) {
+  const R0 = RAR[x.def.rar], win = x.statut === 'reussi', lost = x.statut === 'rate';
+  const pct = x.def.type === 'plafond' ? (x.max > 0 ? x.cur / x.max * 100 : (x.cur > 0 ? 100 : 0)) : x.def.type === 'unique' ? (lost ? 100 : 0) : x.cur / x.max * 100;
+  const etat = win ? 'ok' : lost ? 'rate' : (x.def.type === 'plafond' && pct >= 85) ? 'warn' : '';
+  return dcard({ med: medaille(x.def.ico, R0.n, 26, !win), tag: 'ÉCLAIR · ' + R0.l, xp: R0.xp, titre: x.def.nom, pct, etat, msg: x.txt,
+    sous: `${esc(x.info)} · ${win ? '<b class="c-ok">badge gagné</b>' : lost ? '<b class="c-bad">raté</b>' : x.reste > 1 ? x.reste + ' j restants' : 'dernier jour'}` });
+}
+function carteSemaineMini() {
+  const st = etatSemaines(), fin = new Date(lundi(now)); fin.setDate(fin.getDate() + 6);
+  const tag = 'SEMAINE · ' + fin.getDate() + ' ' + MC[fin.getMonth()].toUpperCase();
+  if (st.cur) { const ok = st.cur.dep <= st.cur.montant + 0.005;
+    return dcard({ tag, xp: 30, titre: st.cur.cat + ' ≤ ' + e0(st.cur.montant), pct: st.cur.montant > 0 ? st.cur.dep / st.cur.montant * 100 : 100, etat: ok ? '' : 'rate', msg: 'Seules les dépenses saisies depuis l\'appli comptent.', sous: `${e0(st.cur.dep)} dépensés${ok ? '' : ' · <b class="c-bad">raté</b>'}` }); }
+  const p = propositionSemaine(); if (!p) return '';
+  return dcard({ tag, xp: 30, titre: p.cat + ' < ' + e0(p.montant), etat: 'offre', act: 'sem-ok', attrs: `data-cat="${esc(p.cat)}" data-m="${p.montant}"`, sous: '20 % de moins que d\'habitude · <b>touche pour relever</b>' });
+}
+function carteSurpriseMini(e) {
+  const pct = e.id === 'baisse' ? (e.ref > 0 ? e.dep / e.ref * 100 : 0) : e.cur / e.max * 100;
+  return dcard({ tag: 'SURPRISE DU MOIS', xp: MISSION_XP, titre: e.nom, pct, etat: e.ok ? 'ok' : e.rate ? 'rate' : '', msg: e.txt,
+    sous: e.id === 'baisse' ? `${e0(e.dep)} / ${e0(e.ref)} · ${esc(e.cat)}` : `${e.cur}/${e.max} · ${esc(e.txt)}` });
+}
+function ligneDefiPerso(d, m) {
+  if (!d) return `<button class="drow" data-act="defi-go"><span class="dtag">TON DÉFI ${deMois(m)}</span><span class="muted">+ choisir un plafond ›</span></button>`;
+  const w = d.montant > 0 ? Math.min(100, d.dep / d.montant * 100) : 100;
+  return `<button class="drow ${d.ok ? '' : 'rate'}" data-act="defi-go"><span class="dtag">TON DÉFI ${deMois(m)} · +25</span><span><b>${esc(d.cat)} ≤ ${e0(d.montant)}</b> · ${e0(d.dep)}</span><i class="bar"><i style="width:${w}%;background:${d.ok ? 'var(--ok)' : 'var(--bad)'}"></i></i></button>`;
+}
+function blocCoupDoeil() {
+  const T = [];
+  if (on('series')) { const j = joursSansDepense(), rec = recordSans(), v = serieVert();
+    T.push(`<div class="gl ${j >= 2 ? 'chaud' : ''}"><b>${j}</b><small>JOUR${j > 1 ? 'S' : ''} SANS DÉPENSE</small><em>${rec > j ? 'record ' + rec : j > 0 ? 'ton record 🔥' : 'à lancer'}</em></div>`);
+    T.push(`<div class="gl ${v >= 2 ? 'chaud' : ''}"><b>${v}</b><small>MOIS DANS LE VERT</small><em>${v ? "d'affilée" : 'à lancer ce mois-ci'}</em></div>`); }
+  if (ouvert('objectif')) { const o = etatObjectif(now.getFullYear());
+    if (!o) T.push(`<button class="gl" data-act="obj-edit"><b>+</b><small>OBJECTIF D'ÉPARGNE</small><em>à fixer</em></button>`);
+    else { const f = o.frac, a = Math.PI * (1 - f), x = 22 + 17 * Math.cos(a), yy = 22 - 17 * Math.sin(a);
+      T.push(`<button class="gl" data-act="obj-voir"><svg viewBox="0 0 44 24" width="44" height="24"><path d="M5 22a17 17 0 0 1 34 0" fill="none" stroke="var(--track)" stroke-width="4" stroke-linecap="round"/>${f > 0.005 ? `<path d="M5 22A17 17 0 0 1 ${x.toFixed(1)} ${yy.toFixed(1)}" fill="none" stroke="${o.ecart >= 0 ? 'var(--ok)' : 'var(--warn)'}" stroke-width="4" stroke-linecap="round"/>` : ''}<text x="22" y="21" text-anchor="middle" font-size="9" font-family="var(--mono)" fill="var(--ink)" font-weight="600">${Math.round(f * 100)}%</text></svg><small>ÉPARGNE ${o.y}</small><em>${e0(o.ep)} / ${e0(o.cible)}</em></button>`); } }
+  return T.length ? `<div class="glance" style="grid-template-columns:repeat(${T.length},1fr)">${T.join('')}</div>` : '';
 }
 function blocMission() {
   const e = etatMission(now.getFullYear(), now.getMonth() + 1); if (!e) return '';
@@ -3658,7 +3785,7 @@ document.addEventListener('click', ev => {
     case 'ptab': S.progT = el.dataset.t; LS.set('progT', S.progT); rendre(true); scrollTo(0, Math.min(scrollY, ($('.ptabs') || { offsetTop: 0 }).offsetTop - 60)); break;
     case 'go-succes': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; LS.set('progT', 'succes'); rendre(); scrollTo(0, 0); break;
     case 'xpinfo': S.form = { mode: 'xpinfo' }; rendreForm(); ouvrirSheet(); break;
-    case 'xpjournal': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; rendre(); setTimeout(() => { const z = document.getElementById('xpjournal'); if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); break;
+    case 'xpjournal': S.form = { mode: 'xplog' }; rendreForm(); ouvrirSheet(); $('#sheet').scrollTop = 0; break;
     case 'go-progres': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; rendre(); scrollTo(0, 0); break;
     case 'allseries': S.allSeries = !S.allSeries; rendre(true); break;
     case 'story': { const sl = el.dataset.k === 'm' ? slidesMois(+el.dataset.y, +el.dataset.m) : slidesAnnee(+el.dataset.y); lancerStory(sl); break; }
@@ -3669,6 +3796,11 @@ document.addEventListener('click', ev => {
     case 'tuto': S.retourSaisie = S.form; S.form = { mode: 'tuto' }; rendreForm(); $('#sheet').scrollTop = 0; break;
     case 'tuto-ok': LS.set('tutoVu', true); if (S.retourSaisie) { S.form = S.retourSaisie; S.retourSaisie = null; rendreForm(); } else fermer(); break;
     case 'vit': basculerVitrine(el.dataset.id); break;
+    case 'dmsg': if (el.dataset.m) toast(el.dataset.m); break;
+    case 'vitrine': S.form = { mode: 'vitrine' }; rendreForm(); ouvrirSheet(); break;
+    case 'vit-vider': setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: [] })); rendre(true); rendreVitrine(); break;
+    case 'ev-ban': { const L = LS.get('evBanCaches', []); LS.set('evBanCaches', L.concat(el.dataset.k).slice(-50)); rendre(true); toast('Bannière masquée · l\'événement reste dans Défis', 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; rendre(); scrollTo(0, 0); }); break; }
+    case 'obj-voir': { const z = document.getElementById('objectif'); if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'ev-voir': S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; rendre(); scrollTo(0, 0); break;
     case 'xplog': S.allXp = !S.allXp; rendre(true); break;
     case 'exclus': S.form = { mode: 'exclus', ex: exclusSerie().slice() }; rendreForm(); ouvrirSheet(); break;
