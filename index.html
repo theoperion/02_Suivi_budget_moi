@@ -743,7 +743,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '8.3';
+const VERSION = '8.5';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -898,6 +898,9 @@ async function pomper() {
     }
   } catch (err) {
     S.lastErr = { msg: String(err && err.message || err), quand: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
+    // Un élément « à venir » qui échoue ne bloque plus les autres envois : il passe en fin de file.
+    op.essais = (op.essais || 0) + 1;
+    if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => !o.op.startsWith('av-'))) { S.queue.push(S.queue.shift()); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
     S.busy = false; setSync('off'); setTimeout(pomper, 8000); return;
   }
   S.queue.shift(); S.gen = (S.gen || 0) + 1;
@@ -1554,7 +1557,7 @@ function rendreForm() {
   }
   const sug = f.cat ? suggestions(f.cat) : [];
   $('#sheetIn').innerHTML = `<div class="grab"></div>
-    <div class="shead"><span>${f.mode === 'edit' ? 'MODIFIER LA LIGNE' : futur ? 'ACHAT PRÉVU' : 'NOUVELLE LIGNE'} <button class="lnk" data-act="tuto" style="margin-left:6px">? AIDE</button></span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
+    <div class="shead"><span>${f.mode === 'edit' ? 'MODIFIER LA LIGNE' : futur ? (f.type === 'Revenu' ? 'REVENU PRÉVU' : f.type === 'Épargne' ? 'ÉPARGNE PRÉVUE' : 'ACHAT PRÉVU') : 'NOUVELLE LIGNE'} <button class="lnk" data-act="tuto" style="margin-left:6px">? AIDE</button></span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     <div class="seg">${Object.keys(TYPES).map(t => `<button class="${f.type === t ? 'on' : ''}" data-act="type" data-t="${t}">${t.toUpperCase()}</button>`).join('')}</div>
     <div class="amt ${montantNum() ? '' : 'zero'}" id="amt">${f.montant ? esc(f.montant) : '0'} €</div>
     <div class="mrow"><button class="mbtn" data-act="fm:-1" aria-label="Mois précédent">‹</button><span>${moisLabel(f.y, f.m).toUpperCase()}</span><button class="mbtn" data-act="fm:1" aria-label="Mois suivant">›</button></div>
@@ -1597,7 +1600,7 @@ function majHint() {
   const f = S.form, h = $('#hint'), a = $('#amt'); if (!f || !h) return;
   a.textContent = (f.montant || '0') + ' €'; a.classList.toggle('zero', !montantNum());
   $('#ferr').textContent = '';
-  if (estPrevu(f) && f.mode === 'add') { h.innerHTML = '<span class="muted">Rangé dans tes achats à venir : tu le valideras le jour venu (onglet Journal ou accueil)</span>'; return; }
+  if (estPrevu(f) && f.mode === 'add') { h.innerHTML = '<span class="muted">Rangé dans « À venir » : tu le valideras le jour venu, sur l\'accueil</span>'; return; }
   if (!f.cat) { h.innerHTML = '<span class="muted">Choisis une catégorie</span>'; return; }
   const pa = partage(), z = $('#presume');
   if (z) z.innerHTML = !f.noms || !f.noms.length ? 'Choisis qui te doit' : montantNum() ? `Ta part : <b>${e2(pa.moi)} €</b> dans ton budget · ${pa.n > 1 ? 'chacun te doit' : esc(f.noms[0]) + ' te doit'} <b>${e2(pa.chacun)} €</b>${pa.auto ? ' (parts égales)' : ''}` : 'Tape le montant total payé';
@@ -2079,18 +2082,19 @@ function rendreAv() {
   const f = S.form, cours = nowYM(), cible = f.y * 12 + f.m;
   const payeMois = cible > cours ? moisLabel(now.getFullYear(), now.getMonth() + 1) : moisLabel(f.y, f.m);
   let tout = '';
-  if (f.all) GROUPES.forEach(g => { const l = cats().filter(c => c.groupe === g && c.type === 'Dépense'); if (!l.length) return; tout += `<div class="grp">${esc(g.toUpperCase())}</div><div class="chips">` + l.map(c => `<button class="chip ${f.cat === c.nom ? 'on' : ''}" data-act="av-cat" data-cat="${esc(c.nom)}">${esc(c.nom)}</button>`).join('') + '</div>'; });
-  $('#sheetIn').innerHTML = enteteSheet('ACHAT PRÉVU') + `
+  const rv = ['Revenu', 'Retrait'].includes((catMap()[f.cat] || {}).type), tp = rv ? ['Revenu'] : (catMap()[f.cat] || {}).type === 'Épargne' ? ['Épargne'] : ['Dépense'];
+  if (f.all) GROUPES.forEach(g => { const l = cats().filter(c => c.groupe === g && tp.includes(c.type)); if (!l.length) return; tout += `<div class="grp">${esc(g.toUpperCase())}</div><div class="chips">` + l.map(c => `<button class="chip ${f.cat === c.nom ? 'on' : ''}" data-act="av-cat" data-cat="${esc(c.nom)}">${esc(c.nom)}</button>`).join('') + '</div>'; });
+  $('#sheetIn').innerHTML = enteteSheet(rv ? 'REVENU PRÉVU' : 'ACHAT PRÉVU') + `
     <input class="libin" data-f="lib" value="${esc(f.lib)}" maxlength="80" style="margin-top:14px">
     <input class="libin" data-f="montant" inputmode="decimal" placeholder="Montant en €" value="${esc(f.montant)}" style="margin-top:0">
     <div class="chips"><button class="chip on" data-act="av-allcat">${esc(f.cat)} ▾</button></div>${tout}
     <div class="stp"><span>MOIS</span><span class="v"><button data-act="avs" data-s="m" data-d="-1">‹</button><span>${MC[f.m - 1]} ${f.y}</span><button data-act="avs" data-s="m" data-d="1">›</button></span></div>
     <div class="stp"><span>JOUR</span><span class="v"><button data-act="avs" data-s="j" data-d="-1">‹</button><span>${f.jour ? 'le ' + f.jour : 'non précisé'}</span><button data-act="avs" data-s="j" data-d="1">›</button></span></div>
     <div class="err" id="ferr" style="margin-top:10px"></div>
-    <button class="go" data-act="av-paye">C'EST PAYÉ · ${esc(payeMois.toUpperCase())}</button>
+    <button class="go" data-act="av-paye">${rv ? "C'EST REÇU" : "C'EST PAYÉ"} · ${esc(payeMois.toUpperCase())}</button>
     <div class="note" style="margin-top:6px">Le montant ci-dessus part dans le Journal : ajuste-le si le prix a changé.</div>
     <button class="ghost" data-act="av-save">ENREGISTRER LES CHANGEMENTS</button>
-    <button class="danger ${f.arm ? 'armed' : ''}" data-act="av-del">${f.arm ? 'TOUCHE ENCORE POUR SUPPRIMER' : "J'ANNULE CET ACHAT"}</button>`;
+    <button class="danger ${f.arm ? 'armed' : ''}" data-act="av-del">${f.arm ? 'TOUCHE ENCORE POUR SUPPRIMER' : (rv ? "CE REVENU N'ARRIVERA PAS" : "J'ANNULE CET ACHAT")}</button>`;
   lierChamps();
 }
 function avValider() {
