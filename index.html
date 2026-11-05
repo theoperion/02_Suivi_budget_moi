@@ -754,7 +754,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '8.7';
+const VERSION = '8.8';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -920,7 +920,7 @@ async function pomper() {
     op.essais = (op.essais || 0) + 1;
     // Tous les envois du même élément passent ensemble en fin de file, pour garder leur ordre.
     if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => o.id !== op.id)) { const lot = S.queue.filter(o => o.id === op.id); S.queue = S.queue.filter(o => o.id !== op.id).concat(lot); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
-    S.busy = false; setSync('off'); clearTimeout(S.reessai); S.reessai = setTimeout(pomper, 8000); return;
+    S.busy = false; setSync('off'); clearTimeout(S.reessai); S.reessai = setTimeout(pomper, [2000, 4000, 8000][op.essais - 1] || 15000); return;
   }
   S.queue.shift(); S.gen = (S.gen || 0) + 1;
   if (res && typeof res.patrimoine === 'string' && res.patrimoine.startsWith('erreur')) toast('Budget enregistré, mais le report vers ton patrimoine a échoué (' + res.patrimoine.slice(9) + ')');
@@ -1418,7 +1418,7 @@ function rejetRenvoyer(i) {
 }
 function rendreFile() {
   const er = S.lastErr;
-  $('#sheetIn').innerHTML = enteteSheet('ENVOIS EN ATTENTE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Ces modifications sont enregistrées sur ton téléphone mais pas encore dans ton fichier Google Sheets. L'appli réessaie toute seule toutes les 8 secondes.</div>
+  $('#sheetIn').innerHTML = enteteSheet('ENVOIS EN ATTENTE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Ces modifications sont enregistrées sur ton téléphone mais pas encore dans ton fichier Google Sheets. L'appli réessaie toute seule (après 2 s, 4 s, 8 s, puis toutes les 15 s).</div>
     <div class="ticket" style="margin-top:8px">${S.queue.map((o, i) => `<div class="tl"><span style="white-space:normal">${i + 1}. ${esc(descOp(o))}</span></div>`).join('') || '<div class="tl"><span>Rien en attente ✓</span></div>'}</div>
     ${rejetsHtml()}
     ${er ? `<div class="alert" style="margin-top:10px;cursor:default">Dernière erreur (${esc(er.quand)}) : ${esc(er.msg)}</div>` : ''}

@@ -11,6 +11,7 @@
  * v5.2 : la date de la dépense (colonne « Saisi le ») se modifie aussi quand on corrige une ligne.
  * v5.3 : fonction verifier() pour donner les autorisations et tester le script en un clic.
  * v5.6 : « À venir » : le mois est écrit en texte (corrige l'échec des éléments à venir).
+ * v5.8 : classeur ouvert une seule fois par demande ; onglet caché « Diagnostic » (durée et résultat de chaque demande).
  * v5.7 : fichier occupé → réponse OCCUPE (l'appli réessaie) au lieu d'une erreur qui faisait perdre la saisie.
  * v5.5 : chaque appel est noté dans Apps Script › Exécutions (action, résultat, erreur) pour diagnostiquer.
  * v5.4 : la colonne « Contrôle » du Journal ignore les lignes validées « c'est voulu » (libellé terminé par ✓). Mise à jour automatique, une seule fois.
@@ -22,7 +23,7 @@
  */
 
 const CLE_A_ENREGISTRER = 'CHANGE-MOI';
-const VERSION_API = '5.7';
+const VERSION_API = '5.8';
 
 // Laisse vide si le script est ouvert depuis le fichier (Extensions > Apps Script).
 const ID_FICHIER = '';
@@ -57,7 +58,7 @@ function doGet() {
 }
 
 function doPost(e) {
-  let out, action = '?';
+  let out, action = '?'; const t0 = Date.now();
   try {
     const req = JSON.parse(e.postData.contents); action = req && req.action;
     out = traiter_(req);
@@ -66,6 +67,8 @@ function doPost(e) {
     console.error('Erreur ' + action + ' : ' + out.message + (err && err.stack ? '\n' + err.stack : ''));
   }
   try { if (action !== 'data') console.log(action + ' → ' + (out && out.ok ? 'ok' : 'refusé : ' + (out && out.message))); } catch (x) {}
+  diagnostic_(action, Date.now() - t0, out);
+  if (out && out.detail) delete out.detail;
   let txt; try { txt = JSON.stringify(out); } catch (x) { txt = JSON.stringify({ ok: false, error: 'SERVEUR', message: 'Réponse illisible' }); }
   return ContentService.createTextOutput(txt).setMimeType(ContentService.MimeType.JSON);
 }
@@ -108,8 +111,23 @@ function traiter_(req) {
 
 /* ---------- Lecture ---------- */
 
+// Le classeur n'est ouvert qu'une fois par demande (avant : 2 ou 3 fois par ajout).
+let SS_ = null;
 function classeur_() {
-  return ID_FICHIER ? SpreadsheetApp.openById(ID_FICHIER) : SpreadsheetApp.getActiveSpreadsheet();
+  return SS_ || (SS_ = ID_FICHIER ? SpreadsheetApp.openById(ID_FICHIER) : SpreadsheetApp.getActiveSpreadsheet());
+}
+
+// Onglet caché « Diagnostic » : une ligne par demande (heure, action, durée, résultat), 300 dernières gardées.
+// Permet à Claude de comprendre une lenteur ou un échec en lisant le fichier.
+function diagnostic_(action, ms, out) {
+  try {
+    const ss = classeur_();
+    let sh = ss.getSheetByName('Diagnostic');
+    if (!sh) { sh = ss.insertSheet('Diagnostic'); sh.appendRow(['Heure', 'Action', 'Durée (ms)', 'Résultat', 'Message', 'Détail']); sh.hideSheet(); }
+    const ok = out && out.ok;
+    sh.appendRow([new Date(), String(action), ms, ok ? 'ok' : String(out && out.error || '?'), ok ? '' : String(out && out.message || '').slice(0, 200), out && out.detail ? JSON.stringify(out.detail).slice(0, 400) : '']);
+    if (sh.getLastRow() > 400) sh.deleteRows(2, sh.getLastRow() - 301);
+  } catch (e) { /* le diagnostic ne doit jamais bloquer un envoi */ }
 }
 
 function lireDonnees_() {
@@ -311,7 +329,7 @@ function modifier_(row, attendu, l) {
   if (err) return { ok: false, error: 'INVALIDE', message: err };
   const jou = classeur_().getSheetByName('Journal');
   const r = jou.getRange(row, 1, 1, 4);
-  if (!identique_(r.getValues()[0], attendu)) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.' };
+  if (!identique_(r.getValues()[0], attendu)) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.', detail: { row, fichier: r.getValues()[0].map(String), attendu } };
   r.setValues([[l.mois, l.lib || l.cat, l.cat, Math.round(Number(l.montant) * 100) / 100]]);
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(l.date || ''))) ecrireDate_(jou, row, l.date); // date de la dépense corrigée dans l'appli
   return { ok: true, row };
@@ -320,7 +338,7 @@ function modifier_(row, attendu, l) {
 function supprimer_(row, attendu) {
   const jou = classeur_().getSheetByName('Journal');
   const r = jou.getRange(row, 1, 1, 4);
-  if (!identique_(r.getValues()[0], attendu)) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.' };
+  if (!identique_(r.getValues()[0], attendu)) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.', detail: { row, fichier: r.getValues()[0].map(String), attendu } };
   if (row > 5) jou.deleteRow(row); else { r.clearContent(); if (jou.getMaxColumns() >= COL_DATE) jou.getRange(row, COL_DATE).clearContent(); }
   return { ok: true, row, decale: row > 5 };
 }
