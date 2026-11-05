@@ -1,0 +1,31 @@
+{
+  "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle.",
+  "clement": {
+    "depot": "05_Suivi_budget_Clement",
+    "titre": "Budget · Clément",
+    "nom_appli": "Jauge · Clément",
+    "lien_script": "https://script.google.com/macros/s/AKfycbxW02G2fTsST3lRgajwU3HcoYOIf7BkFmstNVtfJ5st-q4U5Nj3JgHH5BwFIMx315E_qg/exec",
+    "prefixe_stockage": "jauge-clem.",
+    "prefixe_cache": "jauge-clement-v",
+    "acces_anticipe": false,
+    "nom_script": "du budget de Clément",
+    "id_fichier": "1-KW7FXImyYXkgsRFlB0O894FG9E0luqf7KD9-eFdsCs",
+    "commentaire_fichier": "fichier budget de Clément",
+    "script_id": "15NRPaFPGeApaP_9qSKBSb-ATts4ORo_amSMJmwo28Cfq4pgdnOLbxsel",
+    "deploiement": "AKfycbxW02G2fTsST3lRgajwU3HcoYOIf7BkFmstNVtfJ5st-q4U5Nj3JgHH5BwFIMx315E_qg"
+  },
+  "devlin": {
+    "depot": "06_Suivi_budget_Devlin",
+    "titre": "Budget · Devlin",
+    "nom_appli": "Jauge · Devlin",
+    "lien_script": "https://script.google.com/macros/s/AKfycbyq1DoL_nP5dOMlHvWdxubnv2gW63MWgHeZ3wo_ZYZuXotnNHjrIjnXrTmSt5BQYAv90Q/exec",
+    "prefixe_stockage": "jauge-devlin.",
+    "prefixe_cache": "jauge-devlin-v",
+    "acces_anticipe": false,
+    "nom_script": "du budget de Devlin",
+    "id_fichier": "1TFXRVMLuVv_NauUH7VyJ4Pgd-Us5JuD3_3lzN_ojfvQ",
+    "commentaire_fichier": "fichier budget de Devlin",
+    "script_id": "1A9SuNl_I6zYsdN8Xm0ZEWaMthxEqdFjAo5G4fQa_WBNj0v_G5fCVE51U",
+    "deploiement": "AKfycbyq1DoL_nP5dOMlHvWdxubnv2gW63MWgHeZ3wo_ZYZuXotnNHjrIjnXrTmSt5BQYAv90Q"
+  }
+}
