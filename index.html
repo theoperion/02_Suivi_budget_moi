@@ -754,7 +754,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '8.8';
+const VERSION = '8.9';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -885,7 +885,7 @@ async function pomper() {
     if (op.op === 'call') {
       res = await api(op.action, op.payload);
       const P = op.payload || {}, de = op.action === 'cat-edit' ? P.ancien : op.action === 'cat-del' ? P.nom : null, vers = op.action === 'cat-edit' ? P.nom : P.cible;
-      if (res.ok && de && vers && de !== vers) { S.journal.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); S.data.echeancier.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); }
+      if (res.ok && de && vers && de !== vers) { S.journal.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); S.data.echeancier.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); (S.data.avenir || []).forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); }
     }
     else if (op.op === 'ech-save') {
       if (x) { const env = { lib: x.lib, cat: x.cat, montant: x.montant }; res = await api('ech-save', { row: x.ligne || null, attendu: x.srv, e: pickEch(x) }); if (res.ok) { x.ligne = res.row; x.srv = env; } }
@@ -954,7 +954,8 @@ function echMontant(e, y, m, brut) {
   const d0 = brut ? null : debut(); if (d0 && new Date(y, m - 1, 1) < d0) return 0;
   if (e.h && y < e.h) return 0; if (e.i && y > e.i) return 0;
   const f = Math.max(1, e.f || 1), g = e.g || 12;
-  const c1 = (e.h && y > e.h) || m >= f, c2 = (e.i && y < e.i) || m <= g;
+  // Sans année « Depuis », une ligne trimestrielle/semestrielle/annuelle tombe chaque année à son rythme (C1).
+  const c1 = (e.h && y > e.h) || m >= f || (!e.h && e.freq !== 'Mensuel'), c2 = (e.i && y < e.i) || m <= g;
   const p = { Mensuel: 1, Trimestriel: 3, Semestriel: 6 }[e.freq] || 12;
   return c1 && c2 && (((m - f) % p) + p) % p === 0 ? e.montant : 0;
 }
@@ -1167,15 +1168,14 @@ function trierBudgets(l) {
   return l.slice().sort((a, b) => rang(b) - rang(a) || b.ratio - a.ratio);
 }
 function budgetDe(cat, y, m) { return budgets(y, m).find(b => b.c.nom === cat) || null; }
-function soldeFin(y, m) {
-  const s = S.data && S.data.soldes ? S.data.soldes[String(y)] : null;
-  if (typeof s !== 'number' || Math.abs(s) <= 1) return null;
-  let t = s; for (let k = 1; k <= m; k++) t += calc(y, k).restant; return t;
+function soldeFin(y, m, k) {
+  const s = soldeDepart(y, k); if (s == null) return null;
+  let t = s; for (let q = 1; q <= m; q++) t += calc(y, q).restant; return t;
 }
 function occurrences(y, m) {
   const cm = catMap();
   return (S.data ? S.data.echeancier : []).map(e => ({ e, v: echMontant(e, y, m), c: cm[e.cat] }))
-    .filter(o => o.v && o.c).map(o => ({ id: o.e.id, lib: o.e.lib, cat: o.e.cat, type: o.c.type, v: o.v, jour: o.e.jour || 1, y, m }))
+    .filter(o => o.v && o.c).map(o => ({ id: o.e.id, lib: o.e.lib, cat: o.e.cat, type: o.c.type, v: o.v, jour: Math.min(o.e.jour || 1, dim(y, m)), y, m })) // « le 31 » tombe le 30 en avril (C4)
     .sort((a, b) => a.jour - b.jour);
 }
 function avenirMois(y, m) { return ((S.data && S.data.avenir) || []).filter(a => !a.fait && !a.deleted && a.y === y && a.m === m).sort((a, b) => (a.jour || 32) - (b.jour || 32)); }
@@ -1326,7 +1326,8 @@ function courbeSolde() {
     for (let j = j0 + 1; j <= nbj; j++) {
       const ev = [];
       oc.forEach(o => { if (Math.min(o.jour, nbj) === j) { s += signe(o.type) * o.v; ev.push({ lib: o.lib, v: signe(o.type) * o.v }); } });
-      av.forEach(a => { if (Math.min(a.jour || 15, nbj) === j) { const v = signe(cm[a.cat] ? cm[a.cat].type : 'Dépense') * a.montant; s += v; ev.push({ lib: a.lib, v }); } });
+      // Achat prévu sans jour (le 15) ou dont le jour est passé : compté demain, comme dans « à prélever » (C5).
+      av.forEach(a => { if (Math.max(Math.min(a.jour || 15, nbj), j0 + 1) === j) { const v = signe(cm[a.cat] ? cm[a.cat].type : 'Dépense') * a.montant; s += v; ev.push({ lib: a.lib, v }); } });
       s -= parJour;
       pts.push({ y: yy, m: mm, j, s, ev });
     }
@@ -1625,8 +1626,9 @@ function partage() {
   const f = S.form, n = (f.noms || []).length, tot = montantNum();
   if (!f.partage || !n) return null;
   const pt = parseFloat(String(f.part || '').replace(',', '.')), auto = !(pt >= 0);
-  const moi = Math.round((auto ? tot / (n + 1) : Math.min(pt, tot)) * 100) / 100;
-  const chacun = Math.round((tot - moi) / n * 100) / 100;
+  const moi0 = auto ? tot / (n + 1) : Math.min(pt, tot);
+  const chacun = Math.max(0, Math.round((tot - moi0) / n * 100) / 100);
+  const moi = Math.round((tot - chacun * n) * 100) / 100; // le centime d'arrondi reste sur ta part : le total est exact (C6)
   return { moi, chacun, n, auto };
 }
 function ajoutNom() {
@@ -1690,7 +1692,7 @@ function enregistrer() {
     if (!assurerCatAv()) return;
     const objet = (f.lib || '').trim() || f.cat, nouv = [];
     if (pa.moi > 0) nouv.push({ lib, cat: f.cat, montant: pa.moi });
-    f.noms.forEach(n => nouv.push({ lib: n + ' · ' + objet, cat: CAT_AV, montant: pa.chacun }));
+    if (pa.chacun > 0) f.noms.forEach(n => nouv.push({ lib: n + ' · ' + objet, cat: CAT_AV, montant: pa.chacun }));
     const es = nouv.map(x => ({ id: uid(), row: null, date: f.date || auj(), mois, lib: x.lib, cat: x.cat, montant: x.montant, y: f.y, m: f.m, srv: null, pending: true, nw: true }));
     es.forEach(e => S.journal.push(e)); memo = new Map(); if (casseSerie(f.cat)) noterDepenseDuJour(f.date);
     fermer(); S.y = f.y; S.m = f.m; rendre(true);
@@ -1740,7 +1742,7 @@ function lierChamps() {
     if (S.form.mode === 'ech') { majEchApercu(); majReel(); }
   }));
 }
-function usage(nom) { return S.journal.filter(e => !e.deleted && e.cat === nom).length + S.data.echeancier.filter(e => !e.deleted && e.cat === nom).length; }
+function usage(nom) { return S.journal.filter(e => !e.deleted && e.cat === nom).length + S.data.echeancier.filter(e => !e.deleted && e.cat === nom).length + (S.data.avenir || []).filter(a => !a.deleted && !a.fait && a.cat === nom).length; }
 function appel(action, payload) { enfiler({ op: 'call', id: uid(), action, payload }); }
 
 /* ================= V2 · PRÉVU ================= */
@@ -1804,7 +1806,7 @@ function majEchApercu() {
 }
 function enregistrerEch(stop) {
   const f = S.form, e = echDepuisForm();
-  if (stop) { e.i = now.getFullYear(); if (e.freq === 'Mensuel') e.g = now.getMonth() + 1; }
+  if (stop) { e.i = now.getFullYear(); e.g = now.getMonth() + 1; } // arrêt après ce mois, quelle que soit la fréquence (C2)
   if (!e.lib) return ($('#ferr').textContent = 'Donne un libellé');
   if (!(e.montant > 0)) return ($('#ferr').textContent = 'Tape un montant (ex. 12,50)');
   if (!e.cat) return ($('#ferr').textContent = 'Choisis une catégorie');
@@ -1889,10 +1891,15 @@ function rendreCatEdit() {
   $('#sheetIn').innerHTML = h; lierChamps();
   const i = $('#sheetIn [data-f=nom]'); if (i) i.addEventListener('input', () => { if (f.ancien) { const z = $('#ferr'); if (z) z.textContent = ''; } });
 }
+// Renomme partout sur le téléphone : Journal, Échéancier, À venir, ordre, épingles, favoris, défi, exclusions de série (C3).
 function renommerLocal(ancien, nouveau) {
   S.journal.forEach(e => { if (e.cat === ancien) e.cat = nouveau; });
   S.data.echeancier.forEach(e => { if (e.cat === ancien) e.cat = nouveau; });
-  LS.set('ordre', LS.get('ordre', []).map(n => n === ancien ? nouveau : n));
+  (S.data.avenir || []).forEach(a => { if (a.cat === ancien) a.cat = nouveau; });
+  ['ordre', 'pins'].forEach(k => LS.set(k, [...new Set(LS.get(k, []).map(n => n === ancien ? nouveau : n))]));
+  const u = LS.get('usage', {}); if (u[ancien]) { u[nouveau] = (u[nouveau] || 0) + u[ancien]; delete u[ancien]; LS.set('usage', u); }
+  Object.values(S.data.defis || {}).forEach(d => { if (d && d.cat === ancien) d.cat = nouveau; });
+  const j = getPref('jeu', null); if (j && Array.isArray(j.exclus) && j.exclus.includes(ancien)) setPref('jeu', Object.assign({}, j, { exclus: [...new Set(j.exclus.map(n => n === ancien ? nouveau : n))] }));
 }
 function enregistrerCat() {
   const f = S.form, nom = String(f.nom || '').trim();
@@ -1927,7 +1934,8 @@ function retirerCat() {
 
 /* ---- contrôle du solde ---- */
 function signe(type) { return type === 'Revenu' || type === 'Retrait' ? 1 : -1; }
-function soldeDepart(y) { const s = S.data.soldes ? S.data.soldes[String(y)] : null; return typeof s === 'number' && Math.abs(s) > 1 ? s : null; }
+// Solde au 1er janvier : celui saisi pour l'année, sinon la fin calculée de l'année d'avant (au plus 2 ans en arrière) (C7).
+function soldeDepart(y, k) { const s = S.data && S.data.soldes ? S.data.soldes[String(y)] : null; if (typeof s === 'number' && Math.abs(s) > 1) return s; return (k || 0) < 2 ? soldeFin(y - 1, 12, (k || 0) + 1) : null; }
 function ouvrirSolde() {
   const c = S.data.controle || {};
   S.form = { mode: 'solde', y: now.getFullYear(), m: now.getMonth() + 1, banque: '', especes: c.especes ? txtNum(c.especes) : '', dep: '', neg: false, salDeja: false };
@@ -2086,6 +2094,9 @@ function nouveauMontant() {
   if (!x || !(n > 0)) { $('#ferr').textContent = 'Tape le nouveau montant'; return; }
   const debX = x.h ? x.h * 12 + (x.f || 1) : 0, deb = f.ny * 12 + f.nm;
   if (deb <= debX) { $('#ferr').textContent = 'Choisis un mois après le début de la ligne actuelle'; return; }
+  if (x.i && deb > x.i * 12 + (x.g || 12)) { $('#ferr').textContent = 'Cette ligne s\'arrête avant : choisis un mois avant sa fin'; return; } // (C8)
+  const per = { Trimestriel: 3, Semestriel: 6, Annuel: 12 }[x.freq];
+  if (per && (((f.nm - (x.f || 1)) % per) + per) % per) { $('#ferr').textContent = 'Choisis un mois où ce paiement tombe'; return; } // garde le même rythme (C8)
   const finAvant = deb - 1, ancienI = x.i, ancienG = x.g;
   const neuf = Object.assign({}, pickEch(x), { id: uid(), ligne: null, srv: null, pending: true, montant: Math.round(n * 100) / 100, h: f.ny, f: f.nm, i: ancienI || null, g: ancienI ? ancienG : 12 });
   Object.assign(x, { i: Math.floor((finAvant - 1) / 12), g: ((finAvant - 1) % 12) + 1, pending: true });

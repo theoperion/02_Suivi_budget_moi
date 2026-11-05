@@ -11,6 +11,7 @@
  * v5.2 : la date de la dépense (colonne « Saisi le ») se modifie aussi quand on corrige une ligne.
  * v5.3 : fonction verifier() pour donner les autorisations et tester le script en un clic.
  * v5.6 : « À venir » : le mois est écrit en texte (corrige l'échec des éléments à venir).
+ * v5.9 : renommer une catégorie met aussi à jour le défi du mois ; on ne peut plus retirer une catégorie encore utilisée dans « À venir ».
  * v5.8 : classeur ouvert une seule fois par demande ; onglet caché « Diagnostic » (durée et résultat de chaque demande).
  * v5.7 : fichier occupé → réponse OCCUPE (l'appli réessaie) au lieu d'une erreur qui faisait perdre la saisie.
  * v5.5 : chaque appel est noté dans Apps Script › Exécutions (action, résultat, erreur) pour diagnostiquer.
@@ -23,7 +24,7 @@
  */
 
 const CLE_A_ENREGISTRER = 'CHANGE-MOI';
-const VERSION_API = '5.8';
+const VERSION_API = '5.9';
 
 // Laisse vide si le script est ouvert depuis le fichier (Extensions > Apps Script).
 const ID_FICHIER = '';
@@ -431,6 +432,10 @@ function remplacerCat_(ancien, nouveau) {
     v.forEach(r => { if (String(r[0]).trim() === ancien) { r[0] = nouveau; ch = true; n++; } });
     if (ch) rg.setValues(v);
   });
+  // Le défi du mois suit aussi le nouveau nom (v5.9).
+  const d = defis_(); let dch = false;
+  Object.keys(d).forEach(k => { if (d[k] && d[k].cat === ancien) { d[k].cat = nouveau; dch = true; } });
+  if (dch) PropertiesService.getScriptProperties().setProperty('DEFIS', JSON.stringify(d));
   return n;
 }
 
@@ -457,7 +462,8 @@ function catRetirer_(nom, cible) {
   } else {
     const ss = classeur_();
     const usage = ss.getSheetByName('Journal').getRange(5, 3, nbLignesJournal_(ss.getSheetByName('Journal')), 1).getValues().filter(x => String(x[0]).trim() === nom).length +
-      (sh => sh.getRange(5, 2, finEch_(sh) - 4, 1).getValues())(ss.getSheetByName('Échéancier')).filter(x => String(x[0]).trim() === nom).length;
+      (sh => sh.getRange(5, 2, finEch_(sh) - 4, 1).getValues())(ss.getSheetByName('Échéancier')).filter(x => String(x[0]).trim() === nom).length +
+      (sh => sh ? sh.getRange(4, 3, finAv_(sh) - 3, 3).getValues().filter(x => String(x[0]).trim() === nom && x[2] !== true).length : 0)(ss.getSheetByName('À venir'));
     if (usage) return { ok: false, error: 'UTILISEE', message: usage + ' ligne(s) utilisent encore cette catégorie.' };
   }
   par.getRange(r, 1, 1, 2).setValues([['Catégorie libre', '']]);
