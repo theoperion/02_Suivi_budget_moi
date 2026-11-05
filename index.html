@@ -754,7 +754,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '8.6';
+const VERSION = '8.7';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -856,6 +856,8 @@ async function rafraichir(force) {
     if (!r.ok) { if (r.error === 'CLE' || r.error === 'SANS_CLE') return verrouiller(r.message); throw new Error(r.message); }
     // Une écriture a eu lieu pendant la lecture : ces données sont déjà périmées, on les ignore.
     if (S.queue.length || (S.gen || 0) !== gen) { S.lastFetch = 0; return; }
+    // Une fiche est ouverte : les numéros de ligne pourraient changer sous ses pieds. On actualisera à sa fermeture.
+    if (S.form) { S.majEnAttente = true; S.lastFetch = 0; return; }
     S.data = prepData(r.data);
     S.journal = entriesFromData(r.data);
     sauver(); setSync('ok');
@@ -865,6 +867,8 @@ async function rafraichir(force) {
 
 /* ================= FILE D'ÉCRITURES (optimiste) ================= */
 const pick = e => ({ mois: e.mois, lib: e.lib, cat: e.cat, montant: e.montant });
+// Erreurs passagères du script (fichier occupé, panne Google) : l'envoi reste en file et repart plus tard, comme une coupure réseau.
+const ERREURS_PASSAGERES = ['OCCUPE', 'SERVEUR'];
 const pickEch = e => ({ lib: e.lib, cat: e.cat, montant: e.montant, freq: e.freq, jour: e.jour, f: e.f, g: e.g, h: e.h, i: e.i, pause: !!e.pause });
 const trouverEch = id => S.data && S.data.echeancier.find(e => e.id === id);
 const trouver = id => S.journal.find(e => e.id === id);
@@ -884,35 +888,39 @@ async function pomper() {
       if (res.ok && de && vers && de !== vers) { S.journal.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); S.data.echeancier.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); }
     }
     else if (op.op === 'ech-save') {
-      if (x) { res = await api('ech-save', { row: x.ligne || null, attendu: x.srv, e: pickEch(x) }); if (res.ok) { x.ligne = res.row; x.srv = { lib: x.lib, cat: x.cat, montant: x.montant }; } }
+      if (x) { const env = { lib: x.lib, cat: x.cat, montant: x.montant }; res = await api('ech-save', { row: x.ligne || null, attendu: x.srv, e: pickEch(x) }); if (res.ok) { x.ligne = res.row; x.srv = env; } }
     } else if (op.op === 'ech-del') {
       if (x && x.ligne) { res = await api('ech-del', { row: x.ligne, attendu: x.srv }); }
       if (res.ok) S.data.echeancier = S.data.echeancier.filter(z => z !== x);
     }
     else if (op.op.startsWith('av-')) {
       const a = trouverAv(op.id);
-      if (a && op.op === 'av-save') { res = await api('av-save', { row: a.row || null, attendu: a.srv, a: { mois: a.mois, lib: a.lib, cat: a.cat, montant: a.montant, jour: a.jour } }); if (res.ok) { a.row = res.row; a.srv = { lib: a.lib, cat: a.cat, montant: a.montant }; a.pending = false; } }
+      if (a && op.op === 'av-save') { const env = { lib: a.lib, cat: a.cat, montant: a.montant }; res = await api('av-save', { row: a.row || null, attendu: a.srv, a: { mois: a.mois, lib: a.lib, cat: a.cat, montant: a.montant, jour: a.jour } }); if (res.ok) { a.row = res.row; a.srv = env; a.pending = false; } }
       else if (a && op.op === 'av-del') { if (a.row) res = await api('av-del', { row: a.row, attendu: a.srv }); if (res.ok) S.data.avenir = S.data.avenir.filter(z => z !== a); }
-      else if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { res = await api('av-paye', { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }); if (res.ok) { j.row = res.row; j.srv = pick(j); j.pending = false; } } }
+      else if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { const env = pick(j); res = await api('av-paye', { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }); if (res.ok) { j.row = res.row; j.srv = env; j.pending = false; } } }
     }
     else if (!e) res = { ok: true };
     else if (op.op === 'add') {
+      // On mémorise ce qui part réellement : si la ligne est modifiée pendant l'envoi, la modification suivra (P2).
+      const env = pick(e);
       res = await api('add', { ligne: Object.assign(pick(e), { date: e.date || null, uid: e.id }) });
-      if (res.ok) { e.row = res.row; e.srv = pick(e); }
+      if (res.ok) { e.row = res.row; e.srv = env; }
     } else if (op.op === 'update') {
-      if (e.row != null) { res = await api('update', { row: e.row, attendu: e.srv, ligne: Object.assign(pick(e), { date: e.date || null }) }); if (res.ok) e.srv = pick(e); }
+      if (e.row != null) { const env = pick(e); res = await api('update', { row: e.row, attendu: e.srv, ligne: Object.assign(pick(e), { date: e.date || null }) }); if (res.ok) e.srv = env; }
     } else if (op.op === 'delete') {
       if (e.row != null) {
         res = await api('delete', { row: e.row, attendu: e.srv });
         if (res.ok) { const r0 = e.row; S.journal = S.journal.filter(x => x !== e); if (res.decale) S.journal.forEach(x => { if (x.row != null && x.row > r0) x.row--; }); }
       } else S.journal = S.journal.filter(x => x !== e);
     }
+    if (res && !res.ok && ERREURS_PASSAGERES.includes(res.error)) throw new Error(res.message || 'Script momentanément indisponible');
   } catch (err) {
     S.lastErr = { msg: String(err && err.message || err), quand: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
     // Un élément « à venir » qui échoue ne bloque plus les autres envois : il passe en fin de file.
     op.essais = (op.essais || 0) + 1;
-    if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => !o.op.startsWith('av-'))) { S.queue.push(S.queue.shift()); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
-    S.busy = false; setSync('off'); setTimeout(pomper, 8000); return;
+    // Tous les envois du même élément passent ensemble en fin de file, pour garder leur ordre.
+    if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => o.id !== op.id)) { const lot = S.queue.filter(o => o.id === op.id); S.queue = S.queue.filter(o => o.id !== op.id).concat(lot); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
+    S.busy = false; setSync('off'); clearTimeout(S.reessai); S.reessai = setTimeout(pomper, 8000); return;
   }
   S.queue.shift(); S.gen = (S.gen || 0) + 1;
   if (res && typeof res.patrimoine === 'string' && res.patrimoine.startsWith('erreur')) toast('Budget enregistré, mais le report vers ton patrimoine a échoué (' + res.patrimoine.slice(9) + ')');
@@ -922,7 +930,11 @@ async function pomper() {
   if (!res.ok) {
     if (res.error === 'CLE') { sauver(); return verrouiller(res.message); }
     const vieux = /Action inconnue/.test(res.message || '');
-    toast(vieux ? "Pas enregistré : ton Apps Script n'est pas à jour (Gérer les déploiements > Nouvelle version)" : 'Pas enregistré dans le fichier : ' + (res.message || 'erreur'));
+    // Une dépense refusée n'est plus perdue : elle est gardée de côté, à renvoyer ou supprimer depuis « Envois » (P3).
+    const garde = op.op === 'add' && e;
+    if (garde) { const rj = LS.get('rejets', []); rj.push(Object.assign(pick(garde), { date: garde.date || null, msg: res.message || 'erreur', quand: new Date().toLocaleDateString('fr-FR') })); LS.set('rejets', rj); S.journal = S.journal.filter(z => z !== garde); }
+    if (garde) toast('Pas enregistré : ' + (res.message || 'erreur') + '. Gardé de côté dans Réglages › Envois', 'VOIR', () => { S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); });
+    else toast(vieux ? "Pas enregistré : ton Apps Script n'est pas à jour (Gérer les déploiements > Nouvelle version)" : 'Pas enregistré dans le fichier : ' + (res.message || 'erreur'));
     sauver(); rendre(true); pomper(); return;
   }
   sauver(); rendre(true); pomper();
@@ -1391,10 +1403,24 @@ function descOp(o) {
   const d = e ? `${e.lib} · ${e2(e.montant)} €` : a ? `${a.lib} · ${e2(a.montant)} €` : x ? `${x.lib} · ${e2(x.montant || 0)} €` : o.action || '';
   return nom + (d ? ' · ' + d : '');
 }
+// Dépenses refusées par le fichier (mois ou catégorie inconnus…) : gardées sur le téléphone jusqu'à ce que tu décides.
+function rejetsHtml() {
+  const rj = LS.get('rejets', []); if (!rj.length) return '';
+  return `<div class="note" style="display:block;margin-top:12px"><b>Refusées par le fichier</b> : corrige la cause (souvent une catégorie ou un mois absent du fichier), puis renvoie.</div>
+    <div class="ticket" style="margin-top:6px">${rj.map((r, i) => `<div class="tl"><span style="white-space:normal">${esc(r.mois)} · ${esc(r.lib)} · ${e2(r.montant)} €<br><span class="muted" style="font-size:12px">${esc(r.quand)} · ${esc(r.msg)}</span></span></div>
+      <div style="display:flex;gap:8px;margin:4px 0 8px"><button class="opt" data-act="rejet-renvoyer" data-i="${i}">RENVOYER</button><button class="opt" data-act="rejet-suppr" data-i="${i}">SUPPRIMER</button></div>`).join('')}</div>`;
+}
+function rejetRenvoyer(i) {
+  const rj = LS.get('rejets', []), r = rj[i]; if (!r) return;
+  rj.splice(i, 1); LS.set('rejets', rj);
+  const p = parseMois(r.mois), e = { id: uid(), row: null, date: r.date, mois: r.mois, lib: r.lib, cat: r.cat, montant: r.montant, y: p ? p.y : null, m: p ? p.m : null, srv: null, pending: true, nw: true };
+  S.journal.push(e); memo = new Map(); enfiler({ op: 'add', id: e.id }); rendre(true);
+}
 function rendreFile() {
   const er = S.lastErr;
   $('#sheetIn').innerHTML = enteteSheet('ENVOIS EN ATTENTE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Ces modifications sont enregistrées sur ton téléphone mais pas encore dans ton fichier Google Sheets. L'appli réessaie toute seule toutes les 8 secondes.</div>
     <div class="ticket" style="margin-top:8px">${S.queue.map((o, i) => `<div class="tl"><span style="white-space:normal">${i + 1}. ${esc(descOp(o))}</span></div>`).join('') || '<div class="tl"><span>Rien en attente ✓</span></div>'}</div>
+    ${rejetsHtml()}
     ${er ? `<div class="alert" style="margin-top:10px;cursor:default">Dernière erreur (${esc(er.quand)}) : ${esc(er.msg)}</div>` : ''}
     <div class="note" style="display:block;margin-top:8px">Si ça bloque : ouvre le lien de ton script (/exec) dans un navigateur. Il doit afficher « script … en ligne ✓ ». Sinon, dans Apps Script, lance une fonction une fois (bouton ▶) pour redonner l'autorisation, puis Déployer › Gérer les déploiements › Nouvelle version.</div>
     <button class="go" data-act="file-retry" style="margin-top:10px">RÉESSAYER MAINTENANT</button>
@@ -1551,7 +1577,7 @@ function rendreTuto() {
   $('#sheetIn').innerHTML = enteteSheet('COMMENT SAISIR', null) + `<div style="margin-top:8px">${TUTO.map(t => `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--rule)"><span style="font-size:24px;flex:none;width:34px;text-align:center">${t[0]}</span><div style="flex:1;min-width:0"><div style="font-family:var(--mono);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:3px">${t[1]}</div><div style="font-size:13px;line-height:1.45;color:var(--ink2)">${t[2]}</div></div></div>`).join('')}</div>
     <button class="go" data-act="tuto-ok" style="margin-top:14px">COMPRIS, ON SAISIT</button>`;
 }
-function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; }
+function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
@@ -1683,8 +1709,7 @@ function enregistrer() {
     toast(b ? `${e.cat} : ${b.reste >= 0 ? 'il te reste ' + e0(b.reste) : 'dépassé de ' + e0(-b.reste)}` : 'Enregistré', 'ANNULER', () => supprimer(e));
     enfiler({ op: 'add', id: e.id });
   } else {
-    const e = trouver(f.id) || (f.row != null && S.journal.find(x => x.row === f.row && !x.deleted)); if (!e) { fermer(); toast('Ligne introuvable, réessaie'); return; }
-    Object.assign(e, { mois, lib, cat: f.cat, montant: n, y: f.y, m: f.m, date: f.date || e.date || null, pending: true });
+    const e = trouver(f.id) || (f.row != null && S.journal.find(x => x.row === f.row && !x.deleted)); if (!e) { fermer(); toast('Ligne introuvable, réessaie'); return; }    Object.assign(e, { mois, lib, cat: f.cat, montant: n, y: f.y, m: f.m, date: f.date || e.date || null, pending: true });
     fermer(); rendre(true); toast('Ligne modifiée'); enfiler({ op: 'update', id: e.id });
   }
 }
@@ -2185,7 +2210,7 @@ function rendreReglages() {
     ${ACCES_ANTICIPE ? tg('anticipe', anticipe(), 'Accès anticipé', 'débloque tout de suite les nouveautés prévues pour les prochains mois') : ''}` : ''}
     <div class="grp" style="margin-top:18px">DONNÉES</div>
     ${S.data.url ? `<a class="opt" href="${esc(S.data.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span>Ouvrir mon fichier Google Sheets</span><span class="muted">↗</span></a>` : ''}
-    <button class="opt" data-act="${S.queue.length ? 'file' : 'refresh'}"><span>${S.queue.length ? 'Envois en attente' : 'Actualiser depuis le fichier'}</span><span class="${S.queue.length ? 'c-bad' : 'muted'} mono" style="font-size:12px">${S.queue.length ? S.queue.length + ' en attente · voir ›' : 'à jour'}</span></button>
+    <button class="opt" data-act="${S.queue.length || LS.get('rejets', []).length ? 'file' : 'refresh'}"><span>${S.queue.length ? 'Envois en attente' : LS.get('rejets', []).length ? 'Envois refusés à revoir' : 'Actualiser depuis le fichier'}</span><span class="${S.queue.length ? 'c-bad' : 'muted'} mono" style="font-size:12px">${S.queue.length ? S.queue.length + ' en attente · voir ›' : 'à jour'}</span></button>
     ${IN_GAS ? '' : `<button class="opt" data-act="go:lien"><span>Lien de mon script</span><span class="muted mono" style="font-size:12px">modifier ›</span></button>`}
     <button class="danger ${S.form.armOut ? 'armed' : ''}" data-act="logout" style="margin-top:14px">${S.form.armOut ? 'TOUCHE ENCORE : DÉCONNEXION DE CE TÉLÉPHONE' : 'SE DÉCONNECTER / CHANGER DE COMPTE'}</button>
     <p class="muted mono" style="font-size:11px;text-align:center;margin-top:22px">BUDGET · V${VERSION}</p>`;
@@ -3964,7 +3989,7 @@ function statsMois(y, m) {
 /* ================= VERROU ================= */
 const URL_OK = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]+\/exec\/?$/.test(u);
 function oublierCompte() {
-  ['key', 'api', 'cache', 'queue', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'prestVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
+  ['key', 'api', 'cache', 'queue', 'rejets', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'prestVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
   Object.assign(S, { key: '', api: '', data: null, journal: [], queue: [], lastBig: null, lastFrac: 0 });
 }
 // Écran de connexion : chacun branche SON script et SA clé. Rien n'est stocké ailleurs que sur ce téléphone.
@@ -3988,7 +4013,8 @@ function verrouiller(msg) {
     try {
       const r = await api('data');
       if (!r.ok) { go.textContent = 'OUVRIR'; $('#kerr').textContent = r.message || 'Clé incorrecte'; return; }
-      LS.set('key', v); LS.set('api', u); S.data = prepData(r.data); S.journal = entriesFromData(r.data); S.queue = []; sauver();
+      // Même compte : on garde les envois en attente et les données du téléphone, ils partiront juste après (P1).
+      LS.set('key', v); LS.set('api', u); if (!S.queue.length || !S.data) { S.data = prepData(r.data); S.journal = entriesFromData(r.data); } sauver();
       l.hidden = true; S.lastFetch = Date.now(); setSync('ok'); rendre(); pomper();
     } catch (e) { go.textContent = 'OUVRIR'; $('#kerr').textContent = 'Connexion impossible : vérifie le lien, ta connexion internet, et que le déploiement est en accès « Tout le monde ».'; }
   };
@@ -4218,6 +4244,8 @@ document.addEventListener('click', ev => {
     case 'theme': LS.set('theme', el.dataset.t); appliquerTheme(); rendreReglages(); break;
     case 'refresh': fermer(); rafraichir(true); toast('Actualisation…'); break;
     case 'file': S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); break;
+    case 'rejet-renvoyer': rejetRenvoyer(+el.dataset.i); rendreFile(); toast('Renvoi en cours…'); break;
+    case 'rejet-suppr': { const rj = LS.get('rejets', []); rj.splice(+el.dataset.i, 1); LS.set('rejets', rj); rendreFile(); rendre(true); } break;
     case 'file-retry': if (!S.busy) pomper(); toast('Nouvel essai…'); setTimeout(() => { if (S.form && S.form.mode === 'file') rendreFile(); }, 4000); break;
     case 'file-drop': if (!S.form.arm) { S.form.arm = true; rendreFile(); break; } { const o = S.queue.shift(); const e = o && trouver(o.id); if (e) e.pending = false; sauver(); S.form.arm = false; rendreFile(); rendre(true); toast('Envoi abandonné : à ressaisir si besoin'); } break;
     case 'logout': if (!S.form.armOut) { S.form.armOut = true; rendreReglages(); } else { fermer(); oublierCompte(); rendre(); verrouiller(); } break;
