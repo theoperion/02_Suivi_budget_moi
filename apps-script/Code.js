@@ -1,5 +1,5 @@
 /**
- * BUDGET · API du budget (Apps Script) · v5.6
+ * BUDGET · API du budget (Apps Script) · v5.9
  * ------------------------------------------
  * Ce script est relié au fichier budget dans lequel il a été créé.
  * Il lit les Paramètres, l'Échéancier et le Journal, et écrit dans le Journal.
