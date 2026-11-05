@@ -700,7 +700,7 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '9.0';
+const VERSION = '9.1';
 // Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
 const FONCS = [
   ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
@@ -771,11 +771,14 @@ function entriesFromData(d) {
 }
 
 /* ================= THÈME ================= */
-function appliquerTheme() {
+function themeDeBase() { // réglage clair/sombre de la personne, avant cosmétiques
   const t = LS.get('theme', 'auto');
   const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.querySelector('meta[name=theme-color]').content = dark ? '#0F0F0E' : '#2C2C2A';
+}
+function appliquerTheme() {
+  themeDeBase();
   try { appliquerCosmetiques(); } catch (e) { /* modules pas encore chargés au tout premier appel */ }
 }
 appliquerTheme();
@@ -822,7 +825,8 @@ function enfiler(op) { S.queue.push(op); sauver(); pomper(); }
 async function pomper() {
   if (S.busy) return;
   const op = S.queue[0];
-  if (!op) { setSync('ok'); setTimeout(() => rafraichir(true), 1500); return; }
+  // Actualisation seulement si un envoi vient d'aboutir (sinon : double téléchargement au démarrage, au retour…)
+  if (!op) { setSync('ok'); if (S.envoye) { S.envoye = false; setTimeout(() => rafraichir(true), 1500); } return; }
   S.busy = true; setSync('sync');
   const J = ['add', 'update', 'delete'].includes(op.op);
   const e = J ? trouver(op.id) : null, x = op.op.startsWith('ech') ? trouverEch(op.id) : null;
@@ -868,7 +872,7 @@ async function pomper() {
     if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => o.id !== op.id)) { const lot = S.queue.filter(o => o.id === op.id); S.queue = S.queue.filter(o => o.id !== op.id).concat(lot); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
     S.busy = false; setSync('off'); clearTimeout(S.reessai); S.reessai = setTimeout(pomper, [2000, 4000, 8000][op.essais - 1] || 15000); return;
   }
-  S.queue.shift(); S.gen = (S.gen || 0) + 1;
+  S.queue.shift(); S.gen = (S.gen || 0) + 1; S.envoye = true;
   if (e && !S.queue.some(o => o.id === e.id)) e.pending = false;
   if (x && !S.queue.some(o => o.id === x.id)) x.pending = false;
   S.busy = false;
@@ -892,7 +896,15 @@ function cats() {
   const o = LS.get('ordre', []), pos = n => { const i = o.indexOf(n); return i < 0 ? 1e4 : i; };
   return S.data.categories.map((c, i) => [c, i]).sort((a, b) => (pos(a[0].nom) - pos(b[0].nom)) || (a[1] - b[1])).map(x => x[0]);
 }
-function catMap() { const o = {}; cats().forEach((c, i) => o[c.nom] = Object.assign({ ordre: i }, c)); return o; }
+// catMap() mémorisée le temps d'un affichage : vidée avec memo, ou si les catégories / leur ordre changent
+let cacheCats = null;
+function catMap() {
+  let ro = null; try { ro = localStorage.getItem('jauge.ordre'); } catch (e) {}
+  const C = S.data && S.data.categories, z = cacheCats;
+  if (z && z.m === memo && z.d === S.data && z.c === C && z.n === (C ? C.length : -1) && z.ro === ro) return z.v;
+  const o = {}; cats().forEach((c, i) => o[c.nom] = Object.assign({ ordre: i }, c));
+  cacheCats = { m: memo, d: S.data, c: C, n: C ? C.length : -1, ro, v: o }; return o;
+}
 function debut() { return S.data && S.data.debut ? new Date(S.data.debut + 'T00:00:00') : null; }
 function echMontant(e, y, m, brut) {
   if (!e.lib || e.pause || e.deleted || typeof e.montant !== 'number') return 0;
@@ -1149,7 +1161,7 @@ function majDate() {
 function rendre(silencieux) {
   majDate();
   memo = new Map(); S._jeu = null;
-  clearTimeout(S._ann); S._ann = setTimeout(() => { try { annoncerJeu(); } catch (e) {} }, 900);
+  clearTimeout(S._ann); S._ann = setTimeout(() => { try { annoncerJeu(); } catch (e) {} try { figerJeu(); } catch (e) {} }, 900);
   const st = statut(S.y, S.m);
   $('#mlabel').innerHTML = esc(moisLabel(S.y, S.m).toUpperCase()) + '<small>' + (st === 'cours' ? 'EN COURS' : st === 'passe' ? 'TERMINÉ' : 'PRÉVISION') + '</small>';
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.act === 'tab:' + S.tab));
@@ -1165,6 +1177,7 @@ function rendre(silencieux) {
   else { v.className = ''; void v.offsetWidth; v.className = 'view'; v.innerHTML = html; v.dataset.tab = S.tab; }
   if (silencieux) v.querySelectorAll('.ctabs,.ptabs').forEach((e, i) => { if (hx[i]) e.scrollLeft = hx[i]; });
   if (S.tab === 'home') animerJauge();
+  pauserHorsEcran(v);
   if (S.tab === 'journal') { const q = $('#q'); if (q) q.addEventListener('input', ev => { S.filtre.q = ev.target.value; majListe(); const z = $('#prelev'); if (z) z.hidden = !!S.filtre.q; }); }
   if (S.pop) setTimeout(() => { S.pop = null; }, 900);
   S.journal.forEach(e => { if (e.nw) setTimeout(() => { e.nw = false; }, 900); });
@@ -2329,6 +2342,12 @@ function moisJeu() { // mois terminés depuis le début du jeu
   return L;
 }
 function joursJeu() { // [jour iso, sans dépense ?] du début du jeu à hier
+  // Mémorisé le temps d'un affichage (vidé avec memo, ou si la date, la dernière dépense ou les exclusions changent)
+  const ex0 = exclusSerie(), kj = [S.journal.length, auj(), LS.get('derDep', null), ex0.join('\u0001')].join('|');
+  if (S._jours && S._jours.m === memo && S._jours.k === kj) return S._jours.v;
+  const v = joursJeuCalc(); S._jours = { m: memo, k: kj, v }; return v;
+}
+function joursJeuCalc() {
   // Un jour ne compte que si l'appli est utilisée : une ligne saisie depuis l'appli ce mois-ci OU le mois d'avant.
   // (Avant : il fallait une dépense courante dans le mois même, donc le 1er novembre ne comptait jamais.)
   const ex = exclusSerie(), datees = S.journal.filter(e => !e.deleted && e.date && e.montant > 0);
@@ -2442,7 +2461,7 @@ const SUCCES = [
   ['vert-24', 'extreme', 'Deux ans verts', '24 mois dans le vert d\'affilée', f => [f.vertSerie, 24, f.vertCur]]
 ].map(([id, d, nom, txt, fn]) => ({ id, d, nom, txt, fn }));
 function etatJeu() {
-  const f = faitsJeu();
+  const f = faitsJeu(); if (S._etat && S._etat.f === f) return S._etat.v; // même faits → même état (mémorisé)
   const succes = SUCCES.map(s => { const [cur, max, enCours] = s.fn(f); return Object.assign({}, s, { cur: Math.min(cur, max), max, ok: cur >= max, enCours: enCours === undefined ? null : Math.min(enCours, max) }); });
   // XP récurrente (facile 5/jour sans dépense, 10/mois bouclé · moyen 25 · difficile 60 · extrême 150)
   const rec = [
@@ -2455,7 +2474,7 @@ function etatJeu() {
     ['Événements épiques réussis', 'difficile', RAR.epique.xp, f.evOk.filter(x => x.def.rar === 'epique').length], ['Événements légendaires réussis', 'extreme', RAR.legendaire.xp, f.evOk.filter(x => x.def.rar === 'legendaire').length],
     ['La Nuit des citrouilles (Halloween)', 'difficile', 150, f.saisonsOk.filter(x => x.d.id === 'halloween').length], ["Les Œufs d'Andromède (Pâques)", 'difficile', 150, f.saisonsOk.filter(x => x.d.id === 'paques').length], ["Le Blockbuster de l'été", 'extreme', 250, f.saisonsOk.filter(x => x.d.id === 'ete').length], ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
-  return Object.assign({ f, succes, rec, xp }, niveauDe(xp));
+  const v = Object.assign({ f, succes, rec, xp }, niveauDe(xp)); S._etat = { f, v }; return v;
 }
 // Niveau (1 à 30) puis étoiles de prestige : une étoile tous les 1 000 XP au-delà du niveau 30
 const PRESTIGE_XP = 1000;
@@ -2698,7 +2717,7 @@ appliquerAccent();
 // Préférences gardées dans le script, avec repli sur le téléphone tant que les données ne sont pas chargées.
 const prefsServeur = () => !!(S.data && S.data.prefs);
 function getPref(k, d) { if (prefsServeur() && k in S.data.prefs) return S.data.prefs[k]; const v = LS.get('pref_' + k, undefined); return v === undefined ? d : v; }
-function setPref(k, v) { LS.set('pref_' + k, v); if (S.data) { S.data.prefs = S.data.prefs || {}; S.data.prefs[k] = v; } if (S.data) appel('pref-set', { cle: k, valeur: v }); sauver(); }
+function setPref(k, v) { LS.set('pref_' + k, v); if (S.data) { S.data.prefs = S.data.prefs || {}; S.data.prefs[k] = v; } if (S.data) appel('pref-set', { cle: k, valeur: v }); else sauver(); } // appel() enregistre déjà
 // Calendrier de sortie des nouveautés (accès anticipé possible sur l'appli de Théo)
 const FEAT = [
   ['saison', 'Défis saisonniers', 'Calendrier de l\'avent du budget, Novembre sobre, Wrapped…', 2026, 12],
@@ -2709,7 +2728,8 @@ const FEAT = [
   ['cosmetiques', 'Collection étendue', 'Thèmes, mascotte, tampons, polices, aiguilles, fêtes, tickets.', 2027, 5]
 ];
 const ACCES_ANTICIPE = true; // passé à true dans la version de Théo
-const anticipe = () => ACCES_ANTICIPE && LS.get('anticipe', false);
+// Accès anticipé : synchronisé dans la préférence « jeu » (l'XP en dépend), repli sur ce téléphone
+const anticipe = () => { if (!ACCES_ANTICIPE) return false; const p = getPref('jeu', null); return p && typeof p.anticipe === 'boolean' ? p.anticipe : LS.get('anticipe', false); };
 const dispo = k => { const f = FEAT.find(x => x[0] === k); return !f || anticipe() || nowYM() >= ymNum(f[3], f[4]) || LS.get('debloques', []).includes(k); };
 const ouvert = k => dispo(k) && on(k === 'cosmetiques' ? 'jeu' : k);
 // --- Défi de la semaine ---
@@ -2725,9 +2745,20 @@ function propositionSemaine() {
   return { cat: cand.cat, montant: Math.max(5, Math.round(cand.moy * 0.8 / 5) * 5) };
 }
 function semaines() { return getPref('semaines', {}) || {}; }
+// Au-delà de SEM_DETAIL semaines, les plus anciennes sont résumées dans « _res » (réussies / ratées), pour rester sous 8000 caractères
+const SEM_DETAIL = 40;
+function compacterSemaines(W) {
+  const l0 = isoJ(lundi(now)), ks = Object.keys(W).filter(k => k[0] !== '_').sort();
+  if (ks.length <= SEM_DETAIL) return W;
+  const r = Object.assign({ ok: 0, ko: 0 }, W._res);
+  ks.slice(0, ks.length - SEM_DETAIL).forEach(k => { if (k >= l0) return;
+    if (k >= JEU_DEBUT.iso) { if (depSemaine(W[k].cat, new Date(k + 'T00:00:00')) <= W[k].montant + 0.005) r.ok++; else r.ko++; } // même règle qu'etatSemaines
+    delete W[k]; });
+  W._res = r; return W;
+}
 function etatSemaines() {
-  const W = semaines(), l0 = isoJ(lundi(now)); let reussis = 0;
-  Object.keys(W).forEach(k => { if (k < l0 && k >= JEU_DEBUT.iso) { const d = new Date(k + 'T00:00:00'); if (depSemaine(W[k].cat, d) <= W[k].montant + 0.005) reussis++; } });
+  const W = semaines(), l0 = isoJ(lundi(now)); let reussis = (W._res && W._res.ok) || 0;
+  Object.keys(W).forEach(k => { if (k[0] !== '_' && k < l0 && k >= JEU_DEBUT.iso) { const d = new Date(k + 'T00:00:00'); if (depSemaine(W[k].cat, d) <= W[k].montant + 0.005) reussis++; } });
   return { cur: W[l0] ? Object.assign({ cle: l0 }, W[l0], { dep: depSemaine(W[l0].cat, lundi(now)) }) : null, reussis, cle: l0 };
 }
 // ================= 6.4 · MÉDAILLES ET VITRINE =================
@@ -2904,10 +2935,20 @@ function basculerVitrine(id) {
   setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: v })); rendre(true); if (S.form && S.form.mode === 'vitrine') rendreVitrine();
 }
 const epingle = id => (vitrine() || []).includes(id);
+// Affiches/écussons animés : en pause quand ils sortent de l'écran (économie de batterie, rendu identique)
+var obsAnim = null, svgSuivis = new Set(); // var : utilisables dès le premier rendre()
+function pauserHorsEcran(racine) {
+  if (!racine || !('IntersectionObserver' in window)) return;
+  if (!obsAnim) obsAnim = new IntersectionObserver(L => L.forEach(x => { const v = x.target; if (!v.pauseAnimations) return;
+    if (!x.isIntersecting) { if (!v.animationsPaused()) { v.pauseAnimations(); v._pauseAuto = true; } } else if (v._pauseAuto) { v._pauseAuto = false; v.unpauseAnimations(); } }));
+  svgSuivis.forEach(v => { if (!v.isConnected) { obsAnim.unobserve(v); svgSuivis.delete(v); } }); // affiches retirées de la page
+  racine.querySelectorAll('svg').forEach(v => { if (!svgSuivis.has(v) && v.querySelector('animate,animateTransform,animateMotion')) { obsAnim.observe(v); svgSuivis.add(v); } });
+}
 function rendreVideotheque() {
   const e = etatJeu(), L = e.succes.slice().sort((a, b) => (b.ok - a.ok) || (DN[a.d] - DN[b.d]));
   $('#sheetIn').innerHTML = enteteSheet('TA VIDÉOTHÈQUE · ' + e.succes.filter(s => s.ok).length + '/' + e.succes.length, null) + `<div class="vidtop"><span>Touche une affiche pour la voir en grand</span><button class="pinchip" data-act="vitrine">📌 ${(vitrine() || []).length}/3 au profil</button></div>
     <div class="vidgrid">${L.map(s => `<button data-act="plein" data-id="${s.id}">${affiche(s.id, DN[s.d], 72, !s.ok)}${s.ok && epingle('s:' + s.id) ? '<i class="pinmk">📌</i>' : ''}<small>${esc(s.nom)}</small><em>${s.ok ? CADRES.a[DN[s.d]] : s.cur + '/' + s.max}</em></button>`).join('')}</div>`;
+  pauserHorsEcran($('#sheetIn'));
 }
 // Affiche en plein écran : titre, comment l'obtenir, et l'épingler au profil
 function ouvrirPlein(id) {
@@ -2934,6 +2975,7 @@ function rendreVitrine() {
   $('#sheetIn').innerHTML = enteteSheet('BADGES À CÔTÉ DE LA JAUGE', null) + `<div class="note" style="display:block;margin-top:10px">Touche un badge pour l'afficher ou le retirer (3 maximum).</div>
     ${G.length ? `<div class="vitgrid">${G.map(b => `<button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${b.r(60)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button>`).join('')}</div>${G.filter(b => b.amb).map(b => `<button class="ghost" data-act="amb-go" data-a="${b.amb}" style="margin-top:8px">🎨 APPLIQUER L'AMBIANCE « ${esc(b.nom.toUpperCase())} »</button>`).join('')}` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
     ${v.length ? `<button class="ghost" data-act="vit-vider" style="margin-top:12px">NE PLUS RIEN AFFICHER</button>` : ''}`;
+  pauserHorsEcran($('#sheetIn'));
 }
 function blocVitrine() {
   const L = vitrineAffichee(); if (!L.length) return '';
@@ -2974,12 +3016,16 @@ const EVENEMENTS = [
   { id: 'poche', nom: 'Argent de poche', rar: 'legendaire', duree: 5, type: 'plafond', lim: () => 30, filtre: () => e => estCourante(e.cat), txt: () => 'Pas plus de 30 € de dépenses courantes (courses comprises) en 5 jours.' },
   { id: 'marathon', nom: 'Marathon', rar: 'legendaire', duree: 10, type: 'jours', max: 7, txt: () => '7 jours sans dépense courante sur 10.' }];
 const JEU_EV = '2026-11-02'; // premier lundi du jeu : un événement démarre forcément cette semaine-là
+// Tirages figés (préférence « jeu », synchronisée) : 2 caractères par semaine commencée depuis JEU_EV,
+// lettre = rang dans EVENEMENTS (n'ajouter des événements qu'à la fin) + décalage du début en jours ; '--' = aucun.
+// Une semaine commencée garde son tirage, même si les catégories ou de vieilles lignes changent ensuite.
+const tiragesFiges = () => { const p = getPref('jeu', null); return p && typeof p.tirages === 'string' ? p.tirages : ''; };
 function planEvenements() {
   const c = ctxEv(); if (S._plan && S._plan.k === c) return S._plan.v;
-  const L = [], A = auj(); let w = 0, dernier = null, finPrec = '';
-  for (let l = JEU_EV; l <= A; l = addJ(l, 7), w++) {
+  const L = [], A = auj(), T = tiragesFiges(); let w = 0, dernier = null, finPrec = '', code = '';
+  const tirer = (l, w) => {
     const h = Math.imul(w + 1013, 2654435761) >>> 0;
-    if (w > 0 && h % 10 >= 6) continue; // environ 6 semaines sur 10
+    if (w > 0 && h % 10 >= 6) return null; // environ 6 semaines sur 10
     const k = (h >>> 8) % EVENEMENTS.length; let o = null;
     for (let t = 0; t < EVENEMENTS.length && !o; t++) {
       const d = EVENEMENTS[(k + t) % EVENEMENTS.length]; if (d.id === dernier) continue;
@@ -2987,10 +3033,28 @@ function planEvenements() {
       if (debut <= finPrec || (d.si && !d.si(c, { debut }))) continue;
       o = { cle: d.id + '@' + debut, def: d, debut, fin: addJ(debut, d.duree - 1) };
     }
+    return o;
+  };
+  for (let l = JEU_EV; l <= A; l = addJ(l, 7), w++) {
+    const t = T.substr(2 * w, 2); let o = null;
+    if (t.length < 2) o = tirer(l, w);
+    else if (t !== '--') { const d = EVENEMENTS[t.charCodeAt(0) - 97], debut = addJ(l, +t[1] || 0); if (d) o = { cle: d.id + '@' + debut, def: d, debut, fin: addJ(debut, d.duree - 1) }; }
+    code += o ? String.fromCharCode(97 + EVENEMENTS.indexOf(o.def)) + ecartJ(l, o.debut) : '--';
     if (!o || o.debut > A) continue;
     L.push(o); dernier = o.def.id; finPrec = o.fin;
   }
-  S._plan = { k: c, v: L }; return L;
+  S._plan = { k: c, v: L, code }; return L;
+}
+// Modifie la préférence « jeu » (synchronisée si le script la gère, sinon gardée sur ce téléphone)
+function majPrefJeu(maj) { const p = Object.assign({}, getPref('jeu', {}) || {}, maj); if (prefsServeur()) setPref('jeu', p); else LS.set('pref_jeu', p); }
+// Après chaque affichage : fige les tirages des semaines commencées (P2) et partage l'accès anticipé déjà activé ici (P3)
+function figerJeu() {
+  if (!S.data || !S.key) return;
+  const p = getPref('jeu', {}) || {}, maj = {};
+  planEvenements(); const code = S._plan && S._plan.code, T = typeof p.tirages === 'string' ? p.tirages : '';
+  if (code && code.length > T.length) maj.tirages = code;
+  if (ACCES_ANTICIPE && typeof p.anticipe !== 'boolean' && LS.get('anticipe', false)) maj.anticipe = true;
+  if (Object.keys(maj).length) majPrefJeu(maj);
 }
 function etatEv(o) {
   const c = ctxEv(), d = o.def, A = auj(), fini = o.fin < A;
@@ -3313,6 +3377,7 @@ function apercuUI(o) {
 }
 // Essai de 4 secondes d'un style verrouillé
 let essaiUI = null;
+const finEssaiUI = () => { if (essaiUI) { clearTimeout(essaiUI.to); essaiUI = null; } }; // un vrai choix annule l'essai en cours
 function essayerUI(t, id) {
   const d = document.documentElement.dataset, k = t === 'ui' ? 'ui' : t === 'texte' ? 'texte' : t === 'ambiance' ? 'amb' : 'cth';
   if (essaiUI) { clearTimeout(essaiUI.to); d[essaiUI.k] = essaiUI.v; d.theme = essaiUI.th; }
@@ -3365,6 +3430,7 @@ function tousCosm() {
 }
 function appliquerCosmetiques() {
   const d = document.documentElement.dataset;
+  themeDeBase(); // sinon un ancien thème sombre (ou une ambiance) resterait collé jusqu'au prochain lancement
   try { appliquerUI(); } catch (e) {}
   d.cth = cos('theme'); d.tampon = cos('tampon'); d.police = cos('police'); d.ticket = cos('ticket');
   const sombre = ['nuit', 'terminal', 'noiror', 'abysses', 'bordeaux', 'aurore', 'cosmos'].includes(d.cth), clair = ['kraft', 'poudre', 'sauge', 'menthe'].includes(d.cth);
@@ -3391,12 +3457,15 @@ function celebrer() {
   requestAnimationFrame(step);
 }
 // --- Son « cha-ching » à l'enregistrement ---
+let ctxSon = null;
 function sonCaisse() {
   const id = cos('son'); if (id === 'off') return;
   const SEQ = { chaching: ['triangle', .25, [[1318, 0], [1760, .09], [2093, .16]]], pop: ['sine', .12, [[420, 0, 900]]], piece: ['square', .18, [[988, 0], [1319, .07]]],
     clochette: ['sine', .7, [[1568, 0], [2093, .1], [2637, .2]]], arcade: ['square', .12, [[523, 0], [659, .06], [784, .12], [1047, .18]]], fanfare: ['triangle', .22, [[523, 0], [523, .13], [523, .26], [698, .39], [880, .62]]] }[id];
   if (!SEQ) return;
-  try { const A = new (window.AudioContext || window.webkitAudioContext)(), t = A.currentTime, [ty, du, notes] = SEQ, vol = ty === 'square' ? .06 : .18;
+  try { if (!ctxSon || ctxSon.state === 'closed') ctxSon = new (window.AudioContext || window.webkitAudioContext)(); // un seul contexte audio pour toute la session
+    if (ctxSon.state === 'suspended') ctxSon.resume();
+    const A = ctxSon, t = A.currentTime, [ty, du, notes] = SEQ, vol = ty === 'square' ? .06 : .18;
     notes.forEach(([fq, d, f2]) => { const o = A.createOscillator(), g = A.createGain(); o.type = ty; o.frequency.setValueAtTime(fq, t + d); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d + du * .8); g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(vol, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + du); o.connect(g).connect(A.destination); o.start(t + d); o.stop(t + d + du + .05); });
   } catch (e) {}
 }
@@ -3576,7 +3645,7 @@ function slidesAnnee(y) {
 }
 function lancerStory(slides) {
   if (!slides.length) return;
-  let i = 0, t0 = 0, raf = 0, pause = false; const DUREE = 4200;
+  let i = 0, t0 = 0, raf = 0, pause = false, tp = 0, fini = false; const DUREE = 4200;
   const el = document.createElement('div'); el.className = 'story';
   el.innerHTML = `<div class="sbars">${slides.map(() => '<i><b></b></i>').join('')}</div><button class="sclose" aria-label="Fermer">✕</button><div class="sbody"></div><div class="szone sprev"></div><div class="szone snext"></div>`;
   document.body.appendChild(el);
@@ -3591,13 +3660,14 @@ function lancerStory(slides) {
     if (s.stamp) setTimeout(() => celebrer(), 350);
     t0 = performance.now();
   };
-  const fermerS = () => { cancelAnimationFrame(raf); el.remove(); };
+  const fermerS = () => { fini = true; cancelAnimationFrame(raf); el.remove(); };
   const aller = d => { i += d; if (i < 0) i = 0; if (i >= slides.length) return fermerS(); montrer(); };
-  const tick = t => { if (!pause) { const p = Math.min(1, (t - t0) / DUREE); el.querySelectorAll('.sbars b')[i].style.width = (p * 100) + '%'; if (p >= 1) aller(1); } raf = requestAnimationFrame(tick); };
+  const tick = t => { if (fini) return; if (!pause) { const p = Math.min(1, (t - t0) / DUREE); el.querySelectorAll('.sbars b')[i].style.width = (p * 100) + '%'; if (p >= 1) aller(1); } if (!fini) raf = requestAnimationFrame(tick); };
   el.querySelector('.sclose').onclick = fermerS;
   el.querySelector('.snext').onclick = () => aller(1);
   el.querySelector('.sprev').onclick = () => aller(-1);
-  el.addEventListener('pointerdown', () => { pause = true; }); el.addEventListener('pointerup', () => { if (pause) { pause = false; t0 = performance.now() - 0; } });
+  // Appui long : pause, puis reprise là où la barre s'était arrêtée
+  el.addEventListener('pointerdown', () => { if (!pause) { pause = true; tp = performance.now(); } }); el.addEventListener('pointerup', () => { if (pause) { pause = false; t0 += performance.now() - tp; } });
   montrer(); raf = requestAnimationFrame(tick);
 }
 
@@ -3707,7 +3777,7 @@ function statsMois(y, m) {
 /* ================= VERROU ================= */
 const URL_OK = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]+\/exec\/?$/.test(u);
 function oublierCompte() {
-  ['key', 'api', 'cache', 'queue', 'rejets', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'prestVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu'].forEach(k => LS.del(k));
+  ['key', 'api', 'cache', 'queue', 'rejets', 'ordre', 'pins', 'usage', 'controles', 'bilanVu', 'derDep', 'serieDepuis', 'recordSans', 'jeuVus', 'skin', 'accent', 'nivVu', 'prestVu', 'xpVu', 'cosmVus', 'alertesVues', 'anticipe', 'cos_theme', 'cos_mascotte', 'cos_tampon', 'cos_police', 'cos_fete', 'cos_son', 'cos_aiguille', 'cos_ticket', 'cos_titre', 'pref_tirelires', 'pref_voyages', 'pref_escalier', 'pref_semaines', 'pref_objectifs', 'cos_ui', 'cos_texte', 'progT', 'debloques', 'resumeVu', 'pref_jeu', 'cos_ambiance', 'xpDetail', 'xpLog', 'evVus', 'evGagnes', 'evBanCaches', 'anomMasquees', 'rappelsVus', 'ctrlFait'].forEach(k => LS.del(k));
   Object.assign(S, { key: '', api: '', data: null, journal: [], queue: [], lastBig: null, lastFrac: 0 });
 }
 // Écran de connexion : chacun branche SON script et SA clé. Rien n'est stocké ailleurs que sur ce téléphone.
@@ -3809,13 +3879,13 @@ document.addEventListener('click', ev => {
     case 'obj-del': { const O = Object.assign({}, objectifs()); delete O[S.form.y]; setPref('objectifs', O); fermer(); rendre(true); toast('Objectif retiré'); break; }
     case 'res-ban': LS.set('resumeVu', el.dataset.k); rendre(true); S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
     case 'res-open': S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
-    case 'anticipe': LS.set('anticipe', !anticipe()); rendreReglages(); rendre(true); break;
+    case 'anticipe': { const v = !anticipe(); LS.set('anticipe', v); if (S.data) majPrefJeu({ anticipe: v }); rendreReglages(); rendre(true); break; }
     case 'colt': S.collT = el.dataset.t; rendre(true); break;
     case 'colt-go': S.collT = el.dataset.t; S.progT = 'style'; LS.set('progT', 'style'); rendre(true); scrollTo(0, 0); break;
-    case 'cosm': { const t = el.dataset.t, id = el.dataset.id; LS.set(cleCos(t), id); const v0 = LS.get('cosmVus', []); if (!v0.includes(t + ':' + id)) LS.set('cosmVus', v0.concat(t + ':' + id)); appliquerCosmetiques(); vibrer(); if (t === 'fete') celebrer(); if (t === 'son') sonCaisse(); rendre(true); break; }
+    case 'cosm': { finEssaiUI(); const t = el.dataset.t, id = el.dataset.id; LS.set(cleCos(t), id); const v0 = LS.get('cosmVus', []); if (!v0.includes(t + ':' + id)) LS.set('cosmVus', v0.concat(t + ':' + id)); appliquerCosmetiques(); vibrer(); if (t === 'fete') celebrer(); if (t === 'son') sonCaisse(); rendre(true); break; }
     case 'titre': LS.set('cos_titre', el.dataset.t); rendre(true); break;
     case 'masc': { const M = mascotte(); toast(M.s[1] + ' ' + M.s[2] + ' · ' + e0(M.ep) + ' épargnés depuis novembre' + (M.next ? ' · prochain stade à ' + e0(M.next[0]) : '')); break; }
-    case 'sem-ok': { const W = Object.assign({}, semaines()); W[isoJ(lundi(now))] = { cat: el.dataset.cat, montant: +el.dataset.m }; setPref('semaines', W); rendre(true); toast('Défi de la semaine lancé 💪'); break; }
+    case 'sem-ok': { const W = Object.assign({}, semaines()); W[isoJ(lundi(now))] = { cat: el.dataset.cat, montant: +el.dataset.m }; setPref('semaines', compacterSemaines(W)); rendre(true); toast('Défi de la semaine lancé 💪'); break; }
     case 'al-ok': LS.set('alertesVues', LS.get('alertesVues', []).concat(el.dataset.id).slice(-200)); rendre(true); break;
     case 'allalertes': S.allAlertes = !S.allAlertes; rendre(true); break;
     case 'ptab': S.progT = el.dataset.t; LS.set('progT', S.progT); rendre(true); scrollTo(0, Math.min(scrollY, ($('.ptabs') || { offsetTop: 0 }).offsetTop - 60)); break;
@@ -3844,7 +3914,7 @@ document.addEventListener('click', ev => {
     case 'anom-masq': { const i0 = el.dataset.i; LS.set('anomMasquees', LS.get('anomMasquees', []).concat(i0).slice(-50)); rendre(true); toast('Anomalie masquée', 'ANNULER', () => { LS.set('anomMasquees', LS.get('anomMasquees', []).filter(x => x !== i0)); rendre(true); }); break; }
     case 'anom-ok': { const e = trouver(el.dataset.id); if (!e) break; ouvrirSaisie(e); if (S.form && !/✓\s*$/.test(S.form.lib || '')) { S.form.lib = ((S.form.lib || e.cat).trim() + ' ✓'); rendreForm(); toast('✓ ajouté au libellé : enregistre si c\'est bien un achat différent du prélèvement'); } break; }
     case 'info': S.form = { mode: 'info', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
-    case 'amb-go': LS.set(cleCos('ambiance'), el.dataset.a); appliquerCosmetiques(); rendre(true); toast('Ambiance appliquée · change-la dans Progrès › Style'); break;
+    case 'amb-go': finEssaiUI(); LS.set(cleCos('ambiance'), el.dataset.a); appliquerCosmetiques(); rendre(true); toast('Ambiance appliquée · change-la dans Progrès › Style'); break;
     case 'videotheque': S.form = { mode: 'videotheque' }; rendreForm(); ouvrirSheet(); break;
     case 'vitrine': S.form = { mode: 'vitrine' }; rendreForm(); ouvrirSheet(); break;
     case 'vit-vider': setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: [] })); rendre(true); rendreVitrine(); break;
