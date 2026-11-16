@@ -624,6 +624,10 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 /* 6.9 · médailles vectorielles */
 .xpcompact .ticket{font-size:11.5px;padding:8px 12px}.xpcompact .tl{padding:2px 0}.xpcompact .sec{margin:12px 0 6px}.xpcompact .note{font-size:12px}
 .vitgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.vitgrid button{border:1.5px solid var(--rule);border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+#gains{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 58px);transform:translate(-50%,-10px);opacity:0;z-index:31;width:min(420px,calc(100% - 32px));background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:opacity .25s,transform .25s;pointer-events:none}
+#gains.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}#gains b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:1.2px;margin-bottom:4px}
+#gains div{padding:3px 0}#gains .gperte{opacity:.65;font-size:12px}#gains .gvoir{display:block;text-align:right;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-decoration:underline;margin-top:4px}
+.vitgrid .vitc{display:flex;flex-direction:column;gap:4px}.vitgrid .vitbig{border:0;padding:3px 2px;border-radius:6px;font-family:var(--mono);font-size:9px;letter-spacing:.8px;color:var(--ink2);text-decoration:underline}
 .vitgrid button.on{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.vitgrid small{font-size:11px;line-height:1.2;text-align:center}.vitgrid em{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.8px;color:var(--ink3)}.vitgrid button.on em{color:var(--ok)}
 /* 6.9 · onglet Défis compact */
 .glance{display:grid;gap:6px;margin-top:4px}.gl{border:1.5px dashed var(--rule);border-radius:10px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:var(--mono);min-width:0;text-align:center}
@@ -681,6 +685,7 @@ body.discret .espv{filter:blur(6px)}
     <button class="mbtn" data-act="prev" aria-label="Mois précédent"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
     <button class="mlabel" data-act="mgrid" id="mlabel"></button>
     <button class="mbtn" data-act="next" aria-label="Mois suivant"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="ibtn" data-act="go-defis" id="hdefis" aria-label="Défis"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></button>
     <button class="ibtn" data-act="go-succes" id="hprog" aria-label="Succès"><svg class="i" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg><span class="hniv" id="hniv"></span></button>
     <button class="ibtn" data-act="gear" aria-label="Réglages"><svg class="i" viewBox="0 0 24 24"><path d="M10.3 4.3c.4-1.8 3-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1 2.5c1.9.5 1.9 3.1 0 3.5a1.7 1.7 0 0 0-1 2.6c.9 1.5-.9 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1c-.4 1.9-3 1.9-3.4 0a1.7 1.7 0 0 0-2.6-1c-1.5.9-3.3-.9-2.4-2.4a1.7 1.7 0 0 0-1-2.6c-1.9-.4-1.9-3 0-3.5a1.7 1.7 0 0 0 1-2.5c-.9-1.6.9-3.3 2.4-2.4a1.7 1.7 0 0 0 2.6-1.1z"/><circle cx="12" cy="12" r="3"/></svg><span class="dot" id="dot"></span></button>
   </header>
@@ -1254,7 +1259,7 @@ function rendre(silencieux) {
   const st = statut(S.y, S.m);
   $('#mlabel').innerHTML = esc(moisLabel(S.y, S.m).toUpperCase()) + '<small>' + (st === 'cours' ? 'EN COURS' : st === 'passe' ? 'TERMINÉ' : 'PRÉVISION') + '</small>';
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.act === 'tab:' + S.tab));
-  { const hp = $('#hprog'); if (hp) { hp.hidden = !(on('jeu') || on('defi') || on('series') || on('bilan')); try { majBadgeProgres(on('jeu') && S.data ? etatJeu() : null); } catch (e) {} } }
+  { const hp = $('#hprog'), hd = $('#hdefis'); if (hd) hd.hidden = !(on('jeu') || on('defi') || on('series') || on('bilan')); if (hp) { hp.hidden = !(on('jeu') || on('defi') || on('series') || on('bilan')); try { majBadgeProgres(on('jeu') && S.data ? etatJeu() : null); } catch (e) {} } }
   document.body.classList.toggle('discret', !!LS.get('discret', false));
   const v = $('#view');
   if (!S.data) { v.innerHTML = '<div class="empty">Chargement de ton fichier…</div>'; return; }
@@ -1273,7 +1278,7 @@ function rendre(silencieux) {
 }
 
 function jaugeSVG(b) {
-  const sk = on('jeu') ? LS.get('skin', 'classique') : 'classique';
+  const sk = cos('skin'); // revient à « classique » si la jauge n'est plus débloquée
   if (sk !== 'classique') {
     const c0 = b.restant < 0 || b.frac < 0.15 ? 'var(--bad)' : b.frac < 0.35 ? 'var(--warn)' : 'var(--ok)';
     const r = skinSVG(sk, b.frac, c0, b.st === 'cours' && on('reperes') ? 1 - now.getDate() / dim(S.y, S.m) : null);
@@ -2496,7 +2501,7 @@ function vueProgres() {
   if (!vis.length) return '';
   let cur = S.progT || LS.get('progT', 'bilans'); if (!vis.some(([k]) => k === cur)) cur = vis[0][0];
   let h = '';
-  if (ej) { const ti = LS.get('cos_titre', '') || ej.titre; const pz = ej.niv === NIV_MAX; h += `<button class="nivmini ${pz ? 'prestige' : ''}" data-act="ptab" data-t="succes"><b>NIV. ${ej.niv}${pz && ej.prest ? ' <em>' + etoilesTxt(ej.prest) + '</em>' : ''}</b><span>${esc(ti.toUpperCase())}</span><i><u style="width:${Math.round((pz ? ej.pfrac : ej.frac) * 100)}%"></u></i><small>${ej.xp} XP</small></button>`; }
+  if (ej) { const ti = titreCos(ej); const pz = ej.niv === NIV_MAX; h += `<button class="nivmini ${pz ? 'prestige' : ''}" data-act="ptab" data-t="succes"><b>NIV. ${ej.niv}${pz && ej.prest ? ' <em>' + etoilesTxt(ej.prest) + '</em>' : ''}</b><span>${esc(ti.toUpperCase())}</span><i><u style="width:${Math.round((pz ? ej.pfrac : ej.frac) * 100)}%"></u></i><small>${ej.xp} XP</small></button>`; }
   h += `<div class="ptabs">${vis.map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" data-act="ptab" data-t="${k}">${l}</button>`).join('')}</div>`;
   const [c, fk] = T[cur];
   h += `<div class="pcont">${c}${blocProchainement(fk)}</div>`;
@@ -2525,7 +2530,8 @@ const ACCENTS = [
   { id: 'polaris', nom: 'Polaris', niv: 99, prest: 1, c: ['#D9A50F', '#9A7408', '#FFD966'] },
   { id: 'lavande', nom: 'Lavande', niv: 26, c: ['#9B7FE0', '#6E52BF', '#CDBDF5'] }, { id: 'emeraude', nom: 'Émeraude', niv: 29, c: ['#0E8A5F', '#086444', '#5ED6A8'] }];
 function appliquerAccent() {
-  const a = ACCENTS.find(x => x.id === LS.get('accent', 'foret')) || ACCENTS[0], st = document.documentElement.style;
+  let ac; try { ac = cos('accent'); } catch (e) { ac = LS.get('accent', 'foret'); } // cos() n'existe pas encore au tout premier appel
+  const a = ACCENTS.find(x => x.id === ac) || ACCENTS[0], st = document.documentElement.style;
   document.body && document.body.classList.toggle('accent', !!a.c);
   if (!a.c) { ['--ok', '--okInk', '--acc'].forEach(k => st.removeProperty(k)); return; }
   const dark = document.documentElement.dataset.theme === 'dark';
@@ -2564,20 +2570,21 @@ function faitsJeu() {
   const M = moisJeu().map(([y, m]) => {
     const c = calc(y, m), bu = budgets(y, m).filter(x => !x.sa), nd = c.restant + c.av + c.ep;
     const df = etatDefi(y, m);
+    // moisJeu() = mois TERMINÉS seulement : le mois en cours ne compte jamais pour les taux, le vert ou les budgets tenus
     return { y, m, vert: c.restant + c.av >= -0.5, zero: bu.length > 0 && bu.every(x => x.reste >= -0.5), taux: c.rev > 0 ? nd / c.rev : 0, defiOk: !!(df && df.ok), defiLance: !!df, defiMarge: df && df.montant > 0 ? (df.montant - df.dep) / df.montant : 0, bu };
   });
   const J = joursJeu(), apresDebut = e => e.y && ymNum(e.y, e.m) >= ymNum(JEU_DEBUT.y, JEU_DEBUT.m);
   const coteL = S.journal.filter(e => !e.deleted && apresDebut(e) && /mis de côté/i.test(e.lib || '') && e.montant > 0);
-  const cote = coteL.reduce((t, e) => t + e.montant, 0);
+  const cote = coteL.reduce((t, e) => t + e.montant, 0), nCoteMois = new Set(coteL.map(e => ymNum(e.y, e.m))).size;
   const rembs = S.journal.filter(e => !e.deleted && apresDebut(e) && estAv(e.cat) && e.montant < 0).length;
   const defisLances = Object.keys((S.data && S.data.defis) || {}).filter(k => { const [y, m] = k.split('-').map(Number); return ymNum(y, m) >= ymNum(JEU_DEBUT.y, JEU_DEBUT.m); }).length;
   const budTenu3 = budgetsDefiables().some(c => maxSerie(M.map(x => { const b = x.bu.find(z => z.c.nom === c.nom); return !!b && b.reste >= -0.5; })) >= 3);
   const v = {
-    M, J, cote, nCote: coteL.length, rembs, defisLances,
+    M, J, cote, nCote: coteL.length, nCoteMois, rembs, defisLances,
     serieJours: maxSerie(J.map(x => x[1])),
     serieJoursCur: S.journal.some(e => !e.deleted && e.date === auj() && e.montant > 0 && casseSerie(e.cat)) ? 0 : finSerie(J.map(x => x[1])),
     vertCur: finSerie(M.map(x => x.vert)), zeroCur: finSerie(M.map(x => x.zero)), defiCur: finSerie(M.map(x => x.defiOk)),
-    epargne: moisJeu().concat([[now.getFullYear(), now.getMonth() + 1]]).reduce((t, [y, m]) => t + calc(y, m).epV, 0),
+    epargne: moisJeu().reduce((t, [y, m]) => t + calc(y, m).epV, 0) + epargneCourante(), // réellement versée : pas les virements à venir
     joursSans: J.filter(x => x[1] === true).length,
     vertSerie: maxSerie(M.map(x => x.vert)), nVert: M.filter(x => x.vert).length,
     zeroSerie: maxSerie(M.map(x => x.zero)), nZero: M.filter(x => x.zero).length,
@@ -2600,6 +2607,13 @@ function faitsJeu() {
     v.objOk = ouvert('objectif') ? Object.keys(objectifs()).filter(y => +y >= 2026 && (etatObjectif(+y) || {}).atteint).length : 0;
   } catch (e) { Object.assign(v, { objOk: 0, semOk: 0, novOk: 0, aventOk: 0 }); }
   S._jeu = { k: memo, q: S.journal.length, v }; return v;
+}
+// Épargne du mois en cours déjà passée : lignes datées jusqu'à aujourd'hui + prélèvements de l'échéancier dont le jour est arrivé
+function epargneCourante() {
+  const y = now.getFullYear(), m = now.getMonth() + 1, A = auj(), cm = catMap(), ep = n => { const c = cm[n]; return !!c && c.type === 'Épargne' && !estAv(n); };
+  let t = S.journal.filter(e => !e.deleted && e.y === y && e.m === m && e.montant && ep(e.cat) && (!e.date || e.date <= A)).reduce((s, e) => s + e.montant, 0);
+  ((S.data && S.data.echeancier) || []).forEach(e => { if (ep(e.cat) && (e.jour || 1) <= now.getDate()) t += echMontant(e, y, m); });
+  return t;
 }
 // --- Succès (une fois) ---
 const SUCCES = [
@@ -2654,7 +2668,30 @@ const SUCCES = [
   ['missions-12', 'extreme', 'Agent double zéro', 'Réussir 12 missions du mois', f => [f.missions, 12]],
   ['taux-25-3', 'extreme', 'Fourmi reine', '3 mois à 25 % de revenus non dépensés', f => [f.taux25, 3]],
   ['semaines-25', 'extreme', 'Métronome', 'Réussir 25 défis de la semaine', f => [f.semOk, 25]],
-  ['vert-24', 'extreme', 'Deux ans verts', '24 mois dans le vert d\'affilée', f => [f.vertSerie, 24, f.vertCur]]
+  ['vert-24', 'extreme', 'Deux ans verts', '24 mois dans le vert d\'affilée', f => [f.vertSerie, 24, f.vertCur]],
+  // 9.5 : paliers de long terme (rien n'est gagnable avec un seul mois d'historique ; les extrêmes demandent des années)
+  ['verts-2', 'facile', 'Deux fois vert', 'Finir 2 mois dans le vert', f => [f.nVert, 2]],
+  ['defis-2', 'facile', 'Doublé', 'Réussir 2 défis du mois', f => [f.defisOk, 2]],
+  ['coffre-3', 'facile', 'Écureuil', 'Mettre de côté le reste de 3 mois différents', f => [f.nCoteMois, 3]],
+  ['weekends-8', 'moyen', 'Huit week-ends calmes', '8 week-ends sans dépense courante', f => [f.weekends, 8]],
+  ['semaines-10', 'moyen', 'Dix semaines', 'Réussir 10 défis de la semaine', f => [f.semOk, 10]],
+  ['taux-10-3', 'moyen', 'Épargnant régulier', '3 mois à 10 % de revenus non dépensés', f => [f.taux10, 3]],
+  ['jours-tot-100', 'difficile', 'Cent jours calmes', '100 jours sans dépense courante au total', f => [f.joursSans, 100]],
+  ['semaines-20', 'difficile', 'Vingt semaines', 'Réussir 20 défis de la semaine', f => [f.semOk, 20]],
+  ['ev-15', 'difficile', "Traqueur d'éclairs", 'Réussir 15 événements éclair', f => [f.evOk.length, 15]],
+  ['verts-18', 'difficile', 'Dix-huit mois verts', 'Finir 18 mois dans le vert (pas forcément d\'affilée)', f => [f.nVert, 18]],
+  ['jours-60', 'extreme', 'Ermite', '60 jours d\'affilée sans dépense courante', f => [f.serieJours, 60, f.serieJoursCur]],
+  ['jours-90', 'extreme', 'Saison blanche', '90 jours d\'affilée sans dépense courante', f => [f.serieJours, 90, f.serieJoursCur]],
+  ['jours-tot-365', 'extreme', 'Une année de calme', '365 jours sans dépense courante au total', f => [f.joursSans, 365]],
+  ['verts-36', 'extreme', 'Trente-six mois verts', 'Finir 36 mois dans le vert', f => [f.nVert, 36]],
+  ['zero-12', 'extreme', 'Douze sans faute', '12 mois sans aucun budget dépassé (au total)', f => [f.nZero, 12]],
+  ['defis-30', 'extreme', 'Trentenaire', 'Réussir 30 défis du mois', f => [f.defisOk, 30]],
+  ['missions-24', 'extreme', 'Agent émérite', 'Réussir 24 missions du mois', f => [f.missions, 24]],
+  ['ev-30', 'extreme', "Maître des éclairs", 'Réussir 30 événements éclair', f => [f.evOk.length, 30]],
+  ['ev-leg-3', 'extreme', 'Triple légende', 'Réussir 3 événements légendaires', f => [f.evOk.filter(x => x.def.rar === 'legendaire').length, 3]],
+  ['cote-20000', 'extreme', 'Coffre-fort', 'Épargner 20 000 € depuis novembre 2026', f => [Math.round(f.epargne), 20000]],
+  ['taux-25-6', 'extreme', 'Colonie de fourmis', '6 mois à 25 % de revenus non dépensés', f => [f.taux25, 6]],
+  ['avent-2', 'extreme', 'Deux Noëls', "Réussir 2 calendriers de l'avent (15 cases)", f => [f.aventOk, 2]]
 ].map(([id, d, nom, txt, fn]) => ({ id, d, nom, txt, fn }));
 function etatJeu() {
   const f = faitsJeu(); if (S._etat && S._etat.f === f) return S._etat.v; // même faits → même état (mémorisé)
@@ -2697,16 +2734,66 @@ function annoncerJeu() {
   if (!on('jeu') || !S.data) return;
   const e = etatJeu();
   // première fois : on mémorise sans rien annoncer
-  if (LS.get('nivVu', null) == null) { journaliserXP(e); LS.set('nivVu', e.niv); LS.set('xpVu', e.xp); LS.set('cosmVus', tousCosm().filter(o => debloque(o, e.niv)).map(o => o.t + ':' + o.id)); nouveautes(e); return; }
-  journaliserXP(e);
+  try { nettoyerVitrine(); verifierCosmetiques(); } catch (err) {}
+  if (LS.get('nivVu', null) == null) { journaliserXP(e); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('xpVu', e.xp); LS.set('cosmVus', tousCosm().filter(o => debloque(o, e.niv)).map(o => o.t + ':' + o.id)); nouveautes(e); return; }
+  const ch = journaliserXP(e), dm = defisMoisChange(e);
   const dxp = e.xp - LS.get('xpVu', e.xp); if (dxp > 0) xpFlottante(dxp); LS.set('xpVu', e.xp);
   const n = nouveautes(e); if (n.length) LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
   const avant = LS.get('nivVu', e.niv);
   if (e.niv > avant) { LS.set('nivVu', e.niv); ecranNiveau(avant, e); return; }
   if (e.niv < avant) LS.set('nivVu', e.niv);
   { const pv = LS.get('prestVu', null); if (pv == null) LS.set('prestVu', e.prest); else if (e.prest > pv) { LS.set('prestVu', e.prest); ecranNiveau(pv, e, true); return; } else if (e.prest < pv) LS.set('prestVu', e.prest); }
-  if (n.length) { const s0 = SUCCES.find(x => 's:' + x.id === n[0]); const dbq = tousCosm().filter(o => o.suc === s0.id); toast('🏆 Succès : ' + s0.nom + ' (+' + DIFF[s0.d].xp + ' XP)' + (dbq.length ? ' · débloque « ' + dbq.map(o => o.nom).join(' », « ') + ' »' : ''), 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = dbq.length ? 'style' : 'succes'; if (dbq.length) S.collT = dbq[0].t; rendre(); scrollTo(0, 0); }); celebrer(); }
-  majBadgeProgres(e); annoncerEv();
+  majBadgeProgres(e);
+  const ev = annoncerEv() || { gagnes: [], neuf: null };
+  annoncerGains(e, ch, n, ev, dm);
+}
+// --- Annonce explicite des gains : une carte, une ligne par gain avec son XP (succès, événements, défis, jours…) ---
+const GAINS_LIB = {
+  'Jours sans dépense courante': n => n + ' jour' + (n > 1 ? 's' : '') + ' sans dépense', 'Mois bouclés': n => n > 1 ? n + ' mois bouclés' : 'Mois bouclé',
+  'Mois dans le vert': n => (n > 1 ? n + ' mois' : 'Mois') + ' dans le vert', 'Défis réussis': n => n > 1 ? n + ' défis du mois réussis' : 'Défi du mois réussi',
+  'Restes mis de côté': n => n > 1 ? n + ' restes mis de côté' : 'Reste du mois mis de côté', 'Mois sans budget dépassé': n => (n > 1 ? n + ' mois' : 'Mois') + ' sans budget dépassé',
+  'Mois à 10 % non dépensés': n => (n > 1 ? n + ' mois' : 'Mois') + ' à 10 % non dépensés', 'Mois à 25 % non dépensés': n => (n > 1 ? n + ' mois' : 'Mois') + ' à 25 % non dépensés',
+  'Défis de la semaine réussis': n => n > 1 ? n + ' défis de la semaine réussis' : 'Défi de la semaine réussi', 'Missions du mois réussies': n => n > 1 ? n + ' missions du mois réussies' : 'Mission du mois réussie',
+  'Week-ends sans dépense': n => n > 1 ? n + ' week-ends sans dépense' : 'Week-end sans dépense' };
+// Mois dont le défi est réussi : sert à dire « défi de novembre » plutôt que « défi du mois »
+function defisMoisChange(e) {
+  const ok = e.f.M.filter(x => x.defiOk).map(x => x.y + '-' + x.m), avant = LS.get('defisOkMois', null); LS.set('defisOkMois', ok);
+  return avant ? { plus: ok.filter(k => !avant.includes(k)), moins: avant.filter(k => !ok.includes(k)) } : { plus: [], moins: [] };
+}
+const moisDefi = k => MOIS[+k.split('-')[1] - 1].toLowerCase();
+function annoncerGains(e, ch, nv, ev, dm) {
+  const G = [], P = [], fx = v => (v > 0 ? '+' : '−') + Math.abs(v) + ' XP';
+  let voir = null, fete = false, dbqTout = [];
+  const sucs = new Set(ch.filter(c => c.k.startsWith('s:') && c.v > 0).map(c => c.k).concat(nv));
+  sucs.forEach(k => { const s = SUCCES.find(x => 's:' + x.id === k); if (!s) return; const dbq = tousCosm().filter(o => o.suc === s.id); dbqTout = dbqTout.concat(dbq);
+    G.push('🏆 Succès « ' + s.nom + ' » · +' + DIFF[s.d].xp + ' XP' + (dbq.length ? ' · débloque « ' + dbq.map(o => o.nom).join(' », « ') + ' »' : '')); fete = true; });
+  ev.gagnes.forEach(x => { G.push('🏅 Badge « ' + x.def.nom + ' » · +' + RAR[x.def.rar].xp + ' XP'); fete = true; });
+  ch.forEach(c => {
+    if (c.k.startsWith('s:')) { if (c.v < 0) P.push(fx(c.v) + ' · succès « ' + libXP(c.k).replace(/^Succès « |»$/g, '').trim() + ' » perdu (ligne ajoutée ou corrigée)'); return; }
+    const lab = c.k.slice(2); if (c.v > 0 && /^Événements .* réussis$/.test(lab) && ev.gagnes.length) return; // déjà dit par le badge
+    const r = e.rec.find(x => x[0] === lab), u = r && r[2] > 0 ? r[2] : 0, n = u ? Math.max(1, Math.round(Math.abs(c.v) / u)) : 1;
+    if (lab === 'Défis réussis' && (c.v > 0 ? dm.plus : dm.moins).length === n) { const L = (c.v > 0 ? dm.plus : dm.moins).map(moisDefi).join(', ');
+      if (c.v > 0) G.push('🎯 Défi de ' + L + ' réussi · ' + fx(c.v)); else P.push(fx(c.v) + ' · défi de ' + L + ' annulé (dépense ajoutée ou corrigée)'); return; }
+    const t = (GAINS_LIB[lab] || (k => (k > 1 ? k + ' × ' : '') + lab))(n);
+    if (c.v > 0) G.push(t + ' · ' + fx(c.v)); else P.push(fx(c.v) + ' · ' + t.charAt(0).toLowerCase() + t.slice(1) + ' en moins (ligne ajoutée ou corrigée)');
+  });
+  if (ev.neuf) G.push('⚡ Nouvel événement : ' + ev.neuf.def.nom);
+  if (!G.length && !P.length) return;
+  if (dbqTout.length) voir = () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'style'; S.collT = dbqTout[0].t; rendre(); scrollTo(0, 0); };
+  else if (fete || G.length) voir = () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = ev.neuf && !fete ? 'defis' : 'succes'; rendre(); scrollTo(0, 0); };
+  const plus = ch.filter(c => c.v > 0).reduce((t, c) => t + c.v, 0), moins = ch.filter(c => c.v < 0).reduce((t, c) => t - c.v, 0);
+  carteGains(plus > 0 ? 'GAGNÉ · +' + plus + ' XP' : G.length ? 'DU NOUVEAU' : 'XP RECALCULÉE · −' + moins + ' XP', G, P, voir);
+  if (fete) celebrer();
+}
+function carteGains(titre, G, P, voir) {
+  const ancien = $('#gains'); if (ancien) ancien.remove(); document.querySelectorAll('.xpf').forEach(x => x.remove()); // la carte dit déjà l'XP
+  const el = document.createElement('div'); el.id = 'gains'; el.setAttribute('role', 'status');
+  const L = G.slice(0, 6), reste = G.length + P.length - L.length - Math.min(P.length, 2);
+  el.innerHTML = `<b>${esc(titre)}</b>${L.map(t => `<div>${esc(t)}</div>`).join('')}${P.slice(0, 2).map(t => `<div class="gperte">${esc(t)}</div>`).join('')}${reste > 0 ? `<div class="gperte">+ ${reste} autre${reste > 1 ? 's' : ''} · voir le journal d'XP</div>` : ''}${voir ? '<span class="gvoir">VOIR ›</span>' : ''}`;
+  document.body.appendChild(el); requestAnimationFrame(() => el.classList.add('on'));
+  const fin = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 300); };
+  clearTimeout(S._gainsT); S._gainsT = setTimeout(fin, 4800);
+  el.onclick = ev => { clearTimeout(S._gainsT); fin(); if (voir && ev.target.closest('.gvoir')) voir(); };
 }
 // --- Journal de l'XP : chaque gain ou perte, avec sa source (gardé sur ce téléphone) ---
 function detailXP(e) {
@@ -2721,11 +2808,12 @@ function libXP(k) {
 }
 function journaliserXP(e) {
   const avant = LS.get('xpDetail', null), apres = detailXP(e); LS.set('xpDetail', apres);
-  if (!avant) return; // premier passage : on pose juste la référence
+  if (!avant) return []; // premier passage : on pose juste la référence
   const L = LS.get('xpLog', []), d = new Date(), h = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-  let n = 0;
-  new Set(Object.keys(avant).concat(Object.keys(apres))).forEach(k => { const v = (apres[k] || 0) - (avant[k] || 0); if (v) { L.unshift({ j: auj(), h, k, v }); n++; } });
-  if (n) LS.set('xpLog', L.slice(0, 100));
+  const ch = [];
+  new Set(Object.keys(avant).concat(Object.keys(apres))).forEach(k => { const v = (apres[k] || 0) - (avant[k] || 0); if (v) { L.unshift({ j: auj(), h, k, v }); ch.push({ k, v }); } });
+  if (ch.length) LS.set('xpLog', L.slice(0, 100));
+  return ch; // les changements, pour la carte des gains
 }
 function rendreXpInfo() {
   const G = [
@@ -2816,7 +2904,7 @@ function recompensesAVenir(e) {
 }
 function blocNiveau(e) {
   const prochain = tousCosm().filter(o => !o.suc && !o.prest && o.niv > e.niv).sort((a, b) => a.niv - b.niv)[0];
-  const ti = LS.get('cos_titre', '') || e.titre, M = dispo('cosmetiques') && cos('mascotte') !== 'off' ? mascotte() : null;
+  const ti = titreCos(e), M = dispo('cosmetiques') && cos('mascotte') !== 'off' ? mascotte() : null;
   if (e.niv === NIV_MAX) {
     const pr = tousCosm().filter(o => o.prest > e.prest).sort((a, b) => a.prest - b.prest)[0], pt = PRESTIGE_TITRES.find(t => t[0] > e.prest);
     return `<div class="niv prestige ${palier(e.niv)}">${M ? `<button class="mascn" data-act="masc">${M.s[1]}</button>` : ''}<div class="nivh"><b>NIV. 30</b><span>${esc(ti.toUpperCase())}</span><small>${e.xp} XP</small></div>
@@ -2931,11 +3019,22 @@ const ouvert = k => dispo(k) && on(k === 'cosmetiques' ? 'jeu' : k);
 // --- Défi de la semaine ---
 const lundi = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
 const isoJ = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-function depSemaine(cat, l) { const a = isoJ(l), f = new Date(l); f.setDate(f.getDate() + 6); const b = isoJ(f); return S.journal.filter(e => !e.deleted && e.date && e.date >= a && e.date <= b && e.cat === cat && e.montant > 0).reduce((t, e) => t + e.montant, 0); }
+// Familles de catégories POUR LE JEU SEULEMENT (défi de la semaine, mission « coup de frein ») :
+// « Jeux de société » et « Jeux vidéos » (et leurs variantes d'écriture) comptent ensemble comme « Biens personnels ».
+// Budgets, stats, Journal et Sheet ne changent pas. Aucune catégorie de la famille → aucun effet.
+const FAMILLES_JEU = [['Biens personnels', /^jeux? (de )?(societe|video)s?$/]];
+const nomJeuNorm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+function familleJeu(cat) { const n = nomJeuNorm(cat), f = FAMILLES_JEU.find(x => x[1].test(n)); return f ? f[0] : cat; }
+// Catégories réelles derrière un nom du jeu : les membres d'une famille, sinon la catégorie elle-même (un ancien défi sur « Jeux vidéos » reste sur « Jeux vidéos »)
+function catsJeu(nom) { const L = FAMILLES_JEU.some(x => x[0] === nom) ? cats().filter(c => familleJeu(c.nom) === nom).map(c => c.nom) : []; return L.length ? L.concat(L.includes(nom) ? [] : [nom]) : [nom]; }
+const depMoisJeu = (nom, y, m) => catsJeu(nom).reduce((t, c) => t + depenseMois(c, y, m), 0);
+function depSemaine(cat, l) { const a = isoJ(l), f = new Date(l); f.setDate(f.getDate() + 6); const b = isoJ(f), C = catsJeu(cat); return S.journal.filter(e => !e.deleted && e.date && e.date >= a && e.date <= b && C.includes(e.cat) && e.montant > 0).reduce((t, e) => t + e.montant, 0); }
 function propositionSemaine() {
-  const l = lundi(now); const cand = budgetsDefiables().filter(c => c.suivi === 'Mensuel' || c.suivi === 'Annuel').map(c => {
-    let t = 0; for (let k = 1; k <= 4; k++) { const d = new Date(l); d.setDate(d.getDate() - 7 * k); t += depSemaine(c.nom, d); }
-    const moy = t / 4 || c.budget * 12 / 52; return { cat: c.nom, moy };
+  const l = lundi(now), G = {};
+  budgetsDefiables().filter(c => c.suivi === 'Mensuel' || c.suivi === 'Annuel').forEach(c => { const k = familleJeu(c.nom); (G[k] = G[k] || []).push(c); });
+  const cand = Object.keys(G).map(k => {
+    let t = 0; for (let w = 1; w <= 4; w++) { const d = new Date(l); d.setDate(d.getDate() - 7 * w); t += depSemaine(k, d); }
+    const moy = t / 4 || G[k].reduce((s, c) => s + c.budget, 0) * 12 / 52; return { cat: k, moy };
   }).sort((a, b) => b.moy - a.moy)[0];
   if (!cand) return null;
   return { cat: cand.cat, montant: Math.max(5, Math.round(cand.moy * 0.8 / 5) * 5) };
@@ -3053,7 +3152,16 @@ const AFFICHES = {
   'defis-suite-3': ['station', 2, "L'ENCHAÎNEMENT"], 'chelem': ['vaisseau', 2, 'LE GRAND CHELEM'], 'missions-6': ['nebuleuse', 1, 'AGENT SPÉCIAL'], 'chelem-3': ['trounoir', 1, 'LA TRILOGIE'],
   'ev-5': ['comete', 0, "CHASSEURS D'ÉCLAIRS"], 'jours-tot-50': ['dunes', 1, 'CINQUANTE SOLEILS'], 'ev-leg': ['portail', 2, 'LA LÉGENDE'], 'ev-tous': ['nebuleuse', 2, 'LA COLLECTION'],
   'jours-tot-200': ['lune', 0, "L'ASCÈTE"], 'missions-12': ['vaisseau', 0, 'DOUBLE ZÉRO'], 'taux-25-3': ['foret', 0, 'LA FOURMILIÈRE'], 'semaines-25': ['ville', 0, 'MÉTRONOME'],
-  'vert-24': ['foret', 2, 'LA SAGA VERTE'], 'cote-1000': ['canyon', 0, "LA RUÉE VERS L'OR"] };
+  'vert-24': ['foret', 2, 'LA SAGA VERTE'], 'cote-1000': ['canyon', 0, "LA RUÉE VERS L'OR"],
+  // 9.5 : nouvelles affiches (décors existants)
+  'verts-2': ['foret', 1, 'LES DEUX RIVES'], 'defis-2': ['comete', 2, 'LE DOUBLÉ'], 'coffre-3': ['canyon', 1, "L'ÉCUREUIL D'ORBITE"],
+  'weekends-8': ['ocean', 0, 'HUIT MARÉES'], 'semaines-10': ['ville', 1, 'DIX SEMAINES'], 'taux-10-3': ['ocean', 2, 'LES TROIS LUNES'],
+  'jours-tot-100': ['dunes', 0, 'CENT SOLEILS'], 'semaines-20': ['station', 1, 'LA RONDE DES SEMAINES'], 'ev-15': ['comete', 1, 'LA TRAQUE'],
+  'verts-18': ['foret', 2, 'LA GRANDE CANOPÉE'], 'jours-60': ['lune', 1, "L'ERMITE DE SÉLÈNE"], 'jours-90': ['aurore', 2, 'LA SAISON BLANCHE'],
+  'jours-tot-365': ['dunes', 2, 'UNE ANNÉE DE SABLE'], 'verts-36': ['aurore', 1, 'LA FORÊT ÉTERNELLE'], 'zero-12': ['vaisseau', 2, 'LA FLOTTE PARFAITE'],
+  'defis-30': ['nebuleuse', 1, 'LES TRENTE ÉPREUVES'], 'missions-24': ['portail', 1, 'AGENT ÉMÉRITE'], 'ev-30': ['nebuleuse', 0, 'LE MAÎTRE DES ÉCLAIRS'],
+  'ev-leg-3': ['portail', 2, 'LA TRIPLE LÉGENDE'], 'cote-20000': ['trounoir', 0, 'LE COFFRE-FORT'], 'taux-25-6': ['trounoir', 1, 'LA COLONIE'],
+  'avent-2': ['neige', 0, 'DEUX NOËLS SUR ANDROMÈDE'] };
 const afficheDe = id => AFFICHES[id] || ['orbite', 0, 'ORBITE'];
 // Écusson de chaque événement éclair : scène + variante
 const ECUSSONS = { blanche: ['lune', 0], cochon: ['canyon', 0], chrono: ['comete', 0], trois5: ['nebuleuse', 2], cocon: ['ocean', 1], maison: ['foret', 0], folie: ['aurore', 0], sobre: ['dunes', 0],
@@ -3120,12 +3228,23 @@ function badgesGagnes() {
   return L;
 }
 function vitrine() { const p = getPref('jeu', {}) || {}; return Array.isArray(p.vitrine) ? p.vitrine : null; }
+// Les succès ne sont pas mémorisés (une dépense saisie après coup peut en faire perdre un) :
+// la vitrine ne compte que les badges ENCORE gagnés (compteurs n/3, limite de 3).
+function vitrineValide() {
+  const v = vitrine() || []; if (!v.length || !on('jeu') || !S.data) return v;
+  const G = new Set(badgesGagnes().map(b => b.id)); return v.filter(id => G.has(id));
+}
+// Retire de la préférence les badges perdus (appelé après chaque affichage, une fois les données chargées)
+function nettoyerVitrine() {
+  const v = vitrine(); if (!v || !v.length || !on('jeu') || !S.data) return;
+  const w = vitrineValide(); if (w.length !== v.length) setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: w }));
+}
 function vitrineAffichee() {
   const G = badgesGagnes(), v = vitrine();
   return (v || []).map(id => G.find(b => b.id === id)).filter(Boolean).slice(0, 3); // rien d'affiché tant que tu n'as rien épinglé
 }
 function basculerVitrine(id) {
-  let v = (vitrine() || []).slice();
+  let v = vitrineValide().slice();
   v = v.includes(id) ? v.filter(x => x !== id) : v.concat(id);
   if (v.length > 3) { toast('3 badges maximum à côté de la jauge : retire-en un d\'abord'); return; }
   setPref('jeu', Object.assign({}, getPref('jeu', {}) || {}, { vitrine: v })); rendre(true); if (S.form && S.form.mode === 'vitrine') rendreVitrine();
@@ -3142,15 +3261,27 @@ function pauserHorsEcran(racine) {
 }
 function rendreVideotheque() {
   const e = etatJeu(), L = e.succes.slice().sort((a, b) => (b.ok - a.ok) || (DN[a.d] - DN[b.d]));
-  $('#sheetIn').innerHTML = enteteSheet('TA VIDÉOTHÈQUE · ' + e.succes.filter(s => s.ok).length + '/' + e.succes.length, null) + `<div class="vidtop"><span>Touche une affiche pour la voir en grand</span><button class="pinchip" data-act="vitrine">📌 ${(vitrine() || []).length}/3 au profil</button></div>
+  $('#sheetIn').innerHTML = enteteSheet('TA VIDÉOTHÈQUE · ' + e.succes.filter(s => s.ok).length + '/' + e.succes.length, null) + `<div class="vidtop"><span>Touche une affiche pour la voir en grand</span><button class="pinchip" data-act="vitrine">📌 ${vitrineValide().length}/3 au profil</button></div>
     <div class="vidgrid">${L.map(s => `<button data-act="plein" data-id="${s.id}">${affiche(s.id, DN[s.d], 72, !s.ok)}${s.ok && epingle('s:' + s.id) ? '<i class="pinmk">📌</i>' : ''}<small>${esc(s.nom)}</small><em>${s.ok ? CADRES.a[DN[s.d]] : s.cur + '/' + s.max}</em></button>`).join('')}</div>`;
   pauserHorsEcran($('#sheetIn'));
 }
 // Affiche en plein écran : titre, comment l'obtenir, et l'épingler au profil
 function ouvrirPlein(id) {
-  const e = etatJeu(), s = e.succes.find(x => x.id === id); if (!s) return;
   let o = $('#plein'); if (!o) { o = document.createElement('div'); o.id = 'plein'; document.body.appendChild(o); }
-  const ep = epingle('s:' + s.id), n = (vitrine() || []).length, fmt = CADRES.a[DN[s.d]];
+  if (String(id).startsWith('e:')) { // écusson d'événement (gagné) : même plein écran
+    const b = badgesGagnes().find(x => x.id === id); if (!b) return;
+    const ep = epingle(id), n = vitrineValide().length, d = EVENEMENTS.find(x => x.id === id.slice(2)), sx = SAISONS_FIXES.concat(SAISONS_EV).find(x => x.id === id.slice(2));
+    const rar = RAR[(d || sx || { rar: 'commune' }).rar], inst = d ? (etatJeu().f.evOk || []).filter(x => x.def.id === d.id).pop() : null; // texte de la dernière réussite
+    o.innerHTML = `<div class="plbox"><button class="plx" data-act="plein-x" aria-label="Fermer">✕</button>
+      <div class="plaf">${b.r(Math.min(300, Math.round(innerWidth * .72)))}</div>
+      <h3>${esc(b.nom)}</h3>
+      <button class="plpin ${ep ? 'on' : ''}" data-act="plein-pin" data-id="${esc(id)}">${ep ? '📌 ÉPINGLÉ AU PROFIL · RETIRER' : n >= 3 ? '📌 PROFIL COMPLET (3/3) · TOUCHE POUR GÉRER' : '📌 ÉPINGLER AU PROFIL (' + n + '/3)'}</button>
+      ${inst ? `<p>${esc(inst.txt)}</p>` : sx && sx.txt ? `<p>${esc(sx.txt)}</p>` : ''}
+      <div class="plmeta">ÉCUSSON ${CADRES.e[rar.n]} · ${rar.l}${b.n > 1 ? ' · ×' + b.n : ''}</div></div>`;
+    o.classList.add('on'); return;
+  }
+  const e = etatJeu(), s = e.succes.find(x => x.id === id); if (!s) return;
+  const ep = epingle('s:' + s.id), n = vitrineValide().length, fmt = CADRES.a[DN[s.d]];
   o.innerHTML = `<div class="plbox"><button class="plx" data-act="plein-x" aria-label="Fermer">✕</button>
     <div class="plaf">${affiche(s.id, DN[s.d], Math.min(300, Math.round(innerWidth * .72)), !s.ok)}</div>
     <h3>${esc(s.nom)}</h3>
@@ -3164,12 +3295,12 @@ function ouvrirPlein(id) {
 function fermerPlein() { const o = $('#plein'); if (o) o.classList.remove('on'); }
 function blocVideotheque(e) {
   const ok = e.succes.filter(s => s.ok), der = ok.slice(-4).reverse(), prochains = e.succes.filter(s => !s.ok).sort((a, b) => b.cur / b.max - a.cur / a.max).slice(0, 4 - der.length);
-  return `<button class="vidban" data-act="videotheque"><div class="vidh"><b>🎬 TA VIDÉOTHÈQUE <span class="pinchip" data-act="vitrine" role="button">📌 ${(vitrine() || []).length}/3 au profil</span></b><span>${ok.length}/${e.succes.length} affiches ›</span></div><div class="vidrow">${der.map(s => affiche(s.id, DN[s.d], 58)).join('')}${prochains.map(s => affiche(s.id, DN[s.d], 58, true)).join('')}</div></button>`;
+  return `<button class="vidban" data-act="videotheque"><div class="vidh"><b>🎬 TA VIDÉOTHÈQUE <span class="pinchip" data-act="vitrine" role="button">📌 ${vitrineValide().length}/3 au profil</span></b><span>${ok.length}/${e.succes.length} affiches ›</span></div><div class="vidrow">${der.map(s => affiche(s.id, DN[s.d], 58)).join('')}${prochains.map(s => affiche(s.id, DN[s.d], 58, true)).join('')}</div></button>`;
 }
 function rendreVitrine() {
   const G = badgesGagnes(), v = vitrine() || [];
   $('#sheetIn').innerHTML = enteteSheet('BADGES À CÔTÉ DE LA JAUGE', null) + `<div class="note" style="display:block;margin-top:10px">Touche un badge pour l'afficher ou le retirer (3 maximum).</div>
-    ${G.length ? `<div class="vitgrid">${G.map(b => `<button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${b.r(60)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button>`).join('')}</div>${G.filter(b => b.amb).map(b => `<button class="ghost" data-act="amb-go" data-a="${b.amb}" style="margin-top:8px">🎨 APPLIQUER L'AMBIANCE « ${esc(b.nom.toUpperCase())} »</button>`).join('')}` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
+    ${G.length ? `<div class="vitgrid">${G.map(b => `<div class="vitc"><button class="${v.includes(b.id) ? 'on' : ''}" data-act="vit" data-id="${b.id}">${b.r(60)}<small>${esc(b.nom)}</small><em>${v.includes(b.id) ? '✓ AFFICHÉ' : 'AFFICHER'}</em></button><button class="vitbig" data-act="plein" data-id="${b.id.startsWith('s:') ? b.id.slice(2) : b.id}">VOIR EN GRAND</button></div>`).join('')}</div>${G.filter(b => b.amb).map(b => `<button class="ghost" data-act="amb-go" data-a="${b.amb}" style="margin-top:8px">🎨 APPLIQUER L'AMBIANCE « ${esc(b.nom.toUpperCase())} »</button>`).join('')}` : '<div class="note" style="display:block">Aucun badge gagné pour l\'instant.</div>'}
     ${v.length ? `<button class="ghost" data-act="vit-vider" style="margin-top:12px">NE PLUS RIEN AFFICHER</button>` : ''}`;
   pauserHorsEcran($('#sheetIn'));
 }
@@ -3285,14 +3416,14 @@ function blocBadgesEv(e) {
     <div class="note" style="display:block;margin-top:8px">Les événements éclair apparaissent certaines semaines, sans prévenir. Réussi : le badge est à toi (et compte en double si tu le regagnes). Raté : rien, il faudra attendre qu'il revienne.</div>`;
 }
 function annoncerEv() {
-  if (!ouvert('saison')) return;
+  if (!ouvert('saison')) return null;
   const L = planEvenements().map(etatEv), vus = LS.get('evVus', null), gagnes = LS.get('evGagnes', null);
   if (vus === null || gagnes === null) { LS.set('evVus', L.filter(x => x.fin < auj()).map(x => x.cle)); LS.set('evGagnes', L.filter(x => x.ok && x.fin < auj()).map(x => x.cle)); }
   const V = LS.get('evVus', []), G = LS.get('evGagnes', []);
-  const neuf = L.find(x => !V.includes(x.cle) && x.statut === 'cours'), gagne = L.find(x => x.ok && !G.includes(x.cle));
-  if (gagne) { LS.set('evGagnes', G.concat(gagne.cle).slice(-200)); celebrer(); toast('🏅 Badge « ' + gagne.def.nom + ' » gagné (+' + RAR[gagne.def.rar].xp + ' XP)', 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; rendre(); scrollTo(0, 0); }); }
-  else if (neuf) toast('⚡ Nouvel événement : ' + neuf.def.nom, 'VOIR', () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; rendre(); scrollTo(0, 0); });
-  if (neuf || gagne) LS.set('evVus', [...new Set(V.concat(L.filter(x => x.statut === 'cours' || x.fin < auj()).map(x => x.cle)))].slice(-200));
+  const neuf = L.find(x => !V.includes(x.cle) && x.statut === 'cours'), nouv = L.filter(x => x.ok && !G.includes(x.cle));
+  if (nouv.length) LS.set('evGagnes', G.concat(nouv.map(x => x.cle)).slice(-200));
+  if (neuf || nouv.length) LS.set('evVus', [...new Set(V.concat(L.filter(x => x.statut === 'cours' || x.fin < auj()).map(x => x.cle)))].slice(-200));
+  return { gagnes: nouv, neuf }; // annoncés ensemble dans la carte des gains (annoncerGains), plus par des toasts qui s'écrasent
 }
 // --- Mission du mois : tirée au sort pour chaque mois (même tirage sur tous tes appareils) ---
 const MISSIONS = [
@@ -3307,7 +3438,8 @@ function missionDe(y, m) {
   let i = tirageMission(y, m); const [py, pm] = reculer(y, m); if (i === tirageMission(py, pm)) i = (i + 1) % MISSIONS.length; // jamais deux fois la même d'affilée
   const mi = Object.assign({}, MISSIONS[i]);
   if (mi.id === 'baisse') {
-    const ex = exclusSerie(), top = cats().filter(c => estCourante(c.nom) && !ex.includes(c.nom)).map(c => ({ n: c.nom, v: depenseMois(c.nom, py, pm) })).sort((a, b) => b.v - a.v)[0];
+    const ex = exclusSerie(), G = [...new Set(cats().filter(c => estCourante(c.nom) && !ex.includes(c.nom)).map(c => familleJeu(c.nom)))]; // famille du jeu = une seule ligne
+    const top = G.map(n => ({ n, v: depMoisJeu(n, py, pm) })).sort((a, b) => b.v - a.v)[0];
     if (!top || top.v < 20) return Object.assign({}, MISSIONS[1]);
     mi.cat = top.n; mi.ref = top.v; mi.txt = mi.txt.replace('{cat}', top.n).replace('{v}', e0(top.v));
   }
@@ -3321,7 +3453,7 @@ function etatMission(y, m) {
   if (mi.id === 'we') { const JA = joursJeu(), pos = new Map(JA.map((x, i) => [x[0], i])); cur = J.some(x => { const n = JA[pos.get(x[0]) + 1]; return new Date(x[0] + 'T00:00:00').getDay() === 6 && x[1] === true && n && n[1] === true; }) ? 1 : 0; }
   else if (mi.id === 'j8') cur = J.filter(x => x[1] === true).length;
   else if (mi.id === 's5') cur = maxSerie(J.map(x => x[1]));
-  else if (mi.id === 'baisse') { mi.dep = depenseMois(mi.cat, y, m); cur = st === 'passe' && mi.dep < mi.ref - 0.005 ? 1 : 0; }
+  else if (mi.id === 'baisse') { mi.dep = depMoisJeu(mi.cat, y, m); cur = st === 'passe' && mi.dep < mi.ref - 0.005 ? 1 : 0; }
   const ok = cur >= mi.max;
   return Object.assign(mi, { cur: Math.min(cur, mi.max), ok, rate: !ok && st === 'passe', y, m });
 }
@@ -3620,7 +3752,22 @@ const ICO_COSM = { ambiance: '🌅', ui: '🖥️', theme: '🎨', texte: '🔤'
 const TYPES_COSM = [['ambiance', 'AMBIANCE'], ['ui', 'INTERFACE'], ['theme', 'COULEURS'], ['texte', 'POLICE'], ['skin', 'JAUGES'], ['accent', 'ACCENT'], ['aiguille', 'AIGUILLES'], ['tampon', 'TAMPONS'], ['police', 'CHIFFRES'], ['fete', 'FÊTES'], ['son', 'SON'], ['ticket', 'TICKET'], ['mascotte', 'MASCOTTE'], ['titre', 'TITRE']];
 const cleCos = t => t === 'skin' ? 'skin' : t === 'accent' ? 'accent' : 'cos_' + t;
 const defCos = t => ({ ambiance: 'aucune', ui: 'papier', texte: 'auto', skin: 'classique', accent: 'foret', theme: 'defaut', mascotte: 'off', tampon: 'encre', police: 'mono', fete: 'confettis', son: 'off', aiguille: 'classique', ticket: 'thermique', titre: '' })[t];
-const cos = t => on('jeu') ? LS.get(cleCos(t), defCos(t)) : defCos(t);
+// Un cosmétique équipé qui n'est plus débloqué (niveau ou succès perdu) revient au réglage par défaut, sans effacer le choix :
+// il revient tout seul s'il est regagné. Avant le chargement des données, on garde le choix (pas de clignotement).
+function cosDebloque(t, id) {
+  if (!S.data || id === defCos(t)) return true;
+  try { const o = tousCosm().find(x => x.t === t && x.id === id); return !o || debloque(o, etatJeu().niv); } catch (e) { return true; }
+}
+const cos = t => { if (!on('jeu')) return defCos(t); const v = LS.get(cleCos(t), defCos(t)); return cosDebloque(t, v) ? v : defCos(t); };
+// Titre choisi, s'il est encore débloqué (niveau ou étoiles de prestige)
+function titreCos(e) {
+  const t = LS.get('cos_titre', ''), k = TITRES.indexOf(t), p = PRESTIGE_TITRES.find(x => x[1] === t);
+  return t && ((k >= 0 && e.niv >= k + 1) || (p && e.prest >= p[0])) ? t : e.titre;
+}
+// Ré-applique les cosmétiques quand l'un d'eux devient (ou redevient) indisponible
+var cosSigApplique = null; // var : lisible dès le tout premier appliquerCosmetiques()
+const sigCos = () => TYPES_COSM.map(([t]) => t === 'titre' ? '' : cos(t)).join('|');
+function verifierCosmetiques() { if (sigCos() !== cosSigApplique) try { appliquerCosmetiques(); } catch (e) {} }
 function tousCosm() {
   const L = SKINS.map(o => Object.assign({ t: 'skin' }, o)).concat(ACCENTS.map(o => Object.assign({ t: 'accent' }, o)));
   return dispo('cosmetiques') ? L.concat(COSM_EXTRA, UI_SKINS, TEXTES) : L;
@@ -3637,6 +3784,7 @@ function appliquerCosmetiques() {
   d.amb = cos('ambiance'); if (d.amb && d.amb !== 'aucune') d.theme = AMB_SOMBRES.includes(d.amb) ? 'dark' : 'light'; // l'ambiance prend le pas sur les couleurs
   const mt = document.querySelector('meta[name=theme-color]'); if (mt && (sombre || clair || d.amb !== 'aucune')) mt.content = getComputedStyle(document.documentElement).getPropertyValue('--nav').trim() || mt.content;
   try { appliquerAccent(); } catch (e) {}
+  try { cosSigApplique = sigCos(); } catch (e) {}
 }
 // --- Fêtes ---
 function celebrer() {
@@ -3716,7 +3864,7 @@ function blocCollection(e) {
   const n = L.filter(o => debloque(o, e.niv)).length;
   let h = `<div class="sec"><span>COLLECTION</span><span>${n}/${L.length}${nouveaux.length ? ' · <b class="nouv">' + nouveaux.length + ' NOUVEAU' + (nouveaux.length > 1 ? 'X' : '') + '</b>' : ''}</span></div>
     <div class="cgrid">${(() => {
-      const cur = LS.get('cos_titre', '') || e.titre, nT = TITRES.filter((x, k) => e.niv >= k + 1).length + PRESTIGE_TITRES.filter(x => e.prest >= x[0]).length;
+      const cur = titreCos(e), nT = TITRES.filter((x, k) => e.niv >= k + 1).length + PRESTIGE_TITRES.filter(x => e.prest >= x[0]).length;
       const tuile = ([t, l]) => { const Lt = L.filter(o => o.t === t), u = Lt.filter(o => debloque(o, e.niv)).length;
         return `<button class="${T === t ? 'on' : ''}" data-act="colt" data-t="${t}"><span>${ICO_COSM[t] || '✨'}</span>${l}<small>${u}/${Lt.length}</small>${nouveaux.some(o => o.t === t) ? '<i></i>' : ''}</button>`; };
       return `<button class="ctitre ${T === 'titre' ? 'on' : ''}" data-act="colt" data-t="titre"><span>👑</span><div><small>TITRE · ${nT}/${TITRES.length + PRESTIGE_TITRES.length}</small><b>${esc(cur.toUpperCase())}</b></div><em>CHANGER ›</em></button>`
@@ -3724,11 +3872,11 @@ function blocCollection(e) {
     })()}</div>
     <div class="grp" style="margin:4px 0 8px">${esc((TYPES_COSM.find(x => x[0] === T) || ['', ''])[1])}</div>`;
   if (T === 'titre') {
-    const cur = LS.get('cos_titre', '') || e.titre;
+    const cur = titreCos(e);
     return h + `<div class="chips">${TITRES.map((ti, k) => { const u = e.niv >= k + 1; return `<button class="chip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-niv="${k + 1}" style="${u ? '' : 'opacity:.4'}">${u ? '' : '🔒 '}${esc(ti)}</button>`; }).join('')}</div>
       <div class="grp" style="margin-top:12px">TITRES DE PRESTIGE</div><div class="chips">${PRESTIGE_TITRES.map(([n, ti]) => { const u = e.prest >= n; return `<button class="chip pchip ${cur === ti ? 'on' : ''}" data-act="${u ? 'titre' : 'lock'}" data-t="${esc(ti)}" data-prest="${n}" style="${u ? '' : 'opacity:.4'}">${u ? '★ ' : '☆' + n + ' '}${esc(ti)}</button>`; }).join('')}</div>`;
   }
-  const sel = LS.get(cleCos(T), defCos(T));
+  const sel = cos(T); // un choix devenu indisponible s'affiche comme le réglage par défaut
   if (T === 'ui') chargerPolices([].concat(...UI_SKINS.map(o => o.f))); if (T === 'texte') chargerPolices(TEXTES.map(o => o.ff).filter(Boolean));
   if (T === 'ui' || T === 'texte' || T === 'theme' || T === 'ambiance') h += `<div class="note" style="display:block;margin:0 0 8px">Touche un style verrouillé pour l'essayer 4 secondes.</div>`;
   h += `<div class="coll ${T === 'skin' ? 'c3' : ''}">`;
@@ -4087,6 +4235,7 @@ document.addEventListener('click', ev => {
     case 'al-ok': LS.set('alertesVues', LS.get('alertesVues', []).concat(el.dataset.id).slice(-200)); rendre(true); break;
     case 'allalertes': S.allAlertes = !S.allAlertes; rendre(true); break;
     case 'ptab': S.progT = el.dataset.t; LS.set('progT', S.progT); rendre(true); scrollTo(0, Math.min(scrollY, ($('.ptabs') || { offsetTop: 0 }).offsetTop - 60)); break;
+    case 'go-defis': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; LS.set('progT', 'defis'); rendre(); scrollTo(0, 0); break;
     case 'go-succes': fermer(); S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; LS.set('progT', 'succes'); rendre(); scrollTo(0, 0); break;
     case 'xpinfo': S.form = { mode: 'xpinfo' }; rendreForm(); ouvrirSheet(); break;
     case 'xpjournal': S.form = { mode: 'xplog' }; rendreForm(); ouvrirSheet(); $('#sheet').scrollTop = 0; break;
@@ -4102,7 +4251,7 @@ document.addEventListener('click', ev => {
     case 'vit': basculerVitrine(el.dataset.id); break;
     case 'plein': ouvrirPlein(el.dataset.id); break;
     case 'plein-x': fermerPlein(); break;
-    case 'plein-pin': { const id = 's:' + el.dataset.id; if (!epingle(id) && (vitrine() || []).length >= 3) { fermerPlein(); S.form = { mode: 'vitrine' }; rendreForm(); ouvrirSheet(); break; }
+    case 'plein-pin': { const id = el.dataset.id.startsWith('e:') ? el.dataset.id : 's:' + el.dataset.id; if (!epingle(id) && vitrineValide().length >= 3) { fermerPlein(); S.form = { mode: 'vitrine' }; rendreForm(); ouvrirSheet(); break; }
       basculerVitrine(id); ouvrirPlein(el.dataset.id); if (S.form && S.form.mode === 'videotheque') rendreVideotheque(); break; }
     case 'dmsg': if (el.dataset.m) toast(el.dataset.m); break;
     case 'anom-voulu': { const e = trouver(el.dataset.id); if (!e) break; const avant = e.lib, i0 = el.dataset.i;
