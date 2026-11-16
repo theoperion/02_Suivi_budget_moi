@@ -677,6 +677,12 @@ body.discret .espv{filter:blur(6px)}
 .anoml{padding-left:16px;margin:8px 0 0}.anoml li{margin-bottom:10px}.anoml small{display:block;opacity:.8;margin-top:2px}.anomacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .anomb{font:inherit;font-size:12px;font-weight:600;padding:4px 9px;border:1px solid currentColor;border-radius:6px;color:inherit}.anomb.ok{background:var(--ok);border-color:var(--ok);color:#fff}
 .regfold{display:flex;justify-content:space-between;width:100%;text-align:left;border-bottom:1px dashed var(--rule);padding-bottom:6px}
+.regmois{margin-top:12px;background:var(--card);border:1.5px solid var(--ink);border-radius:14px;padding:12px 12px 6px}
+.regm{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 4px;text-align:left;border-top:1px dashed var(--rule)}.regm:first-of-type{border-top:0}
+.regm:active{background:var(--soft)}.regm .ri{font-size:24px;width:32px;text-align:center;flex-shrink:0}.regm .rt{flex:1;min-width:0}
+.regm b{display:block;font-weight:600;font-size:16px}.regm small{display:block;font-family:var(--mono);font-size:12px;color:var(--ink3);margin-top:1px}.regm small.c-ok{color:var(--okInk)}
+.regm small.afaire{color:var(--acc,var(--warnInk));font-weight:600}.regm .rc{color:var(--ink3);font-size:18px}
+.regaff{padding:0 0 4px}
 </style>
 </head>
 <body>
@@ -709,24 +715,10 @@ body.discret .espv{filter:blur(6px)}
 <script>
 /* ================= CONFIG ================= */
 const VERSION = '9.5';
-// Fonctionnalités masquables (Réglages). Masquer = ne plus afficher ; les données continuent d'être enregistrées.
-const FONCS = [
-  ['pj', 'Montant par jour', 'sous le grand chiffre et à la saisie'],
-  ['reperes', 'Repères du jour', 'trait sur la jauge et les budgets du mois'],
-  ['pointbas', 'Point bas prévu', 'courbe du solde jusqu\'à fin du mois prochain'],
-  ['avances', 'Avances et « On te doit »', 'payer pour d\'autres et suivre les remboursements'],
-  ['defi', 'Défi du mois', ''],
-  ['series', 'Séries', 'jours sans dépense, mois dans le vert, budgets tenus'],
-  ['bilan', 'Bilans mensuels', 'récap du 1er au 5 et historique'],
-  ['jeu', 'Niveaux, succès et collection', 'XP, jauges, thèmes et cosmétiques à débloquer'],
-  ['saison', 'Défis saisonniers et mission du mois', 'novembre sobre, calendrier de l\'avent, mission tirée au sort…'],
-  ['semaine', 'Défi de la semaine', 'proposé chaque lundi'],
-  ['objectif', "Objectif d'épargne de l'année", ''],
-  ['resume', 'Résumé du dimanche', 'bandeau le dimanche soir'],
-  ['alertes', 'Alertes futées', 'sur l\'accueil'],
-];
-const on = k => !LS.get('off', []).includes(k);
-const progresVisible = () => on('defi') || on('series') || on('bilan') || on('jeu') || ['saison', 'semaine', 'objectif', 'resume'].some(k => ouvert(k)) || FEAT.some(f => !dispo(f[0]));
+// Toutes les fonctionnalités (jeu, défis, séries, bilans, alertes, saisons, semaine, résumé, objectif, collection…) sont actives pour tout le monde :
+// plus d'interrupteurs dans Réglages. on() reste pour ne pas toucher aux appels ; l'ancienne préférence locale « off » est ignorée.
+const on = k => true;
+const progresVisible = () => true;
 // Optionnel : lien proposé par défaut au premier lancement. Laisser vide pour la version commune.
 const API_DEFAUT = 'https://script.google.com/macros/s/AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ/exec';
 const API_ATTENDUE = '5.2'; // version minimale du script ; les versions plus récentes sont acceptées
@@ -1158,7 +1150,7 @@ function joursSansDepense() {
 }
 function rendreExclus() {
   const f = S.form, L = cats().filter(c => estCourante(c.nom));
-  $('#sheetIn').innerHTML = enteteSheet('JOURS SANS DÉPENSE', null) + `
+  $('#sheetIn').innerHTML = enteteSheet('JOURS SANS DÉPENSE', f.retour || null) + `
     <div class="note" style="display:block;margin-top:10px">Coche les catégories qui <b>ne cassent pas</b> un jour sans dépense (séries, Novembre sobre, mission du mois, calendrier de l'avent). Les montants restent bien sûr comptés dans tes budgets.</div>
     <div class="chips" style="margin-top:10px">${L.map(c => `<button class="chip ${f.ex.includes(c.nom) ? 'on' : ''}" data-act="exclus-tog" data-cat="${esc(c.nom)}">${f.ex.includes(c.nom) ? '✓ ' : ''}${esc(c.nom)}</button>`).join('')}</div>
     <button class="go" data-act="exclus-ok">ENREGISTRER</button>`;
@@ -1687,8 +1679,8 @@ const TUTO = [
   ['🐷', 'ÉPARGNE', "Uniquement l'argent que tu <b>mets de côté</b> : versement sur un livret, PEA, assurance vie, crypto… On ne retire jamais depuis cet onglet. C'est ce qui remplit ton objectif d'épargne. Un transfert d'un placement à un autre (livret A → PEA) ne se saisit pas : ça se passe dans ton suivi de patrimoine."],
   ['🔁', 'PRÉLÈVEMENTS RÉGULIERS', "Loyer, abonnements, salaire, virement d'épargne automatique : mets-les une fois dans l'onglet <b>Prévu</b>. Ne les saisis pas en plus ici, sinon ils comptent deux fois."],
   ['👥', "PAYÉ POUR D'AUTRES", "Dans une dépense, touche « Payé pour d'autres aussi » : ta part va dans ton budget, le reste dans « On te doit » jusqu'au remboursement."],
-  ['🏦', 'MON SOLDE (BANQUE + ESPÈCES)', "Quand tu veux, pas seulement en début de mois (⚙ › Mon solde) : tape ce qu'il y a sur ton compte <b>et</b> le liquide que tu as en poche. Ensuite, l'appli suit les deux toute seule. Si tu oublies les espèces, elle croira qu'il te manque de l'argent."],
-  ['💶', 'ESPÈCES ET DISTRIBUTEUR', "Un achat payé en liquide se saisit comme les autres : active juste <b>« Payé en espèces »</b>, tes espèces baissent d'autant. Un <b>retrait au distributeur</b> n'est pas une dépense : touche « 🏧 un retrait ? » (ou ⚙ › Mon solde › Retrait d'espèces), l'argent passe de la banque à ta poche, ton total ne bouge pas."],
+  ['🏦', 'MON SOLDE (BANQUE + ESPÈCES)', "Quand tu veux, pas seulement en début de mois (⚙ › Chaque mois › Contrôle du solde) : tape ce qu'il y a sur ton compte <b>et</b> le liquide que tu as en poche. Ensuite, l'appli suit les deux toute seule. Si tu oublies les espèces, elle croira qu'il te manque de l'argent."],
+  ['💶', 'ESPÈCES ET DISTRIBUTEUR', "Un achat payé en liquide se saisit comme les autres : active juste <b>« Payé en espèces »</b>, tes espèces baissent d'autant. Un <b>retrait au distributeur</b> n'est pas une dépense : touche « 🏧 un retrait ? » (ou ⚙ › Chaque mois › Retrait d'espèces), l'argent passe de la banque à ta poche, ton total ne bouge pas."],
   ['📅', 'DATE ET ACHAT À VENIR', "La date est celle du jour par défaut. Oublié une dépense hier ? Recule-la avec ‹. Une place d'avant-première, un achat déjà prévu ? Avance la date après aujourd'hui (ou le mois avec ›) : la ligne devient un achat à venir, que tu valideras le jour venu."]];
 const ligneTuto = t => `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--rule)"><span style="font-size:24px;flex:none;width:34px;text-align:center">${t[0]}</span><div style="flex:1;min-width:0"><div style="font-family:var(--mono);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:3px">${t[1]}</div><div style="font-size:13px;line-height:1.45;color:var(--ink2)">${t[2]}</div></div></div>`;
 function rendreTuto() {
@@ -1732,8 +1724,8 @@ function sectionsModeEmploi() {
       ['🍂', 'SAISONS', FEAT_DETAIL.saison]]],
     ['reglages', '⚙', 'RÉGLAGES UTILES', 'Adapter l\'appli à ta façon de faire.', [
       ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », l'aide de la saisie et le lien Mode d'emploi de l'accueil quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
-      ['🧺', 'CATÉGORIES QUI NE CASSENT PAS LES SÉRIES', "Stats › Progrès › Défis, tout en bas : coche par exemple Courses si faire les courses ne doit pas casser un jour sans dépense. Les montants comptent toujours dans tes budgets."],
-      ['🧩', 'FONCTIONNALITÉS', "Réglages › Fonctionnalités et nouveautés : masque ce qui ne te sert pas (défis, niveaux, courbe…). Rien n'est effacé."],
+      ['🧺', 'CATÉGORIES QUI NE CASSENT PAS LES SÉRIES', "Réglages › Mon budget (ou Stats › Progrès › Défis, tout en bas) : coche par exemple Courses si faire les courses ne doit pas casser un jour sans dépense. Les montants comptent toujours dans tes budgets."],
+      ['📅', 'CHAQUE MOIS', "En haut des Réglages : le contrôle du solde (✓ quand il est fait pour le mois), le retrait d'espèces et les budgets par catégorie."],
       ['🙈', 'MODE DISCRET', "Floute les montants quand tu montres ton téléphone."]]]];
 }
 function rendreModeEmploi() {
@@ -1836,7 +1828,7 @@ function touche(k) {
   else { if (s.includes(',') && s.split(',')[1].length >= 2) return; if (s.replace(',', '').length >= 7) return; s = s === '0' ? k : s + k; }
   f.montant = s; majHint();
 }
-function vibrer() { if (navigator.vibrate && LS.get('vibre', true)) navigator.vibrate(12); }
+function vibrer() {} // vibrations supprimées (jamais disponibles sur iPhone) : ne fait plus rien
 function enregistrer() {
   if (S._saveT && Date.now() - S._saveT < 1200) return; // double appui sur ENREGISTRER : ignoré
   const f = S.form, n = Math.round(montantNum() * 100) / 100;
@@ -1847,7 +1839,7 @@ function enregistrer() {
   if (S.data.mois && S.data.mois.length && !S.data.mois.includes(mois)) { $('#ferr').textContent = mois + " n'existe pas dans ton fichier"; return; }
   let lib = (f.lib || '').trim() || f.cat;
   if (futur && f.mode === 'edit') { $('#ferr').textContent = 'Pour un mois à venir : supprime la ligne et crée un achat prévu'; return; }
-  S._saveT = Date.now(); vibrer(); sonCaisse();
+  S._saveT = Date.now(); sonCaisse();
   if (futur) {
     const a = { id: uid(), row: null, mois, lib, cat: f.cat, montant: n, jour: f.jour || (f.date ? +f.date.slice(8) : null), y: f.y, m: f.m, fait: false, srv: null, pending: true };
     S.data.avenir = S.data.avenir || []; S.data.avenir.push(a);
@@ -2159,7 +2151,7 @@ function okRetrait() {
   r.push({ d: f.rd || auj(), m: v });
   // Préférence limitée à 8000 caractères : les plus vieux retraits sont fondus dans la base (même total).
   p.r = r; while (JSON.stringify(p).length > 7000 && p.r.length > 1) { const x = p.r.shift(); p.base = Math.round(((+p.base || 0) + (+x.m || 0)) * 100) / 100; }
-  setPref('especes', p); vibrer();
+  setPref('especes', p);
   f.ret = false; f.rm = ''; f.rd = auj(); f.especes = txtNum(etatEspeces().esp); // le champ du contrôle suit les espèces à jour
   rendreSolde(); rendre(true);
   toast(`Retrait noté : espèces +${e2(v)} €, banque −${e2(v)} €`);
@@ -2328,7 +2320,7 @@ function ecartReel() {
   if (Math.abs(d) < 0.005) { toast('Même montant que prévu : rien à faire'); return; }
   const { y, m } = f.ctx, mois = moisLabel(y, m);
   const e = { id: uid(), row: null, mois, lib: 'Écart ' + x.lib + ' ' + MC[m - 1], cat: x.cat, montant: d, y, m, srv: null, pending: true, nw: true };
-  S.journal.push(e); vibrer(); fermer(); rendre(true);
+  S.journal.push(e); fermer(); rendre(true);
   toast(`${x.lib} : ${e2(r)} € en ${MOIS[m - 1]} (écart ${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €)`, 'ANNULER', () => supprimer(e));
   enfiler({ op: 'add', id: e.id });
 }
@@ -2414,7 +2406,7 @@ function avPayer() {
   const fut = f.y * 12 + f.m > nowYM(), y = fut ? now.getFullYear() : f.y, m = fut ? now.getMonth() + 1 : f.m;
   const jr = !fut && f.jour ? y + '-' + pad2(m) + '-' + pad2(Math.min(f.jour, dim(y, m))) : null;
   const e = { id: uid(), row: null, date: jr && jr <= auj() ? jr : auj(), mois: moisLabel(y, m), lib: f.lib.trim(), cat: f.cat, montant: n, y, m, srv: null, pending: true, nw: true };
-  S.journal.push(e); a.fait = true; memo = new Map(); if (casseSerie(e.cat)) noterDepenseDuJour(e.date); vibrer(); fermer(); S.y = y; S.m = m; rendre(true);
+  S.journal.push(e); a.fait = true; memo = new Map(); if (casseSerie(e.cat)) noterDepenseDuJour(e.date); fermer(); S.y = y; S.m = m; rendre(true);
   toast(`${e.lib} : payé, ajouté au Journal de ${MOIS[m - 1]}`);
   enfiler({ op: 'av-paye', id: a.id, jid: e.id });
 }
@@ -2437,36 +2429,44 @@ function rendreMoisGrille() {
 function rendreReglages() {
   const t = LS.get('theme', 'auto');
   const bud = cats().filter(c => VAR.includes(c.groupe) && c.type === 'Dépense' && c.budget > 0).reduce((s, c) => s + c.budget, 0);
-  const lc = LS.get('controles', [])[0], ob = LS.get('ordreBud', 'urgence'), se = seuil();
+  const ob = LS.get('ordreBud', 'urgence'), se = seuil(), aff = LS.get('regAff', false), ex = exclusSerie();
+  // Contrôle du solde : fait ce mois-ci ? (même repère que le rappel de l'accueil)
+  const fait = LS.get('ctrlFait', 0) === nowYM(), lc = LS.get('controles', [])[0];
+  const dj = lc && /^\d{2}\/\d{2}$/.test(lc.date) && +lc.date.slice(3) === now.getMonth() + 1 ? ' le ' + (+lc.date.slice(0, 2)) + ' ' + MC[now.getMonth()] : ' ce mois-ci';
   const tg = (act, on, lab, sub) => `<div class="opt"><span>${lab}${sub ? `<br><small class="muted" style="font-size:12px">${sub}</small>` : ''}</span><button class="tgl ${on ? 'on' : ''}" data-act="${act}" aria-label="${lab}"><i></i></button></div>`;
+  const op = (act, lab, sub, droite) => `<button class="opt" data-act="${act}"><span>${lab}${sub ? `<br><small class="muted" style="font-size:12px">${sub}</small>` : ''}</span><span class="muted mono" style="font-size:12px;flex-shrink:0;margin-left:10px">${droite || '›'}</span></button>`;
+  const gm = (act, ico, lab, etat, cls) => `<button class="regm" data-act="${act}"><span class="ri">${ico}</span><span class="rt"><b>${lab}</b><small class="${cls || ''}">${etat}</small></span><span class="rc">›</span></button>`;
+  const nq = S.queue.length, nr = LS.get('rejets', []).length;
   $('#sheetIn').innerHTML = enteteSheet('RÉGLAGES') + `
-    <button class="opt" data-act="go:aide" style="margin-top:12px"><span>📖 Mode d'emploi<br><small class="muted" style="font-size:12px">chaque écran, la saisie, les envois, les défis</small></span><span class="muted mono" style="font-size:12px">lire ›</span></button>
-    <div class="grp" style="margin-top:16px">APPARENCE</div>
-    <div class="seg">${[['auto', 'AUTO'], ['light', 'CLAIR'], ['dark', 'SOMBRE']].map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-act="theme" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="regmois">
+      <div class="grp" style="margin:0 0 8px">CHAQUE MOIS</div>
+      ${gm('go:solde', '💰', 'Contrôle du solde', fait ? '✓ fait' + dj : 'À faire ce mois-ci', fait ? 'c-ok' : 'afaire')}
+      ${gm('ret-go', '🏧', "Retrait d'espèces", 'de la banque à ta poche')}
+      ${gm('go:budgets', '📊', 'Budgets par catégorie', e0(bud) + ' par mois')}
+    </div>
     <div class="grp" style="margin-top:18px">MON BUDGET</div>
-    <button class="opt" data-act="go:budgets"><span>Budgets par catégorie</span><span class="muted mono" style="font-size:12px">${e0(bud)}/mois ›</span></button>
-    <button class="opt" data-act="go:cats"><span>Catégories et favorites</span><span class="muted mono" style="font-size:12px">${cats().length} · ${S.data.libres || 0} libre${(S.data.libres || 0) > 1 ? 's' : ''} ›</span></button>
-    <button class="opt" data-act="go:solde"><span>Mon solde (quand tu veux, idéalement le 1er)</span><span class="muted mono" style="font-size:12px">${lc ? 'dernier : ' + lc.date : 'jamais noté'} ›</span></button>
-    <div style="margin-top:10px"></div>${tg('aides', !LS.get('aidesOff', false), "Aides et explications", 'les « ? », l\'aide de la saisie et le lien Mode d\'emploi de l\'accueil')}
-    <div class="grp" style="margin-top:18px">ACCUEIL</div>
-    <div class="grp" style="margin:6px 0 0;letter-spacing:1px">ORDRE DES BUDGETS SUR L'ACCUEIL</div>
+    ${op('go:cats', 'Catégories et favorites', '', cats().length + ' · ' + (S.data.libres || 0) + ' libre' + ((S.data.libres || 0) > 1 ? 's' : '') + ' ›')}
+    ${op('exclus', 'Catégories qui ne cassent pas les séries', ex.length ? esc(ex.join(', ')) : 'aucune pour l\'instant', 'modifier ›')}
+    ${op('achats-reglages', 'Achats plaisir', 'envies, petits achats, prix en heures')}
+    <div class="grp" style="margin-top:18px">AFFICHAGE</div>
+    <button class="opt" data-act="regaff" aria-expanded="${aff}"><span>Affichage et confort<br><small class="muted" style="font-size:12px">apparence, ordre des budgets, alerte, aides, mode discret</small></span><span class="muted mono" style="font-size:12px;flex-shrink:0;margin-left:10px">${aff ? '▴' : '▾'}</span></button>
+    ${aff ? `<div class="regaff">
+    <div class="grp" style="margin:10px 0 0;letter-spacing:1px">APPARENCE</div>
+    <div class="seg">${[['auto', 'AUTO'], ['light', 'CLAIR'], ['dark', 'SOMBRE']].map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-act="theme" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="grp" style="margin:12px 0 0;letter-spacing:1px">ORDRE DES BUDGETS SUR L'ACCUEIL</div>
     <div class="note" style="margin:2px 0 4px;display:block">${ob === 'perso' ? 'Mon ordre : celui que tu as choisi dans Réglages › Catégories (flèches ▲▼).' : 'Les plus urgents d\'abord : ceux proches de leur limite, puis ceux déjà dépassés, puis ceux bien tenus.'}</div>
     <div class="seg">${[['urgence', 'PLUS URGENTS'], ['perso', 'MON ORDRE']].map(([k, l]) => `<button class="${ob === k ? 'on' : ''}" data-act="ordreBud" data-t="${k}">${l}</button>`).join('')}</div>
-    <div class="grp" style="margin:10px 0 0;letter-spacing:1px">ALERTE « LIMITE »</div>
+    <div class="grp" style="margin:12px 0 0;letter-spacing:1px">ALERTE « LIMITE »</div>
     <div class="note" style="margin:2px 0 4px;display:block">Un budget affiche le tampon orange LIMITE quand tu en as dépensé ce pourcentage.</div>
     <div class="seg">${[0.75, 0.85, 0.95].map(k => `<button class="${Math.abs(se - k) < 0.001 ? 'on' : ''}" data-act="seuil" data-t="${k}">${Math.round(k * 100)} %</button>`).join('')}</div>
-    <div class="grp" style="margin-top:18px">CONFORT</div>
+    <div style="margin-top:8px"></div>${tg('aides', !LS.get('aidesOff', false), "Aides et explications", 'les « ? », l\'aide de la saisie et le lien Mode d\'emploi de l\'accueil')}
     ${tg('discret', LS.get('discret', false), 'Mode discret', 'floute les montants quand tu montres ton téléphone')}
-    ${tg('vibre', LS.get('vibre', true), 'Vibrations', 'petit retour quand tu enregistres')}
-    <button class="grp regfold" data-act="regfonc" style="margin-top:18px"><span>FONCTIONNALITÉS ET NOUVEAUTÉS</span><span>${FONCS.filter(([k]) => dispo(k) && on(k)).length}/${FONCS.filter(([k]) => dispo(k)).length} ACTIVÉES · ${S.regFonc ? 'MOINS ▴' : 'VOIR ▾'}</span></button>
-    ${S.regFonc ? `    <div class="note" style="margin:2px 0 4px">Masquer ne supprime rien : tes données restent enregistrées et réapparaissent si tu réactives.</div>
-    ${FONCS.filter(([k]) => dispo(k)).map(([k, l, d]) => tg('fonc:' + k, on(k), l, d)).join('')}
-    ${FEAT.filter(f => !dispo(f[0])).map(f => `<button class="soon" data-act="soon" data-k="${f[0]}"><span>🔒</span><div><b>${esc(f[1])}</b><small>disponible en ${esc(MOIS[f[4] - 1].toLowerCase())} · touche pour l'essayer dès maintenant</small></div></button>`).join('')}
-    ${ACCES_ANTICIPE ? tg('anticipe', anticipe(), 'Accès anticipé', 'débloque tout de suite les nouveautés prévues pour les prochains mois') : ''}` : ''}
-    <div class="grp" style="margin-top:18px">DONNÉES</div>
+    </div>` : ''}
+    <div class="grp" style="margin-top:18px">MON FICHIER ET AIDE</div>
+    ${op('go:aide', "📖 Mode d'emploi", 'chaque écran, la saisie, les envois, les défis', 'lire ›')}
+    <button class="opt" data-act="${nq || nr ? 'file' : 'refresh'}"><span>${nq ? 'Envois en attente' : nr ? 'Envois refusés à revoir' : 'Actualiser depuis le fichier'}</span><span class="${nq ? 'c-bad' : 'muted'} mono" style="font-size:12px">${nq ? nq + ' en attente · voir ›' : nr ? 'voir ›' : 'à jour'}</span></button>
     ${S.data.url ? `<a class="opt" href="${esc(S.data.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span>Ouvrir mon fichier Google Sheets</span><span class="muted">↗</span></a>` : ''}
-    <button class="opt" data-act="${S.queue.length || LS.get('rejets', []).length ? 'file' : 'refresh'}"><span>${S.queue.length ? 'Envois en attente' : LS.get('rejets', []).length ? 'Envois refusés à revoir' : 'Actualiser depuis le fichier'}</span><span class="${S.queue.length ? 'c-bad' : 'muted'} mono" style="font-size:12px">${S.queue.length ? S.queue.length + ' en attente · voir ›' : 'à jour'}</span></button>
-    ${IN_GAS ? '' : `<button class="opt" data-act="go:lien"><span>Lien de mon script</span><span class="muted mono" style="font-size:12px">modifier ›</span></button>`}
+    ${IN_GAS ? '' : op('go:lien', 'Lien de mon script', '', 'modifier ›')}
     <button class="danger ${S.form.armOut ? 'armed' : ''}" data-act="logout" style="margin-top:14px">${S.form.armOut ? 'TOUCHE ENCORE : DÉCONNEXION DE CE TÉLÉPHONE' : 'SE DÉCONNECTER / CHANGER DE COMPTE'}</button>
     <p class="muted mono" style="font-size:11px;text-align:center;margin-top:22px">BUDGET · V${VERSION}</p>`;
 }
@@ -3098,7 +3098,7 @@ appliquerAccent();
 const prefsServeur = () => !!(S.data && S.data.prefs);
 function getPref(k, d) { if (prefsServeur() && k in S.data.prefs) return S.data.prefs[k]; const v = LS.get('pref_' + k, undefined); return v === undefined ? d : v; }
 function setPref(k, v) { LS.set('pref_' + k, v); if (S.data) { S.data.prefs = S.data.prefs || {}; S.data.prefs[k] = v; } if (S.data) appel('pref-set', { cle: k, valeur: v }); else sauver(); } // appel() enregistre déjà
-// Calendrier de sortie des nouveautés (accès anticipé possible sur l'appli de Théo)
+// Nouveautés (anciennement sorties mois par mois) : toutes disponibles tout de suite, la liste sert encore aux textes (Mode d'emploi, fiche « nouveauté »)
 const FEAT = [
   ['saison', 'Défis saisonniers', 'Calendrier de l\'avent du budget, Novembre sobre, Wrapped…', 2026, 12],
   ['objectif', "Objectif d'épargne de l'année", "Un montant à mettre de côté sur l'année, avec sa propre jauge.", 2027, 1],
@@ -3107,10 +3107,9 @@ const FEAT = [
   ['alertes', 'Alertes futées', 'Abonnements qui augmentent, catégories qui dérapent, gros prélèvements.', 2027, 3],
   ['cosmetiques', 'Collection étendue', 'Thèmes, mascotte, tampons, polices, aiguilles, fêtes, tickets.', 2027, 5]
 ];
-const ACCES_ANTICIPE = true; // passé à true dans la version de Théo
-// Accès anticipé : synchronisé dans la préférence « jeu » (l'XP en dépend), repli sur ce téléphone
-const anticipe = () => { if (!ACCES_ANTICIPE) return false; const p = getPref('jeu', null); return p && typeof p.anticipe === 'boolean' ? p.anticipe : LS.get('anticipe', false); };
-const dispo = k => { const f = FEAT.find(x => x[0] === k); return !f || anticipe() || nowYM() >= ymNum(f[3], f[4]) || LS.get('debloques', []).includes(k); };
+const ACCES_ANTICIPE = true; // INUTILISÉE : l'accès anticipé n'existe plus (tout est débloqué), gardée car commun/generer.py remplace cette ligne
+// Tout est disponible pour tout le monde : l'XP est celle du cas « tout débloqué » (ancien accès anticipé), quelle que soit l'appli
+const dispo = k => true;
 const ouvert = k => dispo(k) && on(k === 'cosmetiques' ? 'jeu' : k);
 // --- Défi de la semaine ---
 const lundi = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
@@ -3470,13 +3469,12 @@ function planEvenements() {
 }
 // Modifie la préférence « jeu » (synchronisée si le script la gère, sinon gardée sur ce téléphone)
 function majPrefJeu(maj) { const p = Object.assign({}, getPref('jeu', {}) || {}, maj); if (prefsServeur()) setPref('jeu', p); else LS.set('pref_jeu', p); }
-// Après chaque affichage : fige les tirages des semaines commencées (P2) et partage l'accès anticipé déjà activé ici (P3)
+// Après chaque affichage : fige les tirages des semaines commencées (P2)
 function figerJeu() {
   if (!S.data || !S.key) return;
   const p = getPref('jeu', {}) || {}, maj = {};
   planEvenements(); const code = S._plan && S._plan.code, T = typeof p.tirages === 'string' ? p.tirages : '';
   if (code && code.length > T.length) maj.tirages = code;
-  if (ACCES_ANTICIPE && typeof p.anticipe !== 'boolean' && LS.get('anticipe', false)) maj.anticipe = true;
   if (Object.keys(maj).length) majPrefJeu(maj);
 }
 function etatEv(o) {
@@ -3639,15 +3637,12 @@ const FEAT_DETAIL = {
   alertes: "Un encadré « À surveiller » sur l'accueil : abonnements qui augmentent, abonnements qui coûtent cher à l'année, catégorie qui dérape par rapport à ta moyenne, gros prélèvement dans les 3 jours.",
   cosmetiques: "Plus de choses à débloquer avec les niveaux : thèmes complets, tirelire mascotte, tampons, styles de chiffres, aiguilles, fêtes, tickets, son « cha-ching »."
 };
-const debloques = () => LS.get('debloques', []);
 function rendreSoon() {
-  const f = S.form, F = FEAT.find(x => x[0] === f.k); if (!F) { fermer(); return; }
-  const deja = dispo(F[0]);
-  $('#sheetIn').innerHTML = enteteSheet(deja ? 'NOUVEAUTÉ' : 'PROCHAINEMENT', null) + `
-    <div class="soonh"><span>${deja ? '✨' : '🔒'}</span><b>${esc(F[1])}</b><small>${deja ? 'Débloqué' : 'Arrive pour tout le monde en ' + esc(MOIS[F[4] - 1].toLowerCase()) + ' ' + F[3]}</small></div>
+  const F = FEAT.find(x => x[0] === S.form.k); if (!F) { fermer(); return; }
+  $('#sheetIn').innerHTML = enteteSheet('NOUVEAUTÉ', null) + `
+    <div class="soonh"><span>✨</span><b>${esc(F[1])}</b><small>Disponible</small></div>
     <p class="soonp">${esc(FEAT_DETAIL[F[0]] || F[2])}</p>
-    ${deja ? '<button class="go" data-act="close">OK</button>' : `<button class="go" data-act="soon-ok" data-k="${F[0]}">DÉBLOQUER MAINTENANT</button>
-    <div class="note" style="display:block;text-align:center">Tu pourras le masquer à tout moment dans Réglages → Fonctionnalités.</div>`}`;
+    <button class="go" data-act="close">OK</button>`;
 }
 function blocProchainement(keys) {
   const L = FEAT.filter(f => !dispo(f[0]) && (!keys || keys.includes(f[0])));
@@ -4288,7 +4283,6 @@ document.addEventListener('click', ev => {
   const a = el.dataset.act;
   if (!S.form && el.closest('#sheetIn') && a !== 'close') return; // feuille déjà fermée : clic fantôme ignoré
   if (a.startsWith('tab:')) { S.tab = a.slice(4); if (S.tab !== 'journal') { S.filtre.cat = null; S.filtre.grp = null; } rendre(); scrollTo(0, 0); return; }
-  if (a.startsWith('fonc:')) { const k = a.slice(5), off = LS.get('off', []); LS.set('off', off.includes(k) ? off.filter(x => x !== k) : [...off, k]); memo = new Map(); rendreReglages(); rendre(true); return; }
   if (a.startsWith('grp:')) { S.filtre = { cat: null, q: '', grp: a.slice(4) }; S.tab = 'journal'; rendre(); scrollTo(0, 0); return; }
   if (a.startsWith('mg:y:')) { S.form.y += +a.slice(5); rendreMoisGrille(); return; }
   if (a.startsWith('mg:m:')) { S.y = S.form.y; S.m = +a.slice(5); fermer(); rendre(); return; }
@@ -4314,17 +4308,15 @@ document.addEventListener('click', ev => {
     case 'all': S.form.all = !S.form.all; rendreForm(); break;
     case 'save': enregistrer(); break;
     case 'soon': S.form = { mode: 'soon', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
-    case 'soon-ok': { const k = el.dataset.k; LS.set('debloques', [...new Set(debloques().concat(k))]); const o = LS.get('off', []); if (o.includes(k)) LS.set('off', o.filter(x => x !== k)); if (k === 'cosmetiques') { const o2 = LS.get('off', []); LS.set('off', o2.filter(x => x !== 'jeu')); } rendreSoon(); rendre(true); celebrer(); toast('Débloqué : ' + FEAT.find(x => x[0] === k)[1]); if ($('#sheetIn .tgl')) rendreReglages(); break; }
     case 'obj-edit': { const y = now.getFullYear(), o = objectifs()[y]; S.form = { mode: 'objedit', y, montant: o ? String(o) : '', existe: !!o }; rendreForm(); ouvrirSheet(); break; }
     case 'obj-sug': S.form.montant = el.dataset.v; rendreObjEdit(); break;
     case 'obj-ok': { const n = parseFloat(String(S.form.montant || '').replace(/\s/g, '').replace(',', '.')); if (!(n > 0)) { $('#ferr').textContent = 'Tape un montant'; break; } const O = Object.assign({}, objectifs()); const oy = S.form.y; O[oy] = Math.round(n); setPref('objectifs', O); fermer(); rendre(true); toast('Objectif ' + oy + ' : ' + e0(n)); break; }
     case 'obj-del': { const O = Object.assign({}, objectifs()); delete O[S.form.y]; setPref('objectifs', O); fermer(); rendre(true); toast('Objectif retiré'); break; }
     case 'res-ban': LS.set('resumeVu', el.dataset.k); rendre(true); S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
     case 'res-open': S.form = { mode: 'resume', k: el.dataset.k }; rendreForm(); ouvrirSheet(); break;
-    case 'anticipe': { const v = !anticipe(); LS.set('anticipe', v); if (S.data) majPrefJeu({ anticipe: v }); rendreReglages(); rendre(true); break; }
     case 'colt': S.collT = el.dataset.t; rendre(true); break;
     case 'colt-go': S.collT = el.dataset.t; S.progT = 'style'; LS.set('progT', 'style'); rendre(true); scrollTo(0, 0); break;
-    case 'cosm': { finEssaiUI(); const t = el.dataset.t, id = el.dataset.id; LS.set(cleCos(t), id); const v0 = LS.get('cosmVus', []); if (!v0.includes(t + ':' + id)) LS.set('cosmVus', v0.concat(t + ':' + id)); appliquerCosmetiques(); vibrer(); if (t === 'fete') celebrer(); if (t === 'son') sonCaisse(); rendre(true); break; }
+    case 'cosm': { finEssaiUI(); const t = el.dataset.t, id = el.dataset.id; LS.set(cleCos(t), id); const v0 = LS.get('cosmVus', []); if (!v0.includes(t + ':' + id)) LS.set('cosmVus', v0.concat(t + ':' + id)); appliquerCosmetiques(); if (t === 'fete') celebrer(); if (t === 'son') sonCaisse(); rendre(true); break; }
     case 'titre': LS.set('cos_titre', el.dataset.t); rendre(true); break;
     case 'masc': { const M = mascotte(); toast(M.s[1] + ' ' + M.s[2] + ' · ' + e0(M.ep) + ' épargnés depuis novembre' + (M.next ? ' · prochain stade à ' + e0(M.next[0]) : '')); break; }
     case 'sem-ok': { const W = Object.assign({}, semaines()); W[isoJ(lundi(now))] = { cat: el.dataset.cat, montant: +el.dataset.m }; setPref('semaines', compacterSemaines(W)); rendre(true); toast('Défi de la semaine lancé 💪'); break; }
@@ -4365,12 +4357,12 @@ document.addEventListener('click', ev => {
     case 'obj-voir': { const z = document.getElementById('objectif'); if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'ev-voir': S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'defis'; rendre(); scrollTo(0, 0); break;
     case 'xplog': S.allXp = !S.allXp; rendre(true); break;
-    case 'exclus': S.form = { mode: 'exclus', ex: exclusSerie().slice() }; rendreForm(); ouvrirSheet(); break;
+    case 'exclus': S.form = { mode: 'exclus', ex: exclusSerie().slice(), retour: S.form && S.form.mode === 'reglages' ? 'reglages' : null }; rendreForm(); ouvrirSheet(); break;
     case 'exclus-tog': { const n = el.dataset.cat, x = S.form.ex; S.form.ex = x.includes(n) ? x.filter(v => v !== n) : x.concat(n); rendreExclus(); break; }
-    case 'exclus-ok': { const p = Object.assign({}, getPref('jeu', {}) || {}, { exclus: S.form.ex }); setPref('jeu', p); S._jeu = null; memo = new Map(); fermer(); rendre(true); toast('Séries recalculées'); break; }
+    case 'exclus-ok': { const p = Object.assign({}, getPref('jeu', {}) || {}, { exclus: S.form.ex }); setPref('jeu', p); S._jeu = null; memo = new Map(); const r = S.form.retour; if (r) { S.form = { mode: r }; rendreForm(); } else fermer(); rendre(true); toast('Séries recalculées'); break; }
     case 'retrait-rev': { const f = S.form; f.type = 'Revenu'; f.cat = catAutreRevenu(); if (!f.lib) f.lib = 'Retrait livret A'; rendreForm(); break; }
-    case 'skin': LS.set('skin', el.dataset.id); vibrer(); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
-    case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); vibrer(); rendre(true); break;
+    case 'skin': LS.set('skin', el.dataset.id); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
+    case 'accent': LS.set('accent', el.dataset.id); appliquerAccent(); rendre(true); break;
     case 'lock': { const t = el.dataset.t, sc = el.dataset.suc; if (['ui', 'texte', 'theme', 'ambiance'].includes(t)) essayerUI(t, el.dataset.id); toast((['ui', 'texte', 'theme', 'ambiance'].includes(t) ? 'Aperçu · ' : '') + (el.dataset.sais ? 'se débloque en réussissant l\'événement « ' + nomSaison(el.dataset.sais) + ' »' : sc ? 'se débloque avec le succès « ' + nomSucces(sc) + ' »' : el.dataset.prest ? 'se débloque à l\'étoile de prestige ' + el.dataset.prest : 'se débloque au niveau ' + el.dataset.niv)); break; }
     case 'bilvue': S.bilVue = el.dataset.t; S.bilAll = false; rendre(true); break;
     case 'bilall': S.bilAll = !S.bilAll; rendre(true); break;
@@ -4429,9 +4421,8 @@ document.addEventListener('click', ev => {
     case 'ordreBud': LS.set('ordreBud', el.dataset.t); rendreReglages(); rendre(true); break;
     case 'seuil': LS.set('seuil', +el.dataset.t); rendreReglages(); rendre(true); break;
     case 'discret': LS.set('discret', !LS.get('discret', false)); if (S.form && S.form.mode === 'reglages') rendreReglages(); rendre(true); break;
-    case 'vibre': LS.set('vibre', !LS.get('vibre', true)); rendreReglages(); break;
     case 'aides': LS.set('aidesOff', !LS.get('aidesOff', false)); rendreReglages(); rendre(true); break;
-    case 'regfonc': S.regFonc = !S.regFonc; rendreReglages(); break;
+    case 'regaff': LS.set('regAff', !LS.get('regAff', false)); rendreReglages(); break;
     case 'dup': { const e = trouver(S.form.id); if (e) ouvrirSaisie(e, true); break; }
     case 'sgn': S.form.montant = S.form.montant.startsWith('-') ? S.form.montant.slice(1) : '-' + (S.form.montant || ''); majHint(); break;
     case 'libsug': S.form.lib = el.dataset.l; $('#lib').value = el.dataset.l; break;
@@ -4484,7 +4475,7 @@ document.addEventListener('click', ev => {
   let y0 = null, ok = false; const ind = $('#ptr');
   document.addEventListener('touchstart', e => { y0 = (window.scrollY <= 0 && !$('#sheet').classList.contains('on')) ? e.touches[0].clientY : null; ok = false; }, { passive: true });
   document.addEventListener('touchmove', e => { if (y0 == null) return; ok = e.touches[0].clientY - y0 > 80; ind.classList.toggle('on', ok); }, { passive: true });
-  document.addEventListener('touchend', () => { if (ok) { S.lastFetch = 0; rafraichir(true); pomper(); toast('Actualisation…'); vibrer(); } ind.classList.remove('on'); y0 = null; ok = false; });
+  document.addEventListener('touchend', () => { if (ok) { S.lastFetch = 0; rafraichir(true); pomper(); toast('Actualisation…'); } ind.classList.remove('on'); y0 = null; ok = false; });
 })();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { const avant = now.toDateString(); majDate(); if (now.toDateString() !== avant || avant !== new Date().toDateString()) rendre(); rafraichir(false); pomper(); } });
 
