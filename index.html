@@ -662,6 +662,9 @@ textarea.libin{height:auto;min-height:90px;font-family:var(--mono);font-size:12p
 .aconf{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--rule)}.aconf>button:first-child{flex:1;min-width:0;text-align:left}.aconf b{display:block;font-size:14px}.aconf small{font-size:11.5px;color:var(--ink3)}.aconf .chip{flex:none;margin:0}
 .qi{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid currentColor;font-size:9px;font-weight:700;opacity:.65;margin-left:3px;vertical-align:1px;cursor:pointer;letter-spacing:0}
 .lblsub{display:block;font-size:9.5px;letter-spacing:.6px;opacity:.75;margin-top:2px;text-transform:none}
+.espm{text-transform:none;letter-spacing:.3px;color:var(--ink2)}
+.espw{display:block;font-size:10px;letter-spacing:.3px;margin-top:3px;text-transform:none;color:var(--warnInk)}
+body.discret .espv{filter:blur(6px)}
 .gl .glx{font-size:8px;opacity:.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gauge .pbg svg{max-width:none;margin:0;width:100%}
 .pbas.decouvert{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 18%,transparent);animation:decPulse 1.6s ease-in-out infinite}
@@ -769,7 +772,7 @@ function prepData(d) {
 }
 function sauver() { LS.set('cache', { data: S.data, journal: S.journal }); LS.set('queue', S.queue); }
 function entriesFromData(d) {
-  return d.journal.map(r => { const p = parseMois(r.mois); const base = { mois: r.mois, lib: r.lib, cat: r.cat, montant: typeof r.montant === 'number' ? r.montant : Number(r.montant) }; return Object.assign({ id: 'r' + r.row, row: r.row, date: r.date || null, y: p ? p.y : null, m: p ? p.m : null, srv: Object.assign({}, base, { montant: r.montant }) }, base); });
+  return d.journal.map(r => { const p = parseMois(r.mois); const base = { mois: r.mois, lib: r.lib, cat: r.cat, montant: typeof r.montant === 'number' ? r.montant : Number(r.montant) }; return Object.assign({ id: 'r' + r.row, row: r.row, date: r.date || null, especes: !!r.especes, y: p ? p.y : null, m: p ? p.m : null, srv: Object.assign({}, base, { montant: r.montant }) }, base); });
 }
 
 /* ================= THÈME ================= */
@@ -817,7 +820,7 @@ async function rafraichir(force) {
 }
 
 /* ================= FILE D'ÉCRITURES (optimiste) ================= */
-const pick = e => ({ mois: e.mois, lib: e.lib, cat: e.cat, montant: e.montant });
+const pick = e => ({ mois: e.mois, lib: e.lib, cat: e.cat, montant: e.montant, especes: !!e.especes }); // especes : colonne « Payé en » (le contrôle d'identité reste sur A-D)
 // Erreurs passagères du script (fichier occupé, panne Google) : l'envoi reste en file et repart plus tard, comme une coupure réseau.
 const ERREURS_PASSAGERES = ['OCCUPE', 'SERVEUR'];
 const pickEch = e => ({ lib: e.lib, cat: e.cat, montant: e.montant, freq: e.freq, jour: e.jour, f: e.f, g: e.g, h: e.h, i: e.i, pause: !!e.pause });
@@ -1379,7 +1382,7 @@ function rejetsHtml() {
 function rejetRenvoyer(i) {
   const rj = LS.get('rejets', []), r = rj[i]; if (!r) return;
   rj.splice(i, 1); LS.set('rejets', rj);
-  const p = parseMois(r.mois), e = { id: uid(), row: null, date: r.date, mois: r.mois, lib: r.lib, cat: r.cat, montant: r.montant, y: p ? p.y : null, m: p ? p.m : null, srv: null, pending: true, nw: true };
+  const p = parseMois(r.mois), e = { id: uid(), row: null, date: r.date, mois: r.mois, lib: r.lib, cat: r.cat, montant: r.montant, especes: !!r.especes, y: p ? p.y : null, m: p ? p.m : null, srv: null, pending: true, nw: true };
   S.journal.push(e); memo = new Map(); enfiler({ op: 'add', id: e.id }); rendre(true);
 }
 function rendreFile() {
@@ -1413,7 +1416,7 @@ function vueAccueil() {
   if (b.st === 'cours') h += banniereEv();
   h += `<div class="gauge">${b.st === 'cours' ? blocMascotte() + blocVitrine() : ''}<button data-act="jmode" style="display:block;width:100%" aria-label="Basculer argent restant / solde">${jaugeSVG(b)}
     <div class="big ${val != null && val < 0 ? 'c-bad' : ''}" id="big" data-v="${val == null ? 0 : val}">${val == null ? '—' : e0(val)}</div>
-    <div class="lbl">${solde ? (sc == null ? 'SOLDE PAS ENCORE NOTÉ · ⚙ › MON SOLDE' : 'ARGENT DISPONIBLE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" : '') + '<small class="lblsub">banque + espèces</small>') : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span>${solde ? '' : ' ' + qi('restant')}${solde ? '' : '<small class="lblsub">après les charges et dépenses du mois</small>'}</div></button>
+    <div class="lbl">${solde ? (sc == null ? 'SOLDE PAS ENCORE NOTÉ · ⚙ › MON SOLDE' : 'ARGENT DISPONIBLE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" + sousTitreEspeces(sc) : '<small class="lblsub">banque + espèces</small>')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span>${solde ? '' : ' ' + qi('restant')}${solde ? '' : '<small class="lblsub">après les charges et dépenses du mois</small>'}</div></button>
     ${b.st === 'cours' && !solde && on('pj') ? lignePJ() : ''}
     <p class="phrase">${phraseRythme(b)}</p>`;
   const pills = [];
@@ -1486,7 +1489,7 @@ function htmlListe() {
   const rows = l.map(({ e, c }) => {
     const t = c ? c.type : '';
     if (t === 'Revenu' || t === 'Retrait') rev += e.montant; else dep += e.montant;
-    return `<button class="jl ${e.pending ? 'pend' : ''} ${e.nw ? 'nw' : ''}" data-act="edit" data-id="${e.id}"><div class="l"><div>${esc(e.lib || e.cat)}</div><div class="c">${S.filtre.q ? esc(MC[e.m - 1]) + ' · ' : ''}${esc(e.cat)}${e.date ? ' · le ' + (+e.date.slice(8)) + '/' + esc(e.date.slice(5, 7)) : ''}${c ? '' : ' · catégorie inconnue'}${e.pending ? ' · envoi…' : ''}</div></div>
+    return `<button class="jl ${e.pending ? 'pend' : ''} ${e.nw ? 'nw' : ''}" data-act="edit" data-id="${e.id}"><div class="l"><div>${esc(e.lib || e.cat)}</div><div class="c">${S.filtre.q ? esc(MC[e.m - 1]) + ' · ' : ''}${esc(e.cat)}${e.date ? ' · le ' + (+e.date.slice(8)) + '/' + esc(e.date.slice(5, 7)) : ''}${e.especes ? ' · <span class="espm">💶 espèces</span>' : ''}${c ? '' : ' · catégorie inconnue'}${e.pending ? ' · envoi…' : ''}</div></div>
       ${montantLigne(t, e.montant)}</button>`;
   }).join('');
   return `<div class="sec" style="margin-top:14px"><span>${l.length} LIGNE${l.length > 1 ? 'S' : ''}${S.filtre.q ? ' EN ' + S.y : ''}</span><span>−${e0(dep)}${rev ? ' · +' + e0(rev) : ''}</span></div>` + rows;
@@ -1532,8 +1535,8 @@ function suggestions(cat) {
 function ouvrirSaisie(e, dup) {
   const t = e ? typeDe(e.cat) : 'Dépense';
   const ym = statut(S.y, S.m) === 'futur' ? { y: now.getFullYear(), m: now.getMonth() + 1 } : { y: S.y, m: S.m };
-  S.form = e && !dup ? { mode: 'edit', id: e.id, row: e.row, type: t, montant: String(e.montant).replace('.', ','), cat: e.cat, lib: e.lib === e.cat ? '' : e.lib, y: e.y || S.y, m: e.m || S.m, date: e.date || null, all: false, arm: false, jour: null }
-    : { mode: 'add', type: t, montant: e ? String(e.montant).replace('.', ',') : '', cat: e ? e.cat : null, lib: e && e.lib !== e.cat ? e.lib : '', y: ym.y, m: ym.m, date: dateDefaut(ym.y, ym.m), all: false, arm: false, jour: null };
+  S.form = e && !dup ? { mode: 'edit', id: e.id, row: e.row, type: t, montant: String(e.montant).replace('.', ','), cat: e.cat, lib: e.lib === e.cat ? '' : e.lib, y: e.y || S.y, m: e.m || S.m, date: e.date || null, all: false, arm: false, jour: null, especes: !!e.especes }
+    : { mode: 'add', type: t, montant: e ? String(e.montant).replace('.', ',') : '', cat: e ? e.cat : null, lib: e && e.lib !== e.cat ? e.lib : '', y: ym.y, m: ym.m, date: dateDefaut(ym.y, ym.m), all: false, arm: false, jour: null, especes: !!(e && e.especes) };
   if (!LS.get('tutoVu', false)) { S.retourSaisie = S.form; S.form = { mode: 'tuto' }; }
   rendreForm(); ouvrirSheet();
 }
@@ -1544,7 +1547,8 @@ const TUTO = [
   ['🐷', 'ÉPARGNE', "Uniquement l'argent que tu <b>mets de côté</b> : versement sur un livret, PEA, assurance vie, crypto… On ne retire jamais depuis cet onglet. C'est ce qui remplit ton objectif d'épargne. Un transfert d'un placement à un autre (livret A → PEA) ne se saisit pas : ça se passe dans ton suivi de patrimoine."],
   ['🔁', 'PRÉLÈVEMENTS RÉGULIERS', "Loyer, abonnements, salaire, virement d'épargne automatique : mets-les une fois dans l'onglet <b>Prévu</b>. Ne les saisis pas en plus ici, sinon ils comptent deux fois."],
   ['👥', "PAYÉ POUR D'AUTRES", "Dans une dépense, touche « Payé pour d'autres aussi » : ta part va dans ton budget, le reste dans « On te doit » jusqu'au remboursement."],
-  ['🏦', 'MON SOLDE (BANQUE + ESPÈCES)', "Quand tu veux, pas seulement en début de mois (⚙ › Mon solde) : tape ce qu'il y a sur ton compte <b>et</b> le liquide que tu as en poche. Un retrait au distributeur ne se saisit pas : l'argent passe juste de la banque à ta poche. Ce sont les achats payés en liquide que tu saisis, comme les autres. Si tu oublies les espèces, l'appli croira qu'il te manque de l'argent."],
+  ['🏦', 'MON SOLDE (BANQUE + ESPÈCES)', "Quand tu veux, pas seulement en début de mois (⚙ › Mon solde) : tape ce qu'il y a sur ton compte <b>et</b> le liquide que tu as en poche. Ensuite, l'appli suit les deux toute seule. Si tu oublies les espèces, elle croira qu'il te manque de l'argent."],
+  ['💶', 'ESPÈCES ET DISTRIBUTEUR', "Un achat payé en liquide se saisit comme les autres : active juste <b>« Payé en espèces »</b>, tes espèces baissent d'autant. Un <b>retrait au distributeur</b> n'est pas une dépense : touche « 🏧 un retrait ? » (ou ⚙ › Mon solde › Retrait d'espèces), l'argent passe de la banque à ta poche, ton total ne bouge pas."],
   ['📅', 'DATE ET ACHAT À VENIR', "La date est celle du jour par défaut. Oublié une dépense hier ? Recule-la avec ‹. Une place d'avant-première, un achat déjà prévu ? Avance la date après aujourd'hui (ou le mois avec ›) : la ligne devient un achat à venir, que tu valideras le jour venu."]];
 function rendreTuto() {
   $('#sheetIn').innerHTML = enteteSheet('COMMENT SAISIR', null) + `<div style="margin-top:8px">${TUTO.map(t => `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--rule)"><span style="font-size:24px;flex:none;width:34px;text-align:center">${t[0]}</span><div style="flex:1;min-width:0"><div style="font-family:var(--mono);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:3px">${t[1]}</div><div style="font-size:13px;line-height:1.45;color:var(--ink2)">${t[2]}</div></div></div>`).join('')}</div>
@@ -1575,6 +1579,7 @@ function rendreForm() {
     ${/^Écart/.test(f.lib || '') ? `<div class="mrow" style="margin-top:2px"><button class="chip" data-act="sgn">± CHANGER LE SIGNE</button></div>` : ''}
     ${moisFutur && f.mode === 'add' ? `<div class="mrow" style="margin-top:2px"><button class="mbtn" data-act="fj:-1" aria-label="Jour précédent">‹</button><span>${f.jour ? 'LE ' + f.jour : 'JOUR NON PRÉCISÉ'}</span><button class="mbtn" data-act="fj:1" aria-label="Jour suivant">›</button></div>` : ''}
     <div class="hint" id="hint"></div>
+    ${f.type === 'Dépense' && !futur ? `<div class="mrow" style="margin:-4px 0 6px;flex-wrap:wrap"><button class="chip ${f.especes ? 'on' : ''}" data-act="esp" aria-pressed="${f.especes ? 'true' : 'false'}">💶 ${f.especes ? '✓ ' : ''}PAYÉ EN ESPÈCES</button>${f.mode === 'add' ? '<button class="lnk" data-act="ret-go">🏧 un retrait ?</button>' : ''}</div><div class="note" id="esphint" style="display:${f.especes ? 'block' : 'none'};text-align:center;margin:-2px 0 8px"></div>` : ''}
     ${f.type === 'Dépense' && f.mode === 'add' && !futur && on('avances') ? `<div class="mrow" style="margin:-4px 0 6px"><button class="chip ${f.partage ? 'on' : ''}" data-act="partage">👥 PAYÉ POUR D'AUTRES AUSSI</button></div>${f.partage ? `<div class="part">
       <div class="chips" style="margin:0">${[...new Set([...nomsConnus(), ...(f.noms || [])])].map(n => `<button class="chip ${(f.noms || []).includes(n) ? 'on' : ''}" data-act="pnom" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
       <div style="display:flex;gap:6px"><input class="libin" id="pnouv" placeholder="Ajouter un prénom" autocomplete="off" maxlength="30" style="margin:8px 0"><button class="chip" data-act="pajout" style="margin:8px 0">+</button></div>
@@ -1610,6 +1615,7 @@ function majHint() {
   const f = S.form, h = $('#hint'), a = $('#amt'); if (!f || !h) return;
   a.textContent = (f.montant || '0') + ' €'; a.classList.toggle('zero', !montantNum());
   $('#ferr').textContent = '';
+  majEspHint();
   if (estPrevu(f) && f.mode === 'add') { h.innerHTML = '<span class="muted">Rangé dans « À venir » : tu le valideras le jour venu, sur l\'accueil</span>'; return; }
   if (!f.cat) { h.innerHTML = '<span class="muted">Choisis une catégorie</span>'; return; }
   const pa = partage(), z = $('#presume');
@@ -1663,7 +1669,7 @@ function enregistrer() {
     const objet = (f.lib || '').trim() || f.cat, nouv = [];
     if (pa.moi > 0) nouv.push({ lib, cat: f.cat, montant: pa.moi });
     if (pa.chacun > 0) f.noms.forEach(n => nouv.push({ lib: n + ' · ' + objet, cat: CAT_AV, montant: pa.chacun }));
-    const es = nouv.map(x => ({ id: uid(), row: null, date: f.date || auj(), mois, lib: x.lib, cat: x.cat, montant: x.montant, y: f.y, m: f.m, srv: null, pending: true, nw: true }));
+    const es = nouv.map(x => ({ id: uid(), row: null, date: f.date || auj(), mois, lib: x.lib, cat: x.cat, montant: x.montant, especes: !!f.especes, y: f.y, m: f.m, srv: null, pending: true, nw: true }));
     es.forEach(e => S.journal.push(e)); memo = new Map(); if (casseSerie(f.cat)) noterDepenseDuJour(f.date);
     fermer(); S.y = f.y; S.m = f.m; rendre(true);
     toast(`Ta part ${e2(pa.moi)} € · on te doit ${e2(pa.chacun * pa.n)} €`, 'ANNULER', () => es.forEach(e => supprimer(e)));
@@ -1671,7 +1677,7 @@ function enregistrer() {
   }
   if (f.mode === 'add') {
     const avant = f.type === 'Dépense' ? budgetDe(f.cat, f.y, f.m) : null;
-    const e = { id: uid(), row: null, date: f.date || auj(), mois, lib, cat: f.cat, montant: n, y: f.y, m: f.m, srv: null, pending: true, nw: true };
+    const e = { id: uid(), row: null, date: f.date || auj(), mois, lib, cat: f.cat, montant: n, especes: f.type === 'Dépense' && !!f.especes, y: f.y, m: f.m, srv: null, pending: true, nw: true };
     const use = LS.get('usage', {}); use[f.cat] = (use[f.cat] || 0) + 1; LS.set('usage', use);
     S.journal.push(e); memo = new Map();
     if (casseSerie(e.cat) && e.y === now.getFullYear() && e.m === now.getMonth() + 1) noterDepenseDuJour(e.date);
@@ -1681,7 +1687,7 @@ function enregistrer() {
     toast(b ? `${e.cat} : ${b.reste >= 0 ? 'il te reste ' + e0(b.reste) : 'dépassé de ' + e0(-b.reste)}` : 'Enregistré', 'ANNULER', () => supprimer(e));
     enfiler({ op: 'add', id: e.id });
   } else {
-    const e = trouver(f.id) || (f.row != null && S.journal.find(x => x.row === f.row && !x.deleted)); if (!e) { fermer(); toast('Ligne introuvable, réessaie'); return; }    Object.assign(e, { mois, lib, cat: f.cat, montant: n, y: f.y, m: f.m, date: f.date || e.date || null, pending: true });
+    const e = trouver(f.id) || (f.row != null && S.journal.find(x => x.row === f.row && !x.deleted)); if (!e) { fermer(); toast('Ligne introuvable, réessaie'); return; }    Object.assign(e, { mois, lib, cat: f.cat, montant: n, y: f.y, m: f.m, date: f.date || e.date || null, especes: f.type === 'Dépense' && !!f.especes, pending: true });
     fermer(); rendre(true); toast('Ligne modifiée'); enfiler({ op: 'update', id: e.id });
   }
 }
@@ -1907,10 +1913,75 @@ function signe(type) { return type === 'Revenu' || type === 'Retrait' ? 1 : -1; 
 // Solde au 1er janvier : celui saisi pour l'année, sinon la fin calculée de l'année d'avant (au plus 2 ans en arrière) (C7).
 function soldeDepart(y, k) { const s = S.data && S.data.soldes ? S.data.soldes[String(y)] : null; if (typeof s === 'number' && Math.abs(s) > 1) return s; return (k || 0) < 2 ? soldeFin(y - 1, 12, (k || 0) + 1) : null; }
 function ouvrirSolde() {
-  const c = S.data.controle || {};
-  S.form = { mode: 'solde', y: now.getFullYear(), m: now.getMonth() + 1, banque: '', especes: c.especes ? txtNum(c.especes) : '', dep: '', neg: false, salDeja: false };
+  const es = etatEspeces();
+  S.form = { mode: 'solde', y: now.getFullYear(), m: now.getMonth() + 1, banque: '', especes: es.esp ? txtNum(es.esp) : '', dep: '', neg: false, salDeja: false, ret: false, rm: '', rd: auj() };
   rendreForm();
 }
+/* ---- espèces : ce qui est sur le compte / ce qui est en poche ----
+   Préférence synchronisée « especes » : { depuis: 'aaaa-mm-jj' (jour du dernier contrôle), base: espèces déclarées ce jour-là,
+   deja: espèces payées ce jour-là déjà saisies avant le contrôle (déjà déduites de base), r: [{ d, m }] retraits depuis }.
+   Espèces = base + retraits − dépenses « payé en espèces » datées depuis le contrôle. Banque = total calculé − espèces.
+   Le total (jauge, courbe, prévisions) ne change pas : on ne fait que le découper en deux. */
+function prefEsp() { const p = getPref('especes', null); return p && typeof p === 'object' && !Array.isArray(p) ? p : null; }
+// Montant net payé en espèces (dépenses +, éventuelles rentrées −), lignes datées à partir de « depuis » (ou ce jour-là seulement)
+function sommeEspeces(depuis, seulJour) {
+  const cm = catMap(); let t = 0;
+  S.journal.forEach(e => {
+    if (e.deleted || !e.especes || !e.montant) return;
+    if (seulJour ? e.date !== seulJour : depuis && (!e.date || e.date < depuis)) return;
+    const c = cm[e.cat]; t -= (c ? signe(c.type) : -1) * e.montant;
+  });
+  return Math.round(t * 100) / 100;
+}
+function etatEspeces() {
+  const p = prefEsp(), c = (S.data && S.data.controle) || {};
+  // Sans préférence (contrôle fait avant cette version) : on part des espèces du fichier ; toute ligne « espèces » est forcément plus récente.
+  const base = p && typeof p.base === 'number' ? p.base : (typeof c.especes === 'number' ? c.especes : 0);
+  const depuis = p && p.depuis || null, r = p && Array.isArray(p.r) ? p.r : [];
+  const ret = r.reduce((t, x) => t + (+x.m || 0), 0), dep = sommeEspeces(depuis), deja = p && +p.deja || 0;
+  const v = Math.round((base + ret - dep + deja) * 100) / 100;
+  return { brut: v, esp: Math.max(0, v), neg: v < -0.005, base, ret, dep: Math.round((dep - deja) * 100) / 100, depuis, r };
+}
+// Banque estimée aujourd'hui = total calculé − espèces en poche
+function partageSolde(total) { const es = etatEspeces(); return Object.assign(es, { banque: Math.round((total - es.esp) * 100) / 100 }); }
+const AVERT_ESP = "tu as dépensé plus d'espèces que déclaré : refais un contrôle";
+function sousTitreEspeces(total) {
+  if (total == null) return '<small class="lblsub">banque + espèces</small>';
+  const s = partageSolde(total);
+  return `<small class="lblsub">banque <span class="espv">${e0(s.banque)}</span> · espèces <span class="espv">${e0(s.esp)}</span></small>${s.neg ? `<small class="espw">⚠ ${AVERT_ESP}</small>` : ''}`;
+}
+// Saisie : effet de « Payé en espèces » sur ce qui reste en poche
+function majEspHint() {
+  const f = S.form, z = $('#esphint'); if (!z) return;
+  z.style.display = f.especes ? 'block' : 'none'; if (!f.especes) return;
+  const es = etatEspeces(); let n = montantNum();
+  if (f.mode === 'edit') { const e = trouver(f.id); if (e && e.especes && (!es.depuis || (e.date && e.date >= es.depuis))) n -= e.montant; }
+  const apres = Math.round((es.brut - n) * 100) / 100;
+  z.innerHTML = `Espèces en poche : ${e2(es.esp)} € → <b>${e2(Math.max(0, apres))} €</b>` + (apres < -0.005 ? `<br><span class="c-warn">Plus que ce que tu avais déclaré : refais un contrôle dans ⚙ › Mon solde</span>` : '');
+}
+// Retrait au distributeur : banque −X, espèces +X, total inchangé (ce n'est pas une dépense)
+function okRetrait() {
+  const f = S.form, v = Math.round(numTxt(f.rm) * 100) / 100;
+  if (!(v > 0) || v > 100000) { $('#rerr').textContent = 'Tape le montant retiré'; return; }
+  const es = etatEspeces(), p = Object.assign({}, prefEsp() || { depuis: null, base: es.base }), r = (Array.isArray(p.r) ? p.r : []).slice();
+  r.push({ d: f.rd || auj(), m: v });
+  // Préférence limitée à 8000 caractères : les plus vieux retraits sont fondus dans la base (même total).
+  p.r = r; while (JSON.stringify(p).length > 7000 && p.r.length > 1) { const x = p.r.shift(); p.base = Math.round(((+p.base || 0) + (+x.m || 0)) * 100) / 100; }
+  setPref('especes', p); vibrer();
+  f.ret = false; f.rm = ''; f.rd = auj(); f.especes = txtNum(etatEspeces().esp); // le champ du contrôle suit les espèces à jour
+  rendreSolde(); rendre(true);
+  toast(`Retrait noté : espèces +${e2(v)} €, banque −${e2(v)} €`);
+}
+function supprRetrait(i) {
+  const p = prefEsp(); if (!p || !Array.isArray(p.r) || !p.r[i]) return;
+  const avant = JSON.parse(JSON.stringify(p)), x = p.r[i];
+  const maj = () => { if (S.form && S.form.mode === 'solde') { S.form.especes = txtNum(etatEspeces().esp); rendreSolde(); } rendre(true); };
+  setPref('especes', Object.assign({}, p, { r: p.r.filter((_, k) => k !== i) })); maj();
+  toast('Retrait de ' + e2(x.m) + ' € retiré', 'ANNULER', () => { setPref('especes', avant); maj(); });
+}
+// Un retrait se date au plus tôt le jour du dernier contrôle (avant, il est déjà compté dans les espèces déclarées), et 60 jours en arrière au maximum
+function retraitMin() { const d = etatEspeces().depuis, l = addJ(auj(), -60); return d && d > l ? d : l; }
+const jjmm = iso => iso ? (+iso.slice(8)) + '/' + iso.slice(5, 7) : '';
 // Salaire de l'Échéancier daté du 1er du mois prochain (souvent versé quelques jours avant)
 function salaireDejaLa() {
   const y = now.getFullYear(), m = now.getMonth() + 1, ny = m === 12 ? y + 1 : y, nm = m === 12 ? 1 : m + 1;
@@ -1945,18 +2016,34 @@ function okSolde() {
   else { appel('solde-ctrl', { mois: 'Janvier', solde: null, especes: esp }); S.data.controle = { mois: 'Janvier', solde: null, especes: esp }; } // l'appli suit tout de suite (E6)
   const hist = LS.get('controles', []);
   hist.unshift({ date: now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }), mois: MC[m - 1] + ' ' + y, ecart: e == null ? 0 : Math.round(e * 100) / 100, solde: Math.round(t * 100) / 100 });
-  LS.set('controles', hist.slice(0, 24)); LS.set('ctrlFait', nowYM()); sauver();
+  LS.set('controles', hist.slice(0, 24)); LS.set('ctrlFait', nowYM());
+  // 3) espèces : les espèces déclarées deviennent la nouvelle base, la liste des retraits repart de zéro
+  const pe = { depuis: auj(), base: Math.round(esp * 100) / 100, r: [] }, dj = sommeEspeces(null, auj()); if (dj) pe.deja = dj;
+  setPref('especes', pe); sauver();
   fermer(); rendre(true);
   toast(e == null || Math.abs(e) <= 5 ? 'Solde noté ✓ L\'appli repart de ' + e0(t) : 'Solde noté : écart de ' + e0(e) + ' absorbé, l\'appli repart de ' + e0(t));
 }
 function rendreSolde() {
   const f = S.form, y = now.getFullYear(), m = now.getMonth() + 1, cal = soldeCalcule(y, m), d = now.getDate(), sal = salaireDejaLa();
-  let h = enteteSheet('MON SOLDE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Quand tu veux (idéalement le 1er) : tape ce qu'il y a sur ton compte aujourd'hui <b>et le liquide que tu as en poche</b>. L'appli repart du total, c'est tout. Un retrait d'espèces ne se saisit pas : seuls les achats payés en liquide se saisissent.</div>
-    ${cal != null ? `<div class="ticket" style="margin-top:10px"><div class="tl"><span>L'APPLI CALCULE AUJOURD'HUI</span><span id="scal">${e2(cal)}</span></div></div>` : ''}
+  const ps = partageSolde(cal || 0), rd = f.rd || auj(), rmin = retraitMin();
+  let h = enteteSheet('MON SOLDE', 'reglages');
+  if (cal != null) h += `<div class="ticket" style="margin-top:10px"><div class="tl"><span>🏦 SUR LE COMPTE</span><span id="sbq">${e2(ps.banque)}</span></div><div class="tl"><span>💶 ESPÈCES EN POCHE</span><span id="sesp">${e2(ps.esp)}</span></div><div class="tl tot"><span>TOTAL ESTIMÉ AUJOURD'HUI</span><span id="scal">${e2(cal)}</span></div></div>`;
+  h += `<div class="note" style="display:block;margin-top:${cal != null ? 14 : 10}px;font-family:var(--mono);font-size:11px">ESPÈCES : <span class="espv">${e2(ps.base)} €</span> ${ps.depuis ? 'déclarés le ' + jjmm(ps.depuis) : 'déclarées'}${ps.ret ? ` · <span class="espv">+${e2(ps.ret)} €</span> retirés` : ''}${ps.dep ? ` · <span class="espv">−${e2(ps.dep)} €</span> payés en espèces` : ''}</div>`
+    + (ps.neg ? `<div class="alert" style="margin-top:8px">⚠ ${AVERT_ESP[0].toUpperCase() + AVERT_ESP.slice(1)} (il te manquerait ${e2(-ps.brut)} €).</div>` : '');
+  h += f.ret ? `<div class="grp" style="margin-top:14px">RETRAIT AU DISTRIBUTEUR</div>
+      <input class="libin" data-f="rm" id="rm" inputmode="decimal" placeholder="Montant retiré en €" value="${esc(f.rm)}" style="margin-top:0">
+      <div class="mrow"><button class="mbtn" data-act="ret-d:-1" aria-label="Jour précédent" ${rd <= rmin ? 'disabled style="opacity:.3"' : ''}>‹</button><span>RETIRÉ LE · <b>${libDate(rd)}</b></span><button class="mbtn" data-act="ret-d:1" aria-label="Jour suivant" ${rd >= auj() ? 'disabled style="opacity:.3"' : ''}>›</button></div>
+      <div class="err" id="rerr"></div>
+      <button class="go" data-act="ret-ok" style="margin-top:8px">NOTER LE RETRAIT</button>
+      <button class="ghost" data-act="ret-x">ANNULER</button>
+      <div class="note" style="display:block">Ce n'est pas une dépense : l'argent passe de ta banque à ta poche, ton total ne bouge pas.</div>`
+    : `<button class="ghost" data-act="ret-open" style="margin-top:12px">🏧 RETRAIT D'ESPÈCES</button>`;
+  if (ps.r.length) h += `<div class="grp" style="margin-top:14px">RETRAITS DEPUIS LE DERNIER CONTRÔLE</div>` + ps.r.map((x, i) => `<button class="up" data-act="ret-del" data-i="${i}" aria-label="Retirer ce retrait"><span>${esc(jjmm(x.d))}</span><span>Distributeur</span><span>+${e2(+x.m || 0)} <span class="c-mute">✕</span></span></button>`).reverse().join('');
+  h += `<div class="grp" style="margin-top:18px">NOUVEAU CONTRÔLE</div><div class="note" style="display:block;margin-top:0">Quand tu veux (idéalement le 1er) : tape ce qu'il y a sur ton compte aujourd'hui <b>et le liquide que tu as en poche</b>. L'appli repart de ces deux montants. Entre deux contrôles, elle suit tes espèces : « Payé en espèces » dans une dépense les fait baisser, un retrait au distributeur les fait monter (et baisser la banque).</div>
     <div class="grp" style="margin-top:14px">SUR TON COMPTE AUJOURD'HUI</div>
     <div style="display:flex;gap:8px"><button class="chip ${f.neg ? 'on' : ''}" data-act="s-neg" style="height:42px;margin-top:10px" aria-label="Solde négatif">±</button>
       <input class="libin" data-f="banque" inputmode="decimal" placeholder="Solde de ton compte en €" value="${esc(f.banque)}"></div>
-    <input class="libin" data-f="especes" inputmode="decimal" placeholder="Espèces en poche (liquide pas encore dépensé)" value="${esc(f.especes)}" style="margin-top:0">
+    <div class="grp">ESPÈCES EN POCHE AUJOURD'HUI</div><input class="libin" data-f="especes" inputmode="decimal" placeholder="Liquide que tu as sur toi, en €" value="${esc(f.especes)}" style="margin-top:0">
     ${d >= 20 && sal > 0 ? `<button class="chip ${f.salDeja ? 'on' : ''}" data-act="s-sal" style="margin-top:2px;white-space:normal;text-align:left">${f.salDeja ? '✓ ' : ''}Mon salaire du mois prochain (${e0(sal)}) est déjà sur le compte</button>` : ''}
     <div class="hint" id="secart" style="margin-top:6px"></div><div class="err" id="ferr"></div>
     <button class="go" data-act="s-ok">C'EST MON SOLDE</button>
@@ -3871,6 +3958,7 @@ document.addEventListener('click', ev => {
   if (a.startsWith('mg:m:')) { S.y = S.form.y; S.m = +a.slice(5); fermer(); rendre(); return; }
   if (a.startsWith('fj:')) { const f = S.form, d = +a.slice(3); f.jour = f.jour == null ? (d > 0 ? 1 : 31) : (f.jour + d < 1 || f.jour + d > 31 ? null : f.jour + d); rendreForm(); return; }
   if (a.startsWith('fm:')) { const f = S.form, d = +a.slice(3); let m = f.m + d, y = f.y; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } f.y = y; f.m = m; f.date = dateDefaut(y, m); rendreForm(); return; }
+  if (a.startsWith('ret-d:')) { const f = S.form; let x = addJ(f.rd || auj(), +a.slice(6)); const mn = retraitMin(); if (x < mn) x = mn; if (x > auj()) x = auj(); f.rd = x; rendreSolde(); return; }
   if (a.startsWith('fd:')) { const f = S.form, d = +a.slice(3); let x = addJ(f.date || dateDefaut(f.y, f.m) || auj(), d); const deb = f.y + '-' + pad2(f.m) + '-01', fin = f.y + '-' + pad2(f.m) + '-' + pad2(dim(f.y, f.m)), max = f.mode === 'edit' && fin > auj() ? auj() : fin; // après aujourd'hui = achat à venir (seulement pour une nouvelle ligne)
     if (x < deb) x = deb; if (x > max) x = max; f.date = x; rendreForm(); return; }
   switch (a) {
@@ -4033,6 +4121,12 @@ document.addEventListener('click', ev => {
     case 'cat-del': retirerCat(); break;
     case 's-neg': S.form.neg = !S.form.neg; rendreSolde(); break;
     case 's-ok': okSolde(); break;
+    case 'esp': S.form.especes = !S.form.especes; rendreForm(); break;
+    case 'ret-go': ouvrirSolde(); S.form.ret = true; rendreForm(); setTimeout(() => { const i = $('#rm'); if (i) i.focus(); }, 50); break;
+    case 'ret-open': S.form.ret = true; rendreSolde(); setTimeout(() => { const i = $('#rm'); if (i) i.focus(); }, 50); break;
+    case 'ret-x': S.form.ret = false; S.form.rm = ''; rendreSolde(); break;
+    case 'ret-ok': okRetrait(); break;
+    case 'ret-del': supprRetrait(+el.dataset.i); break;
     case 'theme': LS.set('theme', el.dataset.t); appliquerTheme(); rendreReglages(); break;
     case 'refresh': fermer(); rafraichir(true); toast('Actualisation…'); break;
     case 'file': S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); break;
