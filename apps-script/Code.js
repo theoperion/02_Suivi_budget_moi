@@ -1,5 +1,5 @@
 /**
- * BUDGET · API du budget (Apps Script) · v5.10
+ * BUDGET · API du budget (Apps Script) · v5.11
  * ------------------------------------------
  * Ce script est relié au fichier budget dans lequel il a été créé.
  * Il lit les Paramètres, l'Échéancier et le Journal, et écrit dans le Journal.
@@ -11,6 +11,7 @@
  * v5.2 : la date de la dépense (colonne « Saisi le ») se modifie aussi quand on corrige une ligne.
  * v5.3 : fonction verifier() pour donner les autorisations et tester le script en un clic.
  * v5.6 : « À venir » : le mois est écrit en texte (corrige l'échec des éléments à venir).
+ * v5.11 : action « lot » : plusieurs envois en une demande (un seul verrou) ; un envoi refusé n'empêche pas les suivants.
  * v5.10 : « À venir » accepte un mois futur pas encore présent dans la liste du Journal.
  * v5.9 : renommer une catégorie met aussi à jour le défi du mois ; on ne peut plus retirer une catégorie encore utilisée dans « À venir ».
  * v5.8 : classeur ouvert une seule fois par demande ; onglet caché « Diagnostic » (durée et résultat de chaque demande).
@@ -25,7 +26,7 @@
  */
 
 const CLE_A_ENREGISTRER = 'CHANGE-MOI';
-const VERSION_API = '5.10';
+const VERSION_API = '5.11';
 
 // Laisse vide si le script est ouvert depuis le fichier (Extensions > Apps Script).
 const ID_FICHIER = '';
@@ -68,8 +69,10 @@ function doPost(e) {
     out = { ok: false, error: 'SERVEUR', message: String(err && err.message || err) };
     console.error('Erreur ' + action + ' : ' + out.message + (err && err.stack ? '\n' + err.stack : ''));
   }
-  try { if (action !== 'data') console.log(action + ' → ' + (out && out.ok ? 'ok' : 'refusé : ' + (out && out.message))); } catch (x) {}
-  diagnostic_(action, Date.now() - t0, out);
+  // Un lot : une ligne avec le nombre d'envois et d'échecs (le détail de chaque échec va dans « Détail »).
+  const nom = action === 'lot' && out && out.ok && out.detail ? 'lot (' + out.detail.ops + ' envois, ' + out.detail.echecs + ' échec' + (out.detail.echecs > 1 ? 's' : '') + ')' : action;
+  try { if (action !== 'data') console.log(nom + ' → ' + (out && out.ok ? 'ok' : 'refusé : ' + (out && out.message))); } catch (x) {}
+  diagnostic_(nom, Date.now() - t0, out);
   if (out && out.detail) delete out.detail;
   let txt; try { txt = JSON.stringify(out); } catch (x) { txt = JSON.stringify({ ok: false, error: 'SERVEUR', message: 'Réponse illisible' }); }
   return ContentService.createTextOutput(txt).setMimeType(ContentService.MimeType.JSON);
@@ -89,26 +92,51 @@ function traiter_(req) {
   if (!cle) return { ok: false, error: 'SANS_CLE', message: 'Clé non configurée : lance initialiserCle() dans Apps Script.' };
   if (!req || req.key !== cle) return { ok: false, error: 'CLE', message: 'Clé incorrecte.' };
 
-  switch (req.action) {
-    case 'data': return { ok: true, data: lireDonnees_() };
-    case 'add': return avecVerrou_(() => ajouter_(req.ligne));
-    case 'update': return avecVerrou_(() => modifier_(req.row, req.attendu, req.ligne));
-    case 'delete': return avecVerrou_(() => supprimer_(req.row, req.attendu));
-    case 'ech-save': return avecVerrou_(() => echEnregistrer_(req.row, req.attendu, req.e));
-    case 'ech-del': return avecVerrou_(() => echSupprimer_(req.row, req.attendu));
-    case 'budget': return avecVerrou_(() => budget_(req.nom, req.budget, req.suivi));
-    case 'cat-add': return avecVerrou_(() => catAjouter_(req.nom, req.groupe, req.budget, req.suivi));
-    case 'cat-edit': return avecVerrou_(() => catModifier_(req.ancien, req.nom, req.groupe));
-    case 'cat-del': return avecVerrou_(() => catRetirer_(req.nom, req.cible));
-    case 'solde-ctrl': return avecVerrou_(() => soldeControle_(req.mois, req.solde, req.especes));
-    case 'solde-dep': return avecVerrou_(() => soldeDepart_(req.annee, req.valeur));
-    case 'av-save': return avecVerrou_(() => avEnregistrer_(req.row, req.attendu, req.a));
-    case 'av-del': return avecVerrou_(() => avSupprimer_(req.row, req.attendu));
-    case 'defi': return avecVerrou_(() => defi_(req.mois, req.cat, req.montant));
-    case 'pref-set': return avecVerrou_(() => prefSet_(req.cle, req.valeur));
-    case 'av-paye': return avecVerrou_(() => avPaye_(req.row, req.attendu, req.ligne));
-    default: return { ok: false, error: 'ACTION', message: 'Action inconnue : ' + req.action };
-  }
+  if (req.action === 'data') return { ok: true, data: lireDonnees_() };
+  if (req.action === 'lot') return avecVerrou_(() => lot_(req.ops));
+  const f = ECRITURES_[req.action];
+  if (!f) return { ok: false, error: 'ACTION', message: 'Action inconnue : ' + req.action };
+  return avecVerrou_(() => f(req));
+}
+
+// Écritures : le corps seul, sans verrou (pris par traiter_ pour un envoi, une seule fois pour un lot).
+const ECRITURES_ = {
+  'add': r => ajouter_(r.ligne),
+  'update': r => modifier_(r.row, r.attendu, r.ligne),
+  'delete': r => supprimer_(r.row, r.attendu),
+  'ech-save': r => echEnregistrer_(r.row, r.attendu, r.e),
+  'ech-del': r => echSupprimer_(r.row, r.attendu),
+  'budget': r => budget_(r.nom, r.budget, r.suivi),
+  'cat-add': r => catAjouter_(r.nom, r.groupe, r.budget, r.suivi),
+  'cat-edit': r => catModifier_(r.ancien, r.nom, r.groupe),
+  'cat-del': r => catRetirer_(r.nom, r.cible),
+  'solde-ctrl': r => soldeControle_(r.mois, r.solde, r.especes),
+  'solde-dep': r => soldeDepart_(r.annee, r.valeur),
+  'av-save': r => avEnregistrer_(r.row, r.attendu, r.a),
+  'av-del': r => avSupprimer_(r.row, r.attendu),
+  'defi': r => defi_(r.mois, r.cat, r.montant),
+  'pref-set': r => prefSet_(r.cle, r.valeur),
+  'av-paye': r => avPaye_(r.row, r.attendu, r.ligne)
+};
+
+// v5.11 : plusieurs envois en une demande, exécutés dans l'ordre sous un seul verrou.
+// Chaque envoi a sa propre réponse ; un envoi refusé ou en erreur n'empêche pas les suivants.
+function lot_(ops) {
+  if (!Array.isArray(ops) || !ops.length || ops.length > 50) return { ok: false, error: 'INVALIDE', message: 'Lot vide ou trop long.' };
+  const erreurs = [];
+  const res = ops.map((op, i) => {
+    const f = op && ECRITURES_[op.action];
+    let r;
+    if (!f) r = { ok: false, error: 'ACTION', message: 'Action inconnue : ' + (op && op.action) };
+    else {
+      try { r = f(op) || { ok: false, error: 'SERVEUR', message: 'Réponse vide' }; }
+      catch (err) { r = { ok: false, error: 'SERVEUR', message: String(err && err.message || err) }; console.error('Erreur lot ' + (op && op.action) + ' : ' + r.message); }
+    }
+    if (!r.ok) erreurs.push({ n: i + 1, action: op && op.action, error: r.error, message: r.message, detail: r.detail });
+    if (r.detail) delete r.detail;
+    return r;
+  });
+  return { ok: true, res, detail: { ops: ops.length, echecs: erreurs.length, actions: ops.map(o => o && o.action).join(','), erreurs } };
 }
 
 /* ---------- Lecture ---------- */
