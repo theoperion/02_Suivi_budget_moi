@@ -20,6 +20,8 @@
  * v5.4 : la colonne « Contrôle » du Journal ignore les lignes validées « c'est voulu » (libellé terminé par ✓). Mise à jour automatique, une seule fois.
  * Espèces : colonne « Payé en » du Journal (N par défaut) = « Espèces » pour une dépense payée en liquide ;
  *           préférence « especes » = espèces déclarées au dernier contrôle + retraits au distributeur depuis.
+ * Achat en ligne : même colonne « Payé en » = « En ligne » (exclusif avec « Espèces ») ; relu en enLigne: true.
+ * Achats plaisir : préférence « envies » = liste d'envies avec délai + réglages (taux horaire, seuil, enveloppe).
  *
  * Installation :
  *  1. Remplace CLE_A_ENREGISTRER par ta clé, lance initialiserCle() une fois (inutile si c'est déjà fait).
@@ -216,6 +218,7 @@ function lireDonnees_() {
     const d = dates[i] && dates[i][0];
     const l = { row: 5 + i, mois: String(r[0]), lib: String(r[1]), cat: String(r[2]), montant: r[3], date: d instanceof Date ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : null };
     if (payes[i] && estEspeces_(payes[i][0])) l.especes = true; // champ ajouté seulement si vrai (réponse compacte)
+    else if (payes[i] && estEnLigne_(payes[i][0])) l.enLigne = true;
     journal.push(l);
   });
 
@@ -301,16 +304,31 @@ function colPaye_(jou, creer) {
   return c;
 }
 function estEspeces_(v) { return /^esp[eè]ces$/i.test(String(v).trim()); }
-// Écrit « Espèces » ou vide. Une ligne non payée en espèces ne crée jamais la colonne.
-function ecrirePaye_(jou, row, especes) {
-  const c = colPaye_(jou, !!especes);
-  if (c) jou.getRange(row, c).setValue(especes ? 'Espèces' : '');
+function estEnLigne_(v) { return /^en\s*ligne$/i.test(String(v).trim()); }
+// Écrit « Espèces », « En ligne » ou vide (les deux sont exclusifs : espèces l'emporte).
+// Une ligne ni en espèces ni en ligne ne crée jamais la colonne.
+function ecrirePaye_(jou, row, especes, enLigne) {
+  const v = especes ? 'Espèces' : (enLigne ? 'En ligne' : '');
+  const c = colPaye_(jou, !!v);
+  if (c) jou.getRange(row, c).setValue(v);
+}
+// Modification : une ancienne appli qui n'envoie que « especes » ne doit pas effacer un « En ligne ».
+function majPaye_(jou, row, l) {
+  const e = typeof l.especes === 'boolean', n = typeof l.enLigne === 'boolean';
+  if (!e && !n) return;
+  if (!n) {
+    const c = colPaye_(jou, false);
+    if (!l.especes && c && estEnLigne_(jou.getRange(row, c).getValue())) return;
+  }
+  ecrirePaye_(jou, row, l.especes === true, l.enLigne === true);
 }
 
 /* ---------- Préférences de l'appli (tirelires, voyage, escalier, séries…) gardées dans le script ---------- */
 
 // « especes » : { depuis, base, deja, r: [{ d, m }] } (suivi des espèces entre deux contrôles du solde)
-const PREFS_OK_ = ['tirelires', 'voyages', 'escalier', 'semaines', 'objectifs', 'jeu', 'especes'];
+// « envies » : { l: [{ i, l, p, c, d, s: 'att'|'ach'|'ren', f }], ren: { n, eco }, ach: { n, eco }, r: { taux, seuil, delai, env } }
+//              (liste d'envies avec délai, anciennes envies résumées en compteurs, réglages « Achats plaisir »)
+const PREFS_OK_ = ['tirelires', 'voyages', 'escalier', 'semaines', 'objectifs', 'jeu', 'especes', 'envies'];
 function prefs_() {
   const p = PropertiesService.getScriptProperties(), o = {};
   PREFS_OK_.forEach(k => { try { const v = p.getProperty('PREF_' + k); if (v) o[k] = JSON.parse(v); } catch (e) {} });
@@ -390,7 +408,7 @@ function ajouter_(l) {
   if (row > jou.getMaxRows()) jou.insertRowsAfter(jou.getMaxRows(), 100);
   jou.getRange(row, 1, 1, 4).setValues([[l.mois, l.lib || l.cat, l.cat, Math.round(Number(l.montant) * 100) / 100]]);
   ecrireDate_(jou, row, l.date);
-  ecrirePaye_(jou, row, l.especes === true);
+  ecrirePaye_(jou, row, l.especes === true, l.enLigne === true);
   if (cleUid) cache.put(cleUid, String(row), 21600); // mémorisé 6 h
   return { ok: true, row };
 }
@@ -403,7 +421,7 @@ function modifier_(row, attendu, l) {
   if (!identique_(r.getValues()[0], attendu)) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.', detail: { row, fichier: r.getValues()[0].map(String), attendu } };
   r.setValues([[l.mois, l.lib || l.cat, l.cat, Math.round(Number(l.montant) * 100) / 100]]);
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(l.date || ''))) ecrireDate_(jou, row, l.date); // date de la dépense corrigée dans l'appli
-  if (typeof l.especes === 'boolean') ecrirePaye_(jou, row, l.especes); // une ancienne appli qui n'envoie rien ne touche pas à la colonne
+  majPaye_(jou, row, l); // une ancienne appli qui n'envoie rien ne touche pas à la colonne
   return { ok: true, row };
 }
 
