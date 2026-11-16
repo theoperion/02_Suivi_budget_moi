@@ -767,7 +767,7 @@ body.discret .ticket .tl span.achn{filter:none}
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '9.6';
+const VERSION = '9.7';
 const HEURES_SEMAINE_DEFAUT = 38.67; // heures de contrat par semaine (réglable dans Achats plaisir)
 // Toutes les fonctionnalités (jeu, défis, séries, bilans, alertes, saisons, semaine, résumé, objectif, collection…) sont actives pour tout le monde :
 // plus d'interrupteurs dans Réglages. on() reste pour ne pas toucher aux appels ; l'ancienne préférence locale « off » est ignorée.
@@ -1789,7 +1789,9 @@ function sectionsModeEmploi() {
     ['accueil', '🏠', 'ACCUEIL', 'Où tu en es ce mois-ci, en un coup d\'œil.', [
       ['⏱', 'LA JAUGE ET ' + INFOS.restant[0], INFOS.restant[1] + " Sous le chiffre, une phrase te dit si tu dépenses plus vite ou moins vite que prévu."],
       ['🗓', ...I('fin')], ['⏳', ...I('prelever')], ['🌱', ...I('nd')], ['📉', ...I('courbe')],
-      ['🎯', 'MES BUDGETS', "Une barre par budget : ce que tu as dépensé, ce qu'il reste. Tampon <b>TENU</b>, <b>LIMITE</b> (près du plafond) ou <b>DÉPASSÉ</b>. Touche un budget pour voir ses lignes."]]],
+      ['🎯', 'MES BUDGETS', "Une barre par budget : ce que tu as dépensé, ce qu'il reste. Tampon <b>TENU</b>, <b>LIMITE</b> (près du plafond) ou <b>DÉPASSÉ</b>. Touche un budget pour voir ses lignes."],
+      ['🖼', 'LA VITRINE', "De part et d'autre de la jauge : tes affiches à gauche, tes écussons à droite (3 de chaque). Touche-les pour les voir en grand ou changer ceux qui sont exposés."],
+      ['🛍', 'ACHATS PLAISIR', "Tout en bas de l'accueil : tes achats plaisir du mois, traduits en heures de travail, et ta liste d'envies (une envie attend quelques jours avant d'être achetée)."]]],
     ['journal', '🧾', 'JOURNAL', 'Toutes tes lignes, mois par mois.', [
       ['🧾', 'LE JOURNAL', "Chaque dépense, revenu ou épargne saisi, du plus récent au plus ancien. Change de mois avec ‹ ›, cherche un libellé ou filtre par catégorie. <b>Touche une ligne</b> pour la corriger ou la supprimer."]]],
     ['prevu', '📅', 'PRÉVU', 'Ce qui va tomber : prélèvements réguliers et achats à venir.', [
@@ -1800,7 +1802,8 @@ function sectionsModeEmploi() {
     ['progres', '🏆', 'PROGRÈS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
       ['🎯', 'DÉFIS', "Tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail plus bas, section Défis)."],
-      ['🏅', 'SUCCÈS', "Ton niveau et tes points d'expérience (XP), les succès débloqués et les badges d'événements."],
+      ['🏅', 'SUCCÈS', "Ton niveau (jusqu'à 100), tes points d'expérience (XP) et leur journal, les succès débloqués. Chaque niveau rapporte une récompense."],
+      ['🛡️', 'MES ÉCUSSONS', "Les écussons des événements et des saisons : Stats › Progrès › Succès (ou Défis), bouton « MES ÉCUSSONS · ÉVÉNEMENTS ET SAISONS »."],
       ['🎨', 'STYLE ET COLLECTION', "Thèmes, jauges, tampons et autres cosmétiques gagnés avec les niveaux : choisis ceux que tu veux afficher."]]],
     ['saisir', '✍️', 'SAISIR', 'Le bouton + en bas, et c\'est parti.', [
       ['➕', 'LE BOUTON +', "Choisis Dépense, Revenu ou Épargne, une catégorie, tape le montant et ENREGISTRER. Le libellé est facultatif. « ? AIDE » en haut de la saisie rappelle tout ça."]].concat(TUTO.filter(t => !TUTO_SOLDE.includes(t[1])))],
@@ -1815,11 +1818,14 @@ function sectionsModeEmploi() {
       ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
       ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
       ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
-      ['🍂', 'SAISONS', FEAT_DETAIL.saison]]],
+      ['🍂', 'SAISONS', FEAT_DETAIL.saison],
+      ['🧺', 'LES DÉPENSES ESSENTIELLES', "Les catégories « Sans alerte » (les courses par exemple) ne servent jamais de défi : on ne se prive pas de manger pour gagner des points."]]],
     ['reglages', '⚙', 'RÉGLAGES UTILES', 'Adapter l\'appli à ta façon de faire.', [
-      ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », l'aide de la saisie et le lien Mode d'emploi de l'accueil quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
+      ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », et l'aide de la saisie quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
       ['🧺', 'CATÉGORIES QUI NE CASSENT PAS LES SÉRIES', "Réglages › Mon budget (ou Stats › Progrès › Défis, tout en bas) : coche par exemple Courses si faire les courses ne doit pas casser un jour sans dépense. Les montants comptent toujours dans tes budgets."],
       ['📅', 'CHAQUE MOIS', "En haut des Réglages : le contrôle du solde (✓ quand il est fait pour le mois), le retrait d'espèces et les budgets par catégorie."],
+      ['⏱', 'TAUX HORAIRE', "Dans Achats plaisir : calculé tout seul (salaire moyen des 3 derniers mois ÷ tes heures de contrat). Tu peux changer les heures par semaine ou saisir un taux à la main."],
+      ['◀', 'BOUTON RETOUR', "Le retour du téléphone ferme la fenêtre ouverte, puis revient à l'accueil. Sur l'accueil, appuie deux fois pour quitter."],
       ['🙈', 'MODE DISCRET', "Floute les montants quand tu montres ton téléphone."]]]];
 }
 function rendreModeEmploi() {

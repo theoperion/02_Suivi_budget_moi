@@ -23,6 +23,7 @@ def fabriquer(p):
     html = remplacer(html, '<title>Budget</title>', f'<title>{p["titre"]}</title>')
     html = remplacer(html, r"const API_DEFAUT = '[^']*';", f"const API_DEFAUT = '{p['lien_script']}';", regex=True)
     html = remplacer(html, "'jauge.' + k", f"'{p['prefixe_stockage']}' + k", n=3)
+    html = remplacer(html, r'const HEURES_SEMAINE_DEFAUT = [0-9.]+;', f'const HEURES_SEMAINE_DEFAUT = {p.get("heures_semaine", 35)};', regex=True)
     html = remplacer(html, 'const ACCES_ANTICIPE = true;', f'const ACCES_ANTICIPE = {"true" if p["acces_anticipe"] else "false"};')
     sw = remplacer(lire('sw.js'), "const PREFIXE = 'jauge-v';", f"const PREFIXE = '{p['prefixe_cache']}';")
     man = remplacer(lire('manifest.json'), '"name": "Jauge · mon budget"', f'"name": "{p["nom_appli"]}"')
