@@ -826,72 +826,156 @@ const ERREURS_PASSAGERES = ['OCCUPE', 'SERVEUR'];
 const pickEch = e => ({ lib: e.lib, cat: e.cat, montant: e.montant, freq: e.freq, jour: e.jour, f: e.f, g: e.g, h: e.h, i: e.i, pause: !!e.pause });
 const trouverEch = id => S.data && S.data.echeancier.find(e => e.id === id);
 const trouver = id => S.journal.find(e => e.id === id);
-function enfiler(op) { S.queue.push(op); sauver(); pomper(); }
-async function pomper() {
-  if (S.busy) return;
-  const op = S.queue[0];
-  // Actualisation seulement si un envoi vient d'aboutir (sinon : double téléchargement au démarrage, au retour…)
-  if (!op) { setSync('ok'); if (S.envoye) { S.envoye = false; setTimeout(() => rafraichir(true), 1500); } return; }
-  S.busy = true; setSync('sync');
+// F1 : les envois partent par élément. L'ordre est garanti pour un même élément (même id) ;
+// des éléments différents sont indépendants : un envoi qui bloque ne retient plus les autres.
+// Un « réglage » qui touche aux catégories (cat-add/edit/del) reste une barrière : il attend ceux d'avant, ceux d'après l'attendent.
+const LOT_MAX = 20, DELAIS_ENVOI = [2000, 4000, 8000];
+const BARRIERES = ['cat-add', 'cat-edit', 'cat-del'];
+const estBarriere = o => o.op === 'call' && BARRIERES.includes(o.action);
+// Clés d'ordre d'un envoi : deux envois qui partagent une clé partent dans l'ordre de la file.
+function clesOp(o) {
+  if (o.op === 'call') return [o.action === 'pref-set' ? 'pref:' + ((o.payload || {}).cle) : 'reglages'];
+  return o.jid ? [o.id, o.jid] : [o.id];
+}
+const enVol = o => !!(S.enVol && S.enVol.has(o));
+function enfiler(op) {
+  // Plusieurs changements du même réglage : seul le dernier compte (sauf celui déjà en route).
+  if (op.op === 'call' && op.action === 'pref-set') { const c = (op.payload || {}).cle; S.queue = S.queue.filter(o => enVol(o) || !(o.op === 'call' && o.action === 'pref-set' && (o.payload || {}).cle === c)); }
+  S.queue.push(op); sauver(); pomper();
+}
+// Envois prêts à partir : le 1er envoi en attente de chaque élément (hors délai de nouvel essai), au plus « max ».
+// Une seule suppression du Journal par lot, placée en dernier : elle décale les lignes du dessous.
+function choisirLot(max) {
+  const pris = [], vus = new Set(), t = Date.now(); let suppr = null;
+  for (let i = 0; i < S.queue.length; i++) {
+    const o = S.queue[i], k = clesOp(o);
+    if (estBarriere(o)) { if (i === 0 && !(o.prochain > t)) pris.push(o); break; }
+    const libre = !k.some(c => vus.has(c)); k.forEach(c => vus.add(c));
+    if (!libre || o.prochain > t) continue;
+    if (o.op === 'delete') { if (!suppr) suppr = o; continue; }
+    if (pris.length + (suppr ? 1 : 0) >= max) break;
+    pris.push(o);
+  }
+  if (suppr && !pris.some(estBarriere)) { if (pris.length >= max) pris.pop(); pris.push(suppr); }
+  return pris;
+}
+// Prépare un envoi : { action, payload, apres(res) } ou { local } quand rien n'est à envoyer.
+function preparer(op) {
   const J = ['add', 'update', 'delete'].includes(op.op);
   const e = J ? trouver(op.id) : null, x = op.op.startsWith('ech') ? trouverEch(op.id) : null;
-  let res = { ok: true };
+  const P = { e, x, local: { ok: true } };
+  if (op.op === 'call') {
+    const Q = op.payload || {}, de = op.action === 'cat-edit' ? Q.ancien : op.action === 'cat-del' ? Q.nom : null, vers = op.action === 'cat-edit' ? Q.nom : Q.cible;
+    return Object.assign(P, { local: null, action: op.action, payload: op.payload, apres: res => {
+      if (res.ok && de && vers && de !== vers) { S.journal.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); S.data.echeancier.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); (S.data.avenir || []).forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); } } });
+  }
+  if (op.op === 'ech-save') {
+    if (!x) return P;
+    const env = { lib: x.lib, cat: x.cat, montant: x.montant };
+    return Object.assign(P, { local: null, action: 'ech-save', payload: { row: x.ligne || null, attendu: x.srv, e: pickEch(x) }, apres: res => { if (res.ok) { x.ligne = res.row; x.srv = env; } } });
+  }
+  if (op.op === 'ech-del') {
+    const fin = res => { if (res.ok) S.data.echeancier = S.data.echeancier.filter(z => z !== x); };
+    if (x && x.ligne) return Object.assign(P, { local: null, action: 'ech-del', payload: { row: x.ligne, attendu: x.srv }, apres: fin });
+    return Object.assign(P, { apres: fin });
+  }
+  if (op.op.startsWith('av-')) {
+    const a = trouverAv(op.id);
+    if (a && op.op === 'av-save') { const env = { lib: a.lib, cat: a.cat, montant: a.montant }; return Object.assign(P, { local: null, action: 'av-save', payload: { row: a.row || null, attendu: a.srv, a: { mois: a.mois, lib: a.lib, cat: a.cat, montant: a.montant, jour: a.jour } }, apres: res => { if (res.ok) { a.row = res.row; a.srv = env; a.pending = false; } } }); }
+    if (a && op.op === 'av-del') { const fin = res => { if (res.ok) S.data.avenir = S.data.avenir.filter(z => z !== a); }; return a.row ? Object.assign(P, { local: null, action: 'av-del', payload: { row: a.row, attendu: a.srv }, apres: fin }) : Object.assign(P, { apres: fin }); }
+    if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { const env = pick(j); return Object.assign(P, { local: null, action: 'av-paye', payload: { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }, apres: res => { if (res.ok) { j.row = res.row; j.srv = env; j.pending = false; } } }); } }
+    return P;
+  }
+  if (!e) return P;
+  if (op.op === 'add') {
+    // On mémorise ce qui part réellement : si la ligne est modifiée pendant l'envoi, la modification suivra (P2).
+    const env = pick(e);
+    return Object.assign(P, { local: null, action: 'add', payload: { ligne: Object.assign(pick(e), { date: e.date || null, uid: e.id }) }, apres: res => { if (res.ok) { e.row = res.row; e.srv = env; } } });
+  }
+  if (op.op === 'update') {
+    if (e.row == null) return P;
+    const env = pick(e);
+    return Object.assign(P, { local: null, action: 'update', payload: { row: e.row, attendu: e.srv, ligne: Object.assign(pick(e), { date: e.date || null }) }, apres: res => { if (res.ok) e.srv = env; } });
+  }
+  if (op.op === 'delete') {
+    if (e.row == null) return Object.assign(P, { apres: () => { S.journal = S.journal.filter(z => z !== e); } });
+    const r0 = e.row;
+    return Object.assign(P, { local: null, action: 'delete', payload: { row: r0, attendu: e.srv }, apres: res => {
+      if (res.ok) { S.journal = S.journal.filter(z => z !== e); if (res.decale) S.journal.forEach(z => { if (z.row != null && z.row > r0) z.row--; }); } } });
+  }
+  return P;
+}
+// Essai raté (réseau, fichier occupé, panne Google) : l'envoi reste en file avec son propre délai ; les autres continuent.
+function essaiRate(op, msg) {
+  op.essais = (op.essais || 0) + 1;
+  op.prochain = Date.now() + (DELAIS_ENVOI[op.essais - 1] || 15000);
+  op.err = msg;
+  S.lastErr = { msg, quand: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
+}
+// Réponse définitive (réussie ou refusée) d'un envoi : il quitte la file.
+function terminer(op, p, res) {
+  if (p.apres) p.apres(res);
+  S.queue = S.queue.filter(o => o !== op); S.gen = (S.gen || 0) + 1; S.envoye = true;
+  if (p.e && !S.queue.some(o => o.id === p.e.id)) p.e.pending = false;
+  if (p.x && !S.queue.some(o => o.id === p.x.id)) p.x.pending = false;
+  if (res.ok) return;
+  const vieux = /Action inconnue/.test(res.message || '');
+  // Une dépense refusée n'est plus perdue : elle est gardée de côté, à renvoyer ou supprimer depuis « Envois » (P3).
+  const garde = op.op === 'add' && p.e;
+  if (garde) { const rj = LS.get('rejets', []); rj.push(Object.assign(pick(garde), { date: garde.date || null, msg: res.message || 'erreur', quand: new Date().toLocaleDateString('fr-FR') })); LS.set('rejets', rj); S.journal = S.journal.filter(z => z !== garde); }
+  if (garde) toast('Pas enregistré : ' + (res.message || 'erreur') + '. Gardé de côté dans Réglages › Envois', 'VOIR', () => { S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); });
+  else toast(vieux ? "Pas enregistré : ton Apps Script n'est pas à jour (Gérer les déploiements > Nouvelle version)" : 'Pas enregistré dans le fichier : ' + (res.message || 'erreur'));
+}
+function planifierPompe() {
+  clearTimeout(S.reessai);
+  if (!S.queue.length) return;
+  const t = Date.now(), p = Math.min(...S.queue.map(o => o.prochain > t ? o.prochain : t));
+  S.reessai = setTimeout(pomper, Math.max(50, p - t + 20));
+}
+async function pomper() {
+  if (S.busy) return;
+  // Actualisation seulement si un envoi vient d'aboutir (sinon : double téléchargement au démarrage, au retour…)
+  if (!S.queue.length) { setSync('ok'); if (S.envoye) { S.envoye = false; setTimeout(() => rafraichir(true), 1500); } return; }
+  // Script d'avant la 5.11 (pas d'action « lot ») : un envoi à la fois, mais toujours indépendants.
+  const ops = choisirLot(S.sansLot ? 1 : LOT_MAX);
+  if (!ops.length) { planifierPompe(); return; }
+  S.busy = true; S.enVol = new Set(ops); setSync('sync');
+  const preps = ops.map(preparer), aEnvoyer = preps.filter(p => !p.local);
+  let reps = null, erreurGlobale = null, lotRefuse = null;
   try {
-    if (op.op === 'call') {
-      res = await api(op.action, op.payload);
-      const P = op.payload || {}, de = op.action === 'cat-edit' ? P.ancien : op.action === 'cat-del' ? P.nom : null, vers = op.action === 'cat-edit' ? P.nom : P.cible;
-      if (res.ok && de && vers && de !== vers) { S.journal.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); S.data.echeancier.forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); (S.data.avenir || []).forEach(z => { if (z.srv && z.srv.cat === de) z.srv.cat = vers; }); }
+    if (aEnvoyer.length === 1 || (aEnvoyer.length && S.sansLot)) {
+      reps = [await api(aEnvoyer[0].action, aEnvoyer[0].payload)];
+    } else if (aEnvoyer.length) {
+      const r = await api('lot', { ops: aEnvoyer.map(p => Object.assign({ action: p.action }, p.payload)) });
+      if (r && r.ok && Array.isArray(r.res) && r.res.length === aEnvoyer.length) reps = r.res;
+      else if (r && !r.ok && r.error === 'CLE') lotRefuse = r;
+      else if (r && !r.ok && ERREURS_PASSAGERES.includes(r.error)) throw new Error(r.message || 'Script momentanément indisponible');
+      // Ancien script : « Action inconnue : lot » (ou réponse sans détail) → rien n'a été écrit, on repasse en un par un.
+      else if (r && (!r.ok ? /Action inconnue/.test(r.message || '') : !Array.isArray(r.res))) { S.sansLot = true; reps = []; }
+      else throw new Error((r && r.message) || 'Réponse inattendue du script');
     }
-    else if (op.op === 'ech-save') {
-      if (x) { const env = { lib: x.lib, cat: x.cat, montant: x.montant }; res = await api('ech-save', { row: x.ligne || null, attendu: x.srv, e: pickEch(x) }); if (res.ok) { x.ligne = res.row; x.srv = env; } }
-    } else if (op.op === 'ech-del') {
-      if (x && x.ligne) { res = await api('ech-del', { row: x.ligne, attendu: x.srv }); }
-      if (res.ok) S.data.echeancier = S.data.echeancier.filter(z => z !== x);
-    }
-    else if (op.op.startsWith('av-')) {
-      const a = trouverAv(op.id);
-      if (a && op.op === 'av-save') { const env = { lib: a.lib, cat: a.cat, montant: a.montant }; res = await api('av-save', { row: a.row || null, attendu: a.srv, a: { mois: a.mois, lib: a.lib, cat: a.cat, montant: a.montant, jour: a.jour } }); if (res.ok) { a.row = res.row; a.srv = env; a.pending = false; } }
-      else if (a && op.op === 'av-del') { if (a.row) res = await api('av-del', { row: a.row, attendu: a.srv }); if (res.ok) S.data.avenir = S.data.avenir.filter(z => z !== a); }
-      else if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { const env = pick(j); res = await api('av-paye', { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }); if (res.ok) { j.row = res.row; j.srv = env; j.pending = false; } } }
-    }
-    else if (!e) res = { ok: true };
-    else if (op.op === 'add') {
-      // On mémorise ce qui part réellement : si la ligne est modifiée pendant l'envoi, la modification suivra (P2).
-      const env = pick(e);
-      res = await api('add', { ligne: Object.assign(pick(e), { date: e.date || null, uid: e.id }) });
-      if (res.ok) { e.row = res.row; e.srv = env; }
-    } else if (op.op === 'update') {
-      if (e.row != null) { const env = pick(e); res = await api('update', { row: e.row, attendu: e.srv, ligne: Object.assign(pick(e), { date: e.date || null }) }); if (res.ok) e.srv = env; }
-    } else if (op.op === 'delete') {
-      if (e.row != null) {
-        res = await api('delete', { row: e.row, attendu: e.srv });
-        if (res.ok) { const r0 = e.row; S.journal = S.journal.filter(x => x !== e); if (res.decale) S.journal.forEach(x => { if (x.row != null && x.row > r0) x.row--; }); }
-      } else S.journal = S.journal.filter(x => x !== e);
-    }
-    if (res && !res.ok && ERREURS_PASSAGERES.includes(res.error)) throw new Error(res.message || 'Script momentanément indisponible');
-  } catch (err) {
-    S.lastErr = { msg: String(err && err.message || err), quand: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
-    // Un élément « à venir » qui échoue ne bloque plus les autres envois : il passe en fin de file.
-    op.essais = (op.essais || 0) + 1;
-    // Tous les envois du même élément passent ensemble en fin de file, pour garder leur ordre.
-    if (op.op.startsWith('av-') && op.essais >= 2 && S.queue.some(o => o.id !== op.id)) { const lot = S.queue.filter(o => o.id === op.id); S.queue = S.queue.filter(o => o.id !== op.id).concat(lot); sauver(); S.busy = false; setTimeout(pomper, 300); return; }
-    S.busy = false; setSync('off'); clearTimeout(S.reessai); S.reessai = setTimeout(pomper, [2000, 4000, 8000][op.essais - 1] || 15000); return;
-  }
-  S.queue.shift(); S.gen = (S.gen || 0) + 1; S.envoye = true;
-  if (e && !S.queue.some(o => o.id === e.id)) e.pending = false;
-  if (x && !S.queue.some(o => o.id === x.id)) x.pending = false;
-  S.busy = false;
-  if (!res.ok) {
-    if (res.error === 'CLE') { sauver(); return verrouiller(res.message); }
-    const vieux = /Action inconnue/.test(res.message || '');
-    // Une dépense refusée n'est plus perdue : elle est gardée de côté, à renvoyer ou supprimer depuis « Envois » (P3).
-    const garde = op.op === 'add' && e;
-    if (garde) { const rj = LS.get('rejets', []); rj.push(Object.assign(pick(garde), { date: garde.date || null, msg: res.message || 'erreur', quand: new Date().toLocaleDateString('fr-FR') })); LS.set('rejets', rj); S.journal = S.journal.filter(z => z !== garde); }
-    if (garde) toast('Pas enregistré : ' + (res.message || 'erreur') + '. Gardé de côté dans Réglages › Envois', 'VOIR', () => { S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); });
-    else toast(vieux ? "Pas enregistré : ton Apps Script n'est pas à jour (Gérer les déploiements > Nouvelle version)" : 'Pas enregistré dans le fichier : ' + (res.message || 'erreur'));
-    sauver(); rendre(true); pomper(); return;
-  }
-  sauver(); rendre(true); pomper();
+  } catch (err) { erreurGlobale = String(err && err.message || err); }
+  S.busy = false; S.enVol = null;
+  if (lotRefuse) { sauver(); return verrouiller(lotRefuse.message); }
+  // Applique les réponses dans l'ordre du lot (dont les décalages de lignes des suppressions).
+  let k = 0, cle = null;
+  ops.forEach((op, i) => {
+    const p = preps[i];
+    if (!S.queue.includes(op)) return; // abandonné pendant l'envoi
+    if (p.local) return terminer(op, p, p.local);
+    if (erreurGlobale) return essaiRate(op, erreurGlobale);
+    const res = reps[k++];
+    if (!res) return; // repli « un par un » : pas encore envoyé, il repart tout de suite
+    if (!res.ok && ERREURS_PASSAGERES.includes(res.error)) return essaiRate(op, res.message || 'Script momentanément indisponible');
+    if (!res.ok && res.error === 'CLE') { cle = res; return; }
+    op.err = null; terminer(op, p, res);
+  });
+  sauver();
+  if (cle) return verrouiller(cle.message);
+  setSync(S.queue.some(o => o.essais) ? 'off' : 'sync');
+  rendre(true);
+  if (S.form && S.form.mode === 'file') rendreFile();
+  pomper();
 }
 
 /* ================= CALCULS ================= */
@@ -1372,6 +1456,14 @@ function descOp(o) {
   const d = e ? `${e.lib} · ${e2(e.montant)} €` : a ? `${a.lib} · ${e2(a.montant)} €` : x ? `${x.lib} · ${e2(x.montant || 0)} €` : o.action || '';
   return nom + (d ? ' · ' + d : '');
 }
+// Statut individuel d'un envoi (F1) : chacun a ses propres essais, on voit lequel bloque.
+function statutOp(o) {
+  if (enVol(o)) return 'envoi en cours…';
+  const att = S.queue.slice(0, S.queue.indexOf(o)).some(p => estBarriere(p) || estBarriere(o) || clesOp(p).some(c => clesOp(o).includes(c)));
+  const s = o.prochain > Date.now() ? Math.ceil((o.prochain - Date.now()) / 1000) : 0;
+  return (o.err ? 'erreur : ' + o.err + (o.essais ? ' (' + o.essais + ' essai' + (o.essais > 1 ? 's' : '') + ')' : '') + ' · ' : '')
+    + (s ? 'nouvel essai dans ' + s + ' s' : att ? "attend l'envoi précédent du même élément" : 'en attente');
+}
 // Dépenses refusées par le fichier (mois ou catégorie inconnus…) : gardées sur le téléphone jusqu'à ce que tu décides.
 function rejetsHtml() {
   const rj = LS.get('rejets', []); if (!rj.length) return '';
@@ -1387,13 +1479,13 @@ function rejetRenvoyer(i) {
 }
 function rendreFile() {
   const er = S.lastErr;
-  $('#sheetIn').innerHTML = enteteSheet('ENVOIS EN ATTENTE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Ces modifications sont enregistrées sur ton téléphone mais pas encore dans ton fichier Google Sheets. L'appli réessaie toute seule (après 2 s, 4 s, 8 s, puis toutes les 15 s).</div>
-    <div class="ticket" style="margin-top:8px">${S.queue.map((o, i) => `<div class="tl"><span style="white-space:normal">${i + 1}. ${esc(descOp(o))}</span></div>`).join('') || '<div class="tl"><span>Rien en attente ✓</span></div>'}</div>
+  $('#sheetIn').innerHTML = enteteSheet('ENVOIS EN ATTENTE', 'reglages') + `<div class="note" style="display:block;margin-top:10px">Ces modifications sont enregistrées sur ton téléphone mais pas encore dans ton fichier Google Sheets. Chaque envoi part de son côté : s'il bloque, les autres continuent. L'appli le réessaie tout seul (après 2 s, 4 s, 8 s, puis toutes les 15 s).</div>
+    <div class="ticket" style="margin-top:8px">${S.queue.map((o, i) => `<div class="tl"><span style="white-space:normal">${i + 1}. ${esc(descOp(o))}<br><span class="${o.err ? 'c-bad' : 'muted'}" style="font-size:12px">${esc(statutOp(o))}</span></span></div>
+      ${enVol(o) ? '' : `<div style="display:flex;gap:8px;margin:4px 0 8px"><button class="opt ${S.form.arm === o ? 'armed' : ''}" data-act="file-drop" data-i="${i}">${S.form.arm === o ? 'TOUCHE ENCORE : ABANDONNER' : 'ABANDONNER CET ENVOI'}</button></div>`}`).join('') || '<div class="tl"><span>Rien en attente ✓</span></div>'}</div>
     ${rejetsHtml()}
     ${er ? `<div class="alert" style="margin-top:10px;cursor:default">Dernière erreur (${esc(er.quand)}) : ${esc(er.msg)}</div>` : ''}
     <div class="note" style="display:block;margin-top:8px">Si ça bloque : ouvre le lien de ton script (/exec) dans un navigateur. Il doit afficher « script … en ligne ✓ ». Sinon, dans Apps Script, lance une fonction une fois (bouton ▶) pour redonner l'autorisation, puis Déployer › Gérer les déploiements › Nouvelle version.</div>
-    <button class="go" data-act="file-retry" style="margin-top:10px">RÉESSAYER MAINTENANT</button>
-    ${S.queue.length ? `<button class="danger ${S.form.arm ? 'armed' : ''}" data-act="file-drop">${S.form.arm ? 'TOUCHE ENCORE : ABANDONNER LE 1ER ENVOI' : 'ABANDONNER LE 1ER ENVOI (bloquant)'}</button>` : ''}`;
+    <button class="go" data-act="file-retry" style="margin-top:10px">RÉESSAYER MAINTENANT</button>`;
 }
 function rendreInfo() { const [t, x] = INFOS[S.form.k] || ['', '']; $('#sheetIn').innerHTML = enteteSheet(t, null) + `<p style="font-size:14px;line-height:1.55;margin:12px 0 6px">${x}</p><button class="go" data-act="close">COMPRIS</button>`; }
 function lignePJ() {
@@ -1403,8 +1495,8 @@ function lignePJ() {
 }
 // Envois bloqués (3 essais ratés ou plus) ou refusés : un bandeau visible sur l'accueil, qui ouvre « Envois » (E2).
 function alerteEnvois() {
-  const o = S.queue[0], rj = LS.get('rejets', []).length;
-  if (o && (o.essais || 0) >= 3) return `<div class="alert"><button data-act="file" style="display:block;width:100%;text-align:left"><b style="font-weight:600">⚠ ${S.queue.length} ENVOI${S.queue.length > 1 ? 'S' : ''} EN ATTENTE</b> : ton fichier ne répond pas. L'appli réessaie toute seule ; touche pour voir le détail.</button></div>`;
+  const o = S.queue.find(q => (q.essais || 0) >= 3), rj = LS.get('rejets', []).length;
+  if (o) return `<div class="alert"><button data-act="file" style="display:block;width:100%;text-align:left"><b style="font-weight:600">⚠ ${S.queue.length} ENVOI${S.queue.length > 1 ? 'S' : ''} EN ATTENTE</b> : ton fichier ne répond pas. L'appli réessaie toute seule ; touche pour voir le détail.</button></div>`;
   if (rj) return `<div class="alert"><button data-act="file" style="display:block;width:100%;text-align:left"><b style="font-weight:600">⚠ ${rj} DÉPENSE${rj > 1 ? 'S' : ''} REFUSÉE${rj > 1 ? 'S' : ''}</b> par ton fichier : touche pour la renvoyer ou la supprimer.</button></div>`;
   return '';
 }
@@ -1694,7 +1786,7 @@ function enregistrer() {
 function supprimer(e0) {
   const e = trouver(e0.id) || (e0.row != null && S.journal.find(x => x.row === e0.row && !x.deleted)); if (!e) return;
   const i = S.queue.findIndex(o => o.id === e.id && o.op === 'add');
-  if (i > 0 || (i === 0 && !S.busy)) { S.queue.splice(i, 1); S.journal = S.journal.filter(x => x !== e); sauver(); rendre(true); return; }
+  if (i >= 0 && !enVol(S.queue[i])) { S.queue.splice(i, 1); S.journal = S.journal.filter(x => x !== e); sauver(); rendre(true); return; }
   e.deleted = true; e.pending = true; rendre(true); enfiler({ op: 'delete', id: e.id });
 }
 
@@ -4132,8 +4224,9 @@ document.addEventListener('click', ev => {
     case 'file': S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); break;
     case 'rejet-renvoyer': rejetRenvoyer(+el.dataset.i); rendreFile(); toast('Renvoi en cours…'); break;
     case 'rejet-suppr': { const rj = LS.get('rejets', []); rj.splice(+el.dataset.i, 1); LS.set('rejets', rj); rendreFile(); rendre(true); } break;
-    case 'file-retry': if (!S.busy) pomper(); toast('Nouvel essai…'); setTimeout(() => { if (S.form && S.form.mode === 'file') rendreFile(); }, 4000); break;
-    case 'file-drop': if (!S.form.arm) { S.form.arm = true; rendreFile(); break; } { const o = S.queue.shift(); const e = o && trouver(o.id); if (e) e.pending = false; sauver(); S.form.arm = false; rendreFile(); rendre(true); toast('Envoi abandonné : à ressaisir si besoin'); } break;
+    case 'file-retry': S.queue.forEach(o => { o.prochain = 0; }); if (!S.busy) pomper(); toast('Nouvel essai…'); setTimeout(() => { if (S.form && S.form.mode === 'file') rendreFile(); }, 4000); break;
+    case 'file-drop': { const i = +el.dataset.i, o = S.queue[i]; if (!o || enVol(o)) { S.form.arm = false; rendreFile(); break; } if (S.form.arm !== o) { S.form.arm = o; rendreFile(); break; }
+      S.queue.splice(i, 1); const e = trouver(o.id); if (e && !S.queue.some(q => q.id === e.id)) e.pending = false; sauver(); S.form.arm = false; rendreFile(); rendre(true); toast('Envoi abandonné : à ressaisir si besoin'); pomper(); } break;
     case 'logout': if (!S.form.armOut) { S.form.armOut = true; rendreReglages(); } else { fermer(); oublierCompte(); rendre(); verrouiller(); } break;
     case 'go:lien': S.form = { mode: 'lien', url: S.api }; rendreForm(); break;
     case 'lien-ok': okLien(); break;
