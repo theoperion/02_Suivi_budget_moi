@@ -1331,7 +1331,7 @@ function cartePointBas() {
     <div style="display:flex;gap:6px;margin-top:14px">
       <div style="position:relative;width:40px;height:${H}px;flex-shrink:0;font-size:9px;color:var(--ink3);text-align:right">${gr.map(t => `<span style="position:absolute;right:0;top:${(Y(t) / H * 100).toFixed(1)}%;transform:translateY(-50%);white-space:nowrap" class="${t < 0 ? 'c-bad' : ''}">${kEu(t)} €</span>`).join('')}</div>
       <div class="pbg" style="flex:1;min-width:0;height:${H}px">
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px" preserveAspectRatio="none" role="img" aria-label="Solde du mois : estimé jusqu'à aujourd'hui, prévu ensuite">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px" preserveAspectRatio="none" role="img" aria-label="Solde du mois : calculé jusqu'à aujourd'hui, prévu ensuite">
           <defs><linearGradient id="pbgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity=".24"/><stop offset="1" stop-color="${bas.s < 0 ? 'var(--bad)' : 'var(--ok)'}" stop-opacity="0"/></linearGradient></defs>
           ${gr.map(t => `<line x1="0" x2="${W}" y1="${Y(t)}" y2="${Y(t)}" stroke="${t === 0 && mn < 0 ? 'var(--bad)' : 'var(--rule)'}" stroke-opacity="${t === 0 ? 1 : .4}" ${t === 0 ? 'stroke-dasharray="4 3"' : ''} stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
           ${ticks.map(({ p, i }) => `<line x1="${X(i)}" x2="${X(i)}" y1="0" y2="${H - PB}" stroke="var(--rule)" stroke-opacity="${p.j === 1 ? .8 : .3}" stroke-width="1" ${p.j === 1 ? '' : 'stroke-dasharray="2 3"'} vector-effect="non-scaling-stroke"/>`).join('')}
@@ -1349,7 +1349,7 @@ function cartePointBas() {
       </div>
     </div>
     <div class="pbs" style="position:relative;height:14px;margin:6px 0 0 46px">${ticks.filter(({ i }, k, A) => k === 0 || (X(i) - X(A[k - 1].i)) / W > 0.17).map(({ p, i }) => `<span style="position:absolute;left:${pct(i)};transform:translateX(${X(i) / W < 0.04 ? '0' : X(i) / W > 0.92 ? '-100%' : '-50%'});white-space:nowrap;${p.j === 1 ? 'font-weight:600;color:var(--ink2)' : ''}">${p.j === 1 ? '1er ' : p.j + ' '}${MC[p.m - 1]}</span>`).join('')}</div>
-    <div class="pbleg"><span><i></i>estimé</span><span><i style="background:repeating-linear-gradient(90deg,var(--ink2) 0 4px,transparent 4px 7px)"></i>prévu</span><span><i style="width:2px;height:10px;background:var(--acc,var(--ok))"></i>aujourd'hui</span><span class="c-ok">● entrée</span><span class="c-bad">● sortie</span></div></button>`;
+    <div class="pbleg"><span><i></i>calculé</span><span><i style="background:repeating-linear-gradient(90deg,var(--ink2) 0 4px,transparent 4px 7px)"></i>prévu</span><span><i style="width:2px;height:10px;background:var(--acc,var(--ok))"></i>aujourd'hui</span><span class="c-ok">● entrée</span><span class="c-bad">● sortie</span></div></button>`;
 }
 function alerteVersion() {
   if (IN_GAS || !S.data || versionAuMoins(S.data.apiVersion, API_ATTENDUE)) return '';
@@ -1360,7 +1360,7 @@ const INFOS = {
   fin: ['FIN DE MOIS', "Ce qu'il te restera le dernier jour <b>si tu dépenses exactement tes budgets</b>, pas plus, et en comptant tes achats prévus. Si tu dépenses moins que tes budgets, tu finiras plus haut ; si tu les dépasses, plus bas."],
   prelever: ['À PRÉLEVER', "Les charges et abonnements de l'échéancier qui ne sont pas encore passés ce mois-ci, plus tes achats prévus. C'est l'argent déjà « réservé »."],
   nd: ['NON DÉPENSÉ', "Depuis janvier : revenus − dépenses. Comprend l'argent resté sur ton compte et celui parti en épargne."],
-  courbe: ['SOLDE PRÉVU', "Ton solde en banque jour par jour. Trait plein : estimé jusqu'à aujourd'hui. Pointillés : la suite, si tu dépenses tes budgets au rythme prévu. Points verts : entrées de l'échéancier (salaire…). Points rouges : sorties (loyer, abonnements, virements…) et achats prévus. Une dépense saisie dans ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue) ; un dépassement de budget la fait descendre. Sous 0 € : découvert."] };
+  courbe: ['SOLDE PRÉVU', "Ton argent (banque + espèces) jour par jour. Trait plein : calculé d'après tes saisies et tes prélèvements jusqu'à aujourd'hui (ce n'est pas ton relevé bancaire). Pointillés : la suite, si tu dépenses tes budgets au rythme prévu. Points verts : entrées de l'échéancier (salaire…). Points rouges : sorties (loyer, abonnements, virements…) et achats prévus. Une dépense saisie dans ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue) ; un dépassement de budget la fait descendre. Sous 0 € : découvert."] };
 const qi = k => LS.get('aidesOff', false) ? '' : `<span class="qi" data-act="info" data-k="${k}" role="button" aria-label="Explication">?</span>`;
 // Détail des écritures pas encore envoyées au fichier, avec la dernière erreur
 function descOp(o) {
@@ -1567,7 +1567,7 @@ function rendreForm() {
   }
   const sug = f.cat ? suggestions(f.cat) : [];
   $('#sheetIn').innerHTML = `<div class="grab"></div>
-    <div class="shead"><span>${f.mode === 'edit' ? 'MODIFIER LA LIGNE' : futur ? (f.type === 'Revenu' ? 'REVENU PRÉVU' : f.type === 'Épargne' ? 'ÉPARGNE PRÉVUE' : 'ACHAT PRÉVU') : 'NOUVELLE LIGNE'} <button class="lnk" data-act="tuto" style="margin-left:6px">? AIDE</button></span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
+    <div class="shead"><span>${f.mode === 'edit' ? 'MODIFIER LA LIGNE' : futur ? (f.type === 'Revenu' ? 'REVENU PRÉVU' : f.type === 'Épargne' ? 'ÉPARGNE PRÉVUE' : 'ACHAT PRÉVU') : 'NOUVELLE LIGNE'} ${LS.get('aidesOff', false) ? '' : `<button class="lnk" data-act="tuto" style="margin-left:6px">? AIDE</button>`}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     <div class="seg">${Object.keys(TYPES).map(t => `<button class="${f.type === t ? 'on' : ''}" data-act="type" data-t="${t}">${t.toUpperCase()}</button>`).join('')}</div>
     <div class="amt ${montantNum() ? '' : 'zero'}" id="amt">${f.montant ? esc(f.montant) : '0'} €</div>
     <div class="mrow"><button class="mbtn" data-act="fm:-1" aria-label="Mois précédent">‹</button><span>${moisLabel(f.y, f.m).toUpperCase()}</span><button class="mbtn" data-act="fm:1" aria-label="Mois suivant">›</button></div>
@@ -1581,7 +1581,7 @@ function rendreForm() {
       <div style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px;white-space:nowrap">Ma part</span><input class="libin" id="ppart" inputmode="decimal" placeholder="auto" value="${esc(f.part || '')}" style="margin:0"></div>
       <div class="note" id="presume" style="display:block"></div></div>` : ''}` : ''}
     <div class="chips">${chips}</div>${tout}
-    ${f.type === 'Épargne' && f.mode === 'add' ? `<div class="note" style="display:block;margin:-2px 0 8px">Ici, uniquement l'argent que tu <b>mets de côté</b> (livrets, PEA, assurance vie, crypto…).</div>` : ''}
+    ${f.type === 'Épargne' && f.mode === 'add' && !LS.get('aidesOff', false) ? `<div class="note" style="display:block;margin:-2px 0 8px">Ici, uniquement l'argent que tu <b>mets de côté</b> (livrets, PEA, assurance vie, crypto…).</div>` : ''}
     <input class="libin" id="lib" placeholder="Libellé (facultatif)" value="${esc(f.lib)}" autocomplete="off" maxlength="80">
     ${sug.length ? `<div class="chips" style="margin:-4px 0 8px">${sug.map(s => `<button class="chip sug" data-act="libsug" data-l="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
     <div class="pad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-k="${k}">${k === '⌫' ? ico.back : k}</button>`).join('')}</div>
@@ -2167,7 +2167,7 @@ function rendreReglages() {
     <button class="opt" data-act="go:budgets"><span>Budgets par catégorie</span><span class="muted mono" style="font-size:12px">${e0(bud)}/mois ›</span></button>
     <button class="opt" data-act="go:cats"><span>Catégories et favorites</span><span class="muted mono" style="font-size:12px">${cats().length} · ${S.data.libres || 0} libre${(S.data.libres || 0) > 1 ? 's' : ''} ›</span></button>
     <button class="opt" data-act="go:solde"><span>Mon solde (quand tu veux, idéalement le 1er)</span><span class="muted mono" style="font-size:12px">${lc ? 'dernier : ' + lc.date : 'jamais noté'} ›</span></button>
-    <div style="margin-top:10px"></div>${tg('aides', !LS.get('aidesOff', false), "Petits « ? » d'aide sur l'accueil", 'explications à côté d\'Argent restant, Fin de mois, du graphique…')}
+    <div style="margin-top:10px"></div>${tg('aides', !LS.get('aidesOff', false), "Aides et explications", 'les « ? » de l\'accueil et l\'aide de la saisie')}
     <div class="grp" style="margin-top:18px">ACCUEIL</div>
     <div class="grp" style="margin:6px 0 0;letter-spacing:1px">ORDRE DES BUDGETS SUR L'ACCUEIL</div>
     <div class="note" style="margin:2px 0 4px;display:block">${ob === 'perso' ? 'Mon ordre : celui que tu as choisi dans Réglages › Catégories (flèches ▲▼).' : 'Les plus urgents d\'abord : ceux proches de leur limite, puis ceux déjà dépassés, puis ceux bien tenus.'}</div>
@@ -2714,7 +2714,7 @@ function rendreWrapped() {
   $('#sheetIn').innerHTML = `<div class="grab"></div><div class="shead"><span>MON ANNÉE ${b.y}${b.enCours ? ' (EN COURS)' : ''}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     <button class="play" data-act="story" data-k="a" data-y="${b.y}"><span>▶</span> LANCER MON WRAPPED ${b.y}</button>
     <div class="wrap">
-      <div class="whero"><small>NON DÉPENSÉ SUR ${b.n} MOIS</small><b class="${b.nd < 0 ? 'c-bad' : ''}">${b.nd >= 0 ? '+' : ''}${e0(b.nd)}</b><span>soit ${Math.round(b.taux * 100)} % de tes revenus</span></div>
+      <div class="whero"><small>NON DÉPENSÉ SUR ${b.n} MOIS</small><b class="${b.nd < 0 ? 'c-bad' : ''}">${b.nd >= 0 ? '+' : ''}${e0(b.nd)}</b><span>soit ${Math.round(b.taux * 100)} % de tes revenus${b.ep > 0.5 ? ` · dont ${e0(b.ep)} en épargne` : ''}</span></div>
       <div class="wgrid">
         ${tile('MOIS DANS LE VERT', b.verts + '/' + b.n, b.serie > 1 ? 'meilleure série : ' + b.serie : '')}
         ${tile('MEILLEUR MOIS', esc(MOIS[b.best.m - 1]), (b.best.res >= 0 ? '+' : '') + e0(b.best.res))}
