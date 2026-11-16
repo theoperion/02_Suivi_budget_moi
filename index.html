@@ -806,22 +806,61 @@ function setSync(s) { $('#dot').className = 'dot' + (s === 'sync' ? ' sync' : s 
 
 async function rafraichir(force) {
   if (!S.key) return;
-  if (S.queue.length) return;
+  // Envois en attente : on actualise quand même (G1), sauf s'il y en a qu'on ne sait pas remettre par-dessus le fichier.
+  if (!fusionPossible()) return;
   if (!force && Date.now() - S.lastFetch < 20000) return;
   S.lastFetch = Date.now();
   const gen = S.gen || 0;
   try {
     const r = await api('data');
     if (!r.ok) { if (r.error === 'CLE' || r.error === 'SANS_CLE') return verrouiller(r.message); throw new Error(r.message); }
-    // Une écriture a eu lieu pendant la lecture : ces données sont déjà périmées, on les ignore.
-    if (S.queue.length || (S.gen || 0) !== gen) { S.lastFetch = 0; return; }
+    // Une écriture a eu lieu pendant la lecture (ou un envoi est encore en route) : ces données sont peut-être déjà périmées, on les ignore.
+    if (S.busy || (S.gen || 0) !== gen || !fusionPossible()) { S.lastFetch = 0; return; }
     // Une fiche est ouverte : les numéros de ligne pourraient changer sous ses pieds. On actualisera à sa fermeture.
     if (S.form) { S.majEnAttente = true; S.lastFetch = 0; return; }
-    S.data = prepData(r.data);
-    S.journal = entriesFromData(r.data);
-    sauver(); setSync('ok');
+    const d = prepData(r.data), J = entriesFromData(r.data);
+    fusionnerAttente(d, J);
+    S.data = d; S.journal = J; memo = new Map();
+    sauver(); setSync(S.queue.length ? (S.queue.some(o => o.essais) ? 'off' : 'sync') : 'ok');
     rendre(true);
   } catch (e) { setSync('off'); }
+}
+// G1 · Actualiser malgré des envois en attente : on repart du fichier, puis on remet par-dessus ce qui n'est pas encore parti.
+// Catégories (ajout, renommage, retrait) : effets en cascade sur les lignes, pas d'actualisation tant qu'elles attendent.
+// Envoi « incertain » (coupure réseau : le fichier l'a peut-être déjà écrit) : pareil, pour ne pas afficher de doublon.
+const CALLS_FUSION = ['pref-set', 'defi', 'budget', 'solde-dep', 'solde-ctrl'];
+const fusionPossible = () => !S.queue.some(o => o.incertain || (o.op === 'call' && !CALLS_FUSION.includes(o.action)));
+const memeJ = (a, b) => !!(a && b) && a.mois === b.mois && a.lib === b.lib && a.cat === b.cat && Math.abs(Number(a.montant) - Number(b.montant)) < 0.005;
+const memeE = (a, b) => !!(a && b) && a.lib === b.lib && a.cat === b.cat && Math.abs(Number(a.montant) - Number(b.montant)) < 0.005;
+// Remet un élément local en attente dans la liste neuve L. Sans numéro de ligne (ajout pas encore écrit) : ajouté à la fin.
+// Avec : il remplace la ligne de même numéro (contenu identique à « srv » ou changé dans le fichier : la version locale reste, le serveur tranchera par CHANGE).
+function remettre(L, x, cle, meme, locaux) {
+  const n = x[cle];
+  let i = n == null ? -1 : L.findIndex(z => !locaux.has(z) && z[cle] === n && meme(z.srv, x.srv));
+  if (i < 0 && n != null) i = L.findIndex(z => !locaux.has(z) && z[cle] === n);
+  if (i < 0) L.push(x); else L[i] = x;
+  locaux.add(x);
+}
+function fusionnerAttente(d, J) {
+  if (!S.queue.length) return;
+  const ids = new Set(); S.queue.forEach(o => { if (o.op !== 'call') ids.add(o.id); if (o.jid) ids.add(o.jid); });
+  const locaux = new Set(), dedoubler = L => { const vus = new Set([...locaux].map(z => z.id)); L.forEach(z => { if (!locaux.has(z) && vus.has(z.id)) z.id += '.' + uid(); }); };
+  // Journal : ajouts, modifications, suppressions (masquées) en attente, et la ligne d'un achat prévu payé.
+  S.journal.filter(e => ids.has(e.id)).forEach(e => remettre(J, e, 'row', memeJ, locaux)); dedoubler(J);
+  // Échéancier et achats à venir : même principe (numéro de ligne « ligne » / « row »).
+  if (S.data) {
+    locaux.clear(); (S.data.echeancier || []).filter(x => ids.has(x.id)).forEach(x => remettre(d.echeancier, x, 'ligne', memeE, locaux)); dedoubler(d.echeancier);
+    locaux.clear(); d.avenir = d.avenir || []; (S.data.avenir || []).filter(a => ids.has(a.id)).forEach(a => remettre(d.avenir, a, 'row', memeE, locaux)); dedoubler(d.avenir);
+  }
+  // Réglages en attente (dans l'ordre de la file : le dernier l'emporte).
+  S.queue.forEach(o => {
+    if (o.op !== 'call') return; const q = o.payload || {};
+    if (o.action === 'pref-set') { d.prefs = d.prefs || {}; d.prefs[q.cle] = q.valeur; }
+    else if (o.action === 'defi') { d.defis = d.defis || {}; if (q.cat) d.defis[q.mois] = { cat: q.cat, montant: q.montant }; else delete d.defis[q.mois]; }
+    else if (o.action === 'budget') { const c = (d.categories || []).find(z => z.nom === q.nom); if (c) { c.budget = q.budget > 0 ? q.budget : null; c.suivi = q.suivi; } }
+    else if (o.action === 'solde-dep') { d.soldes = d.soldes || {}; d.soldes[String(q.annee)] = q.valeur; }
+    else if (o.action === 'solde-ctrl') d.controle = { mois: q.mois, solde: q.solde, especes: q.especes };
+  });
 }
 
 /* ================= FILE D'ÉCRITURES (optimiste) ================= */
@@ -911,8 +950,9 @@ function preparer(op) {
   return P;
 }
 // Essai raté (réseau, fichier occupé, panne Google) : l'envoi reste en file avec son propre délai ; les autres continuent.
-function essaiRate(op, msg) {
+function essaiRate(op, msg, incertain) {
   op.essais = (op.essais || 0) + 1;
+  if (incertain) op.incertain = true; // coupure réseau : le fichier a peut-être écrit (G1 : pas d'actualisation tant qu'il attend)
   op.prochain = Date.now() + (DELAIS_ENVOI[op.essais - 1] || 15000);
   op.err = msg;
   S.lastErr = { msg, quand: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
@@ -946,7 +986,7 @@ async function pomper() {
   if (!ops.length) { planifierPompe(); return; }
   S.busy = true; S.enVol = new Set(ops); setSync('sync');
   const preps = ops.map(preparer), aEnvoyer = preps.filter(p => !p.local);
-  let reps = null, erreurGlobale = null, lotRefuse = null;
+  let reps = null, erreurGlobale = null, lotRefuse = null, repondu = false;
   try {
     if (aEnvoyer.length === 1 || (aEnvoyer.length && S.sansLot)) {
       reps = [await api(aEnvoyer[0].action, aEnvoyer[0].payload)];
@@ -954,7 +994,7 @@ async function pomper() {
       const r = await api('lot', { ops: aEnvoyer.map(p => Object.assign({ action: p.action }, p.payload)) });
       if (r && r.ok && Array.isArray(r.res) && r.res.length === aEnvoyer.length) reps = r.res;
       else if (r && !r.ok && r.error === 'CLE') lotRefuse = r;
-      else if (r && !r.ok && ERREURS_PASSAGERES.includes(r.error)) throw new Error(r.message || 'Script momentanément indisponible');
+      else if (r && !r.ok && ERREURS_PASSAGERES.includes(r.error)) { repondu = true; throw new Error(r.message || 'Script momentanément indisponible'); }
       // Ancien script : « Action inconnue : lot » (ou réponse sans détail) → rien n'a été écrit, on repasse en un par un.
       else if (r && (!r.ok ? /Action inconnue/.test(r.message || '') : !Array.isArray(r.res))) { S.sansLot = true; reps = []; }
       else throw new Error((r && r.message) || 'Réponse inattendue du script');
@@ -968,7 +1008,7 @@ async function pomper() {
     const p = preps[i];
     if (!S.queue.includes(op)) return; // abandonné pendant l'envoi
     if (p.local) return terminer(op, p, p.local);
-    if (erreurGlobale) return essaiRate(op, erreurGlobale);
+    if (erreurGlobale) return essaiRate(op, erreurGlobale, !repondu);
     const res = reps[k++];
     if (!res) return; // repli « un par un » : pas encore envoyé, il repart tout de suite
     if (!res.ok && ERREURS_PASSAGERES.includes(res.error)) return essaiRate(op, res.message || 'Script momentanément indisponible');
@@ -1490,7 +1530,9 @@ function rendreFile() {
     ${rejetsHtml()}
     ${er ? `<div class="alert" style="margin-top:10px;cursor:default">Dernière erreur (${esc(er.quand)}) : ${esc(er.msg)}</div>` : ''}
     <div class="note" style="display:block;margin-top:8px">Si ça bloque : ouvre le lien de ton script (/exec) dans un navigateur. Il doit afficher « script … en ligne ✓ ». Sinon, dans Apps Script, lance une fonction une fois (bouton ▶) pour redonner l'autorisation, puis Déployer › Gérer les déploiements › Nouvelle version.</div>
-    <button class="go" data-act="file-retry" style="margin-top:10px">RÉESSAYER MAINTENANT</button>`;
+    <button class="go" data-act="file-retry" style="margin-top:10px">RÉESSAYER MAINTENANT</button>
+    <button class="ghost" data-act="refresh">ACTUALISER DEPUIS LE FICHIER</button>
+    <div class="note" style="display:block;margin-top:4px">Récupère ce qui a changé ailleurs, sans perdre ce qui attend ici${!fusionPossible() ?" (pas tant qu'un changement de catégorie ou un envoi coupé par le réseau attend)" : ''}.</div>`;
 }
 function rendreInfo() { const [t, x] = INFOS[S.form.k] || ['', '']; $('#sheetIn').innerHTML = enteteSheet(t, null) + `<p style="font-size:14px;line-height:1.55;margin:12px 0 6px">${x}</p><button class="go" data-act="close">COMPRIS</button>`; }
 function lignePJ() {
@@ -1522,6 +1564,7 @@ function vueAccueil() {
   const nd = nonDepense(S.y); if (nd != null) pills.push(`<button class="pill ${nd < 0 ? 'p-bad' : ''}" data-act="stats-an"><small>NON DÉPENSÉ ${S.y} ${qi('nd')}</small><b>${sg0(nd)}</b></button>`);
   if (pills.length) h += `<div class="pills" style="grid-template-columns:repeat(${pills.length},1fr)">${pills.join('')}</div>`;
   if (b.st === 'cours' && on('pointbas')) h += cartePointBas();
+  if (!LS.get('aidesOff', false)) h += `<div style="text-align:right;margin-top:8px"><button class="lnk" data-act="mode-emploi">? MODE D'EMPLOI</button></div>`;
   h += `</div>`;
   if (b.st === 'cours' && on('avances')) h += blocAvances();
   h += `<div class="sec"><span>TICKET DU MOIS</span></div><div class="ticket">
@@ -1647,15 +1690,67 @@ const TUTO = [
   ['🏦', 'MON SOLDE (BANQUE + ESPÈCES)', "Quand tu veux, pas seulement en début de mois (⚙ › Mon solde) : tape ce qu'il y a sur ton compte <b>et</b> le liquide que tu as en poche. Ensuite, l'appli suit les deux toute seule. Si tu oublies les espèces, elle croira qu'il te manque de l'argent."],
   ['💶', 'ESPÈCES ET DISTRIBUTEUR', "Un achat payé en liquide se saisit comme les autres : active juste <b>« Payé en espèces »</b>, tes espèces baissent d'autant. Un <b>retrait au distributeur</b> n'est pas une dépense : touche « 🏧 un retrait ? » (ou ⚙ › Mon solde › Retrait d'espèces), l'argent passe de la banque à ta poche, ton total ne bouge pas."],
   ['📅', 'DATE ET ACHAT À VENIR', "La date est celle du jour par défaut. Oublié une dépense hier ? Recule-la avec ‹. Une place d'avant-première, un achat déjà prévu ? Avance la date après aujourd'hui (ou le mois avec ›) : la ligne devient un achat à venir, que tu valideras le jour venu."]];
+const ligneTuto = t => `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--rule)"><span style="font-size:24px;flex:none;width:34px;text-align:center">${t[0]}</span><div style="flex:1;min-width:0"><div style="font-family:var(--mono);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:3px">${t[1]}</div><div style="font-size:13px;line-height:1.45;color:var(--ink2)">${t[2]}</div></div></div>`;
 function rendreTuto() {
-  $('#sheetIn').innerHTML = enteteSheet('COMMENT SAISIR', null) + `<div style="margin-top:8px">${TUTO.map(t => `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--rule)"><span style="font-size:24px;flex:none;width:34px;text-align:center">${t[0]}</span><div style="flex:1;min-width:0"><div style="font-family:var(--mono);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:3px">${t[1]}</div><div style="font-size:13px;line-height:1.45;color:var(--ink2)">${t[2]}</div></div></div>`).join('')}</div>
+  $('#sheetIn').innerHTML = enteteSheet('COMMENT SAISIR', null) + `<div style="margin-top:8px">${TUTO.map(ligneTuto).join('')}</div>
     <button class="go" data-act="tuto-ok" style="margin-top:14px">COMPRIS, ON SAISIT</button>`;
+}
+// ---- Mode d'emploi : tout l'essentiel pour qui découvre l'appli (reprend TUTO, INFOS et FEAT_DETAIL) ----
+const TUTO_SOLDE = ['MON SOLDE (BANQUE + ESPÈCES)', 'ESPÈCES ET DISTRIBUTEUR'];
+function sectionsModeEmploi() {
+  const I = k => [INFOS[k][0], INFOS[k][1]];
+  return [
+    ['accueil', '🏠', 'ACCUEIL', 'Où tu en es ce mois-ci, en un coup d\'œil.', [
+      ['⏱', 'LA JAUGE ET ' + INFOS.restant[0], INFOS.restant[1] + " Sous le chiffre, une phrase te dit si tu dépenses plus vite ou moins vite que prévu."],
+      ['🗓', ...I('fin')], ['⏳', ...I('prelever')], ['🌱', ...I('nd')], ['📉', ...I('courbe')],
+      ['🎯', 'MES BUDGETS', "Une barre par budget : ce que tu as dépensé, ce qu'il reste. Tampon <b>TENU</b>, <b>LIMITE</b> (près du plafond) ou <b>DÉPASSÉ</b>. Touche un budget pour voir ses lignes."]]],
+    ['journal', '🧾', 'JOURNAL', 'Toutes tes lignes, mois par mois.', [
+      ['🧾', 'LE JOURNAL', "Chaque dépense, revenu ou épargne saisi, du plus récent au plus ancien. Change de mois avec ‹ ›, cherche un libellé ou filtre par catégorie. <b>Touche une ligne</b> pour la corriger ou la supprimer."]]],
+    ['prevu', '📅', 'PRÉVU', 'Ce qui va tomber : prélèvements réguliers et achats à venir.', [
+      ['🔁', "L'ÉCHÉANCIER", "Loyer, abonnements, salaire, virement d'épargne automatique : saisis-les <b>une fois</b>, ils comptent chaque mois tout seuls (ou chaque trimestre, chaque année…). Touche une ligne pour la modifier, la mettre en pause, noter le montant réel du mois ou un nouveau montant à partir d'un mois."],
+      ['🛒', 'ACHATS ET REVENUS À VENIR', "Un achat prévu pour plus tard compte déjà dans ta fin de mois. Le jour venu, l'accueil te demande « C'est fait ? » : PAYÉ ✓ l'ajoute au Journal."]]],
+    ['stats', '📊', 'STATS', 'Tes chiffres dans le temps.', [
+      ['📊', 'ANNÉE ET MOIS', "En haut de l'onglet Stats : la vue de l'année (mois par mois, ton épargne, la comparaison des années) ou celle du mois (le détail par catégorie). Pratique pour voir où part l'argent."]]],
+    ['progres', '🏆', 'PROGRÈS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection.', [
+      ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
+      ['🎯', 'DÉFIS', "Tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail plus bas, section Défis)."],
+      ['🏅', 'SUCCÈS', "Ton niveau et tes points d'expérience (XP), les succès débloqués et les badges d'événements."],
+      ['🎨', 'STYLE ET COLLECTION', "Thèmes, jauges, tampons et autres cosmétiques gagnés avec les niveaux : choisis ceux que tu veux afficher."]]],
+    ['saisir', '✍️', 'SAISIR', 'Le bouton + en bas, et c\'est parti.', [
+      ['➕', 'LE BOUTON +', "Choisis Dépense, Revenu ou Épargne, une catégorie, tape le montant et ENREGISTRER. Le libellé est facultatif. « ? AIDE » en haut de la saisie rappelle tout ça."]].concat(TUTO.filter(t => !TUTO_SOLDE.includes(t[1])))],
+    ['solde', '🏦', 'SOLDE ET ESPÈCES', 'Recaler l\'appli sur ton compte, gérer le liquide.', TUTO.filter(t => TUTO_SOLDE.includes(t[1])).concat([
+      ['⇄', 'ARGENT DISPONIBLE', "Touche le grand chiffre de l'accueil pour passer de l'argent restant du mois à ton argent disponible estimé (banque + espèces), et inversement."]])],
+    ['envois', '🔄', 'ENVOIS', 'Comment tes saisies arrivent dans le fichier.', [
+      ['🟠', 'LE POINT SUR ⚙', "Tout ce que tu saisis est gardé sur le téléphone puis envoyé à ton fichier Google Sheets. Un point <b>orange</b> sur ⚙ : envoi en cours. <b>Rouge</b> : le fichier ne répond pas, l'appli réessaie toute seule. Pas de point : tout est à jour."],
+      ['📮', 'RÉGLAGES › ENVOIS', "En bas des Réglages, ligne « Envois en attente » (ou le bandeau d'alerte de l'accueil) : le détail de ce qui attend, avec la dernière erreur. Tu peux réessayer ou abandonner un envoi. Une dépense refusée par le fichier n'est pas perdue : elle est gardée de côté pour la renvoyer ou la supprimer."],
+      ['↓', 'ACTUALISER', "Tire l'écran vers le bas pour récupérer ce qui a changé dans le fichier (ou sur un autre téléphone). Tes saisies pas encore envoyées sont gardées."]]],
+    ['defis', '🎯', 'DÉFIS', 'Pour rendre le budget un peu plus amusant.', [
+      ['🎯', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude. Verdict le 1er du mois suivant."],
+      ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
+      ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
+      ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
+      ['🍂', 'SAISONS', FEAT_DETAIL.saison]]],
+    ['reglages', '⚙', 'RÉGLAGES UTILES', 'Adapter l\'appli à ta façon de faire.', [
+      ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », l'aide de la saisie et le lien Mode d'emploi de l'accueil quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
+      ['🧺', 'CATÉGORIES QUI NE CASSENT PAS LES SÉRIES', "Stats › Progrès › Défis, tout en bas : coche par exemple Courses si faire les courses ne doit pas casser un jour sans dépense. Les montants comptent toujours dans tes budgets."],
+      ['🧩', 'FONCTIONNALITÉS', "Réglages › Fonctionnalités et nouveautés : masque ce qui ne te sert pas (défis, niveaux, courbe…). Rien n'est effacé."],
+      ['🙈', 'MODE DISCRET', "Floute les montants quand tu montres ton téléphone."]]]];
+}
+function rendreModeEmploi() {
+  const f = S.form, ouv = f.ouv || [];
+  $('#sheetIn').innerHTML = enteteSheet("MODE D'EMPLOI", f.retour || null) + `
+    <div class="note" style="display:block;margin-top:12px">L'appli suit ton budget à partir de ton fichier Google Sheets : tout ce que tu saisis ici y arrive tout seul. Touche un écran ou un thème pour l'ouvrir.</div>
+    ${sectionsModeEmploi().map(([k, ic, t, sous, L]) => { const o = ouv.includes(k); return `
+    <button class="grp regfold" data-act="me-sec" data-k="${k}" aria-expanded="${o}" style="margin-top:16px;font-size:11px;color:var(--ink)"><span>${ic} ${t}</span><span class="muted">${o ? 'MOINS ▴' : 'VOIR ▾'}</span></button>
+    <div class="note" style="display:block;margin:4px 0 0">${sous}</div>
+    ${o ? `<div style="margin-top:2px">${L.map(ligneTuto).join('')}</div>` : ''}`; }).join('')}
+    <button class="go" data-act="${f.retour ? 'go:' + f.retour : 'close'}" style="margin-top:20px">COMPRIS</button>`;
 }
 function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
-  const R = { file: rendreFile, info: rendreInfo, videotheque: rendreVideotheque, vitrine: rendreVitrine, xplog: rendreXpLog, xpinfo: rendreXpInfo, tuto: rendreTuto, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
+  const R = { file: rendreFile, info: rendreInfo, videotheque: rendreVideotheque, vitrine: rendreVitrine, xplog: rendreXpLog, xpinfo: rendreXpInfo, tuto: rendreTuto, aide: rendreModeEmploi, exclus: rendreExclus, soon: rendreSoon, objedit: rendreObjEdit, resume: rendreResume, bilmois: rendreBilMois, wrapped: rendreWrapped, remb: rendreRemb, defi: rendreDefi, lien: rendreLien, reglages: rendreReglages, budgets: rendreBudgets, cats: rendreCats, catedit: rendreCatEdit, solde: rendreSolde, ech: rendreEch, av: rendreAv, mois: rendreMoisGrille, fiche: rendreFiche }[f.mode];
   if (R) return R();
   const fav = favoris(f.type), pins = LS.get('pins', []), moisFutur = statut(f.y, f.m) === 'futur', futur = estPrevu(f);
   if (f.cat && !fav.includes(f.cat) && typeDe(f.cat) === f.type) fav.unshift(f.cat);
@@ -2345,13 +2440,14 @@ function rendreReglages() {
   const lc = LS.get('controles', [])[0], ob = LS.get('ordreBud', 'urgence'), se = seuil();
   const tg = (act, on, lab, sub) => `<div class="opt"><span>${lab}${sub ? `<br><small class="muted" style="font-size:12px">${sub}</small>` : ''}</span><button class="tgl ${on ? 'on' : ''}" data-act="${act}" aria-label="${lab}"><i></i></button></div>`;
   $('#sheetIn').innerHTML = enteteSheet('RÉGLAGES') + `
+    <button class="opt" data-act="go:aide" style="margin-top:12px"><span>📖 Mode d'emploi<br><small class="muted" style="font-size:12px">chaque écran, la saisie, les envois, les défis</small></span><span class="muted mono" style="font-size:12px">lire ›</span></button>
     <div class="grp" style="margin-top:16px">APPARENCE</div>
     <div class="seg">${[['auto', 'AUTO'], ['light', 'CLAIR'], ['dark', 'SOMBRE']].map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-act="theme" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="grp" style="margin-top:18px">MON BUDGET</div>
     <button class="opt" data-act="go:budgets"><span>Budgets par catégorie</span><span class="muted mono" style="font-size:12px">${e0(bud)}/mois ›</span></button>
     <button class="opt" data-act="go:cats"><span>Catégories et favorites</span><span class="muted mono" style="font-size:12px">${cats().length} · ${S.data.libres || 0} libre${(S.data.libres || 0) > 1 ? 's' : ''} ›</span></button>
     <button class="opt" data-act="go:solde"><span>Mon solde (quand tu veux, idéalement le 1er)</span><span class="muted mono" style="font-size:12px">${lc ? 'dernier : ' + lc.date : 'jamais noté'} ›</span></button>
-    <div style="margin-top:10px"></div>${tg('aides', !LS.get('aidesOff', false), "Aides et explications", 'les « ? » de l\'accueil et l\'aide de la saisie')}
+    <div style="margin-top:10px"></div>${tg('aides', !LS.get('aidesOff', false), "Aides et explications", 'les « ? », l\'aide de la saisie et le lien Mode d\'emploi de l\'accueil')}
     <div class="grp" style="margin-top:18px">ACCUEIL</div>
     <div class="grp" style="margin:6px 0 0;letter-spacing:1px">ORDRE DES BUDGETS SUR L'ACCUEIL</div>
     <div class="note" style="margin:2px 0 4px;display:block">${ob === 'perso' ? 'Mon ordre : celui que tu as choisi dans Réglages › Catégories (flèches ▲▼).' : 'Les plus urgents d\'abord : ceux proches de leur limite, puis ceux déjà dépassés, puis ceux bien tenus.'}</div>
@@ -4289,6 +4385,9 @@ document.addEventListener('click', ev => {
       ouvrirSaisie({ cat: cE.nom, montant: +el.dataset.v, lib: 'Reste de ' + MOIS[m - 1] + ' mis de côté' }, true); S.form.y = y; S.form.m = m; rendreForm(); break; }
     case 'del': if (!S.form.arm) { S.form.arm = true; rendreForm(); } else { const e = trouver(S.form.id) || S.journal.find(x => x.row === S.form.row && !x.deleted); fermer(); if (e) { supprimer(e); toast('Ligne supprimée'); } } break;
     case 'go:reglages': S.form = { mode: 'reglages' }; rendreForm(); break;
+    case 'mode-emploi': S.form = { mode: 'aide', ouv: [] }; rendreForm(); ouvrirSheet(); $('#sheet').scrollTop = 0; break;
+    case 'go:aide': S.form = { mode: 'aide', ouv: [], retour: 'reglages' }; rendreForm(); $('#sheet').scrollTop = 0; break;
+    case 'me-sec': { const o = S.form.ouv = S.form.ouv || [], k = el.dataset.k; S.form.ouv = o.includes(k) ? o.filter(x => x !== k) : o.concat(k); rendreModeEmploi(); break; }
     case 'go:budgets': S.form = { mode: 'budgets', edit: null }; rendreForm(); break;
     case 'go:cats': S.form = { mode: 'cats' }; rendreForm(); break;
     case 'go:solde': ouvrirSolde(); break;
@@ -4369,7 +4468,7 @@ document.addEventListener('click', ev => {
     case 'ret-ok': okRetrait(); break;
     case 'ret-del': supprRetrait(+el.dataset.i); break;
     case 'theme': LS.set('theme', el.dataset.t); appliquerTheme(); rendreReglages(); break;
-    case 'refresh': fermer(); rafraichir(true); toast('Actualisation…'); break;
+    case 'refresh': fermer(); rafraichir(true); toast(fusionPossible() ? 'Actualisation…' : 'Actualisation après l\'envoi en attente'); break;
     case 'file': S.form = { mode: 'file', arm: false }; rendreForm(); ouvrirSheet(); break;
     case 'rejet-renvoyer': rejetRenvoyer(+el.dataset.i); rendreFile(); toast('Renvoi en cours…'); break;
     case 'rejet-suppr': { const rj = LS.get('rejets', []); rj.splice(+el.dataset.i, 1); LS.set('rejets', rj); rendreFile(); rendre(true); } break;
