@@ -1,5 +1,5 @@
 /**
- * BUDGET · API du budget (Apps Script) · v5.11
+ * BUDGET · API du budget (Apps Script) · v5.12
  * ------------------------------------------
  * Ce script est relié au fichier budget dans lequel il a été créé.
  * Il lit les Paramètres, l'Échéancier et le Journal, et écrit dans le Journal.
@@ -11,6 +11,7 @@
  * v5.2 : la date de la dépense (colonne « Saisi le ») se modifie aussi quand on corrige une ligne.
  * v5.3 : fonction verifier() pour donner les autorisations et tester le script en un clic.
  * v5.6 : « À venir » : le mois est écrit en texte (corrige l'échec des éléments à venir).
+ * v5.12 : préférence « envies » (liste d'envies) ; colonne « Payé en » accepte aussi « En ligne ».
  * v5.11 : action « lot » : plusieurs envois en une demande (un seul verrou) ; un envoi refusé n'empêche pas les suivants.
  * v5.10 : « À venir » accepte un mois futur pas encore présent dans la liste du Journal.
  * v5.9 : renommer une catégorie met aussi à jour le défi du mois ; on ne peut plus retirer une catégorie encore utilisée dans « À venir ».
@@ -30,7 +31,7 @@
  */
 
 const CLE_A_ENREGISTRER = 'CHANGE-MOI';
-const VERSION_API = '5.11';
+const VERSION_API = '5.12';
 
 // Laisse vide si le script est ouvert depuis le fichier (Extensions > Apps Script).
 const ID_FICHIER = '';
