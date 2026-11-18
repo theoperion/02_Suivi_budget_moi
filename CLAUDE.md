@@ -15,7 +15,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.18'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.19'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
 | `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
@@ -58,7 +58,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 - **Journal** : colonne M « Saisi le », colonne N « Payé en » (Espèces). L'option « achat en ligne » a été supprimée.
 - `calc(y, m)` : bilan d'un mois (Journal + Échéancier). `bilan(y, m)` ajoute la fin de mois prévue (`resteBudgets` : part des budgets **des jours restants**, catégorie par catégorie).
 - `budgets(y, m)` : un budget « Annuel » se suit sur l'année (`annuel`, `dep` cumulé). « Sans alerte » = essentiel (courses) : jamais de défi, pas de rythme.
-- Épargne : les catégories dont le nom contient « prêt » ne sont **pas** de l'épargne (objectif, stats), mais comptent dans le solde.
+- Épargne : les catégories dont le nom contient « prêt » ne sont **pas** de l'épargne (objectif, stats), mais comptent dans le solde. L'objectif compte l'épargne **nette** (versements − retraits d'épargne, `estRetraitEp` reconnaît aussi un revenu nommé « retrait … épargne/livret/LEP… »).
 - Jeu : 100 niveaux (`xpNiveau`), 10 rangs, récompense à chaque niveau, ~1/3 des cosmétiques via succès/défis ; les succès reflètent la réalité (pas de mémorisation) ; vitrine : affiches à gauche, écussons à droite.
 - Bouton retour : une entrée d'historique « garde » ; « retour » ne fait **jamais** sortir de l'appli (sinon écran blanc sous Firefox Android).
 - Carte « Nouveau mois » (du 1er au 7) : bilan, conseils de budgets (mensuels + annuels), objectif d'épargne en janvier, contrôle du solde.
