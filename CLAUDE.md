@@ -15,7 +15,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.27'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.28'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
 | `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
@@ -54,7 +54,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 ## Notions importantes du code
 
-- **Préférences synchronisées** (propriétés du script, clés `PREFS_OK_`) : tirelires, voyages, escalier, semaines, objectifs, jeu, especes, envies. Limite ~8 000 caractères par clé.
+- **Préférences synchronisées** (propriétés du script, clés `PREFS_OK_`) : tirelires, voyages, escalier, semaines, objectifs, jeu, especes, envies (qui contient aussi `pn`/`px` : prénoms mémorisés / retirés de « Payé pour d'autres »). Limite ~8 000 caractères par clé.
 - **Journal** : colonne M « Saisi le », colonne N « Payé en » (Espèces). L'option « achat en ligne » a été supprimée.
 - `calc(y, m)` : bilan d'un mois (Journal + Échéancier). `bilan(y, m)` ajoute la fin de mois prévue (`resteBudgets` : part des budgets **des jours restants**, catégorie par catégorie).
 - `budgets(y, m)` : un budget « Annuel » se suit sur l'année (`annuel`, `dep` cumulé). « Sans alerte » = essentiel (courses) : jamais de défi, pas de rythme.
