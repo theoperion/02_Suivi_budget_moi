@@ -15,7 +15,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.26'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.27'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
 | `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
@@ -49,7 +49,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 - Lancer : `node outils/tests/lotH2.js <dossier de l'appli> [dossier captures]` (idem lotA, lotB, lotF1, lotF6, lotG, lotG2-h2, lotI, lotJ, lotK, lotL, lotM). Les `jeu*.js` prennent le chemin de `index.html`.
 - Ils simulent le serveur Apps Script (`page.route`) et figent l'horloge. Résultat attendu : « VERDICT: OK » quand il existe, et **« ERREURS JS: aucune »** partout.
 - Pour Clément/Devlin, certains tests codent en dur le préfixe de stockage `jauge.` : remplacer par `jauge-clem.` / `jauge-devlin.` dans une copie.
-- `g3ui.js` a un contrôle « défi de la semaine visible » qui échoue depuis que les dépenses essentielles ne servent plus de défi (les données de test n'ont que Courses) : c'est le test qui est à mettre à jour, pas l'appli.
+- `g3ui.js` : contrôle large de l'interface (« TOUT VERT » attendu).
 - Dans le cloud, `script.google.com` et `github.io` sont bloqués : on ne teste jamais contre le vrai serveur.
 
 ## Notions importantes du code
@@ -60,6 +60,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 - `budgets(y, m)` : un budget « Annuel » se suit sur l'année (`annuel`, `dep` cumulé). « Sans alerte » = essentiel (courses) : jamais de défi, pas de rythme.
 - Épargne : les catégories dont le nom contient « prêt » ne sont **pas** de l'épargne (objectif, stats), mais comptent dans le solde. L'objectif compte l'épargne **nette** (versements − retraits d'épargne, `estRetraitEp` reconnaît aussi un revenu nommé « retrait … épargne/livret/LEP… »). Saisie : ÉPARGNE › « ↓ Mettre de côté » / « ↑ Retirer » (`f.sens`).
 - Jeu : 100 niveaux (`xpNiveau`), 10 rangs, récompense à chaque niveau, ~1/3 des cosmétiques via succès/défis ; les succès reflètent la réalité (pas de mémorisation) ; vitrine : affiches à gauche, écussons à droite.
+- Mises à jour : le service worker installe les fichiers frais (`cache: 'reload'`), l'appli vérifie au retour au premier plan et se recharge seule (jamais pendant une saisie).
 - Bouton retour : une entrée d'historique « garde » ; « retour » ne fait **jamais** sortir de l'appli (sinon écran blanc sous Firefox Android).
 - Carte « Nouveau mois » (du 1er au 7) : bilan, conseils de budgets (mensuels + annuels), objectif d'épargne en janvier, contrôle du solde.
 
@@ -76,7 +77,6 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 ## À faire / en attente
 
 - **Transfert de l'appli de Clément le mercredi 25 novembre 2026** (fiche de transfert déjà remise à Théo). Ensuite : retirer Clément de `commun/personnes.json` (et adapter `generer.py`). Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
-- Mettre à jour `g3ui.js` (voir Tests).
 
 ## Façon de travailler avec Théo
 

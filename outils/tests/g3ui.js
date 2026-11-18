@@ -13,6 +13,7 @@ let echecs = 0; const ok = (c, m, v) => { if (!c) echecs++; console.log((c ? 'OK
   const data = { categories: [
       { ligne: 10, nom: 'Salaire', groupe: 'Revenus', type: 'Revenu', budget: null, suivi: '' },
       { ligne: 11, nom: 'Courses', groupe: 'Vie courante', type: 'Dépense', budget: 300, suivi: 'Mensuel' },
+      { ligne: 13, nom: 'Loisirs', groupe: 'Loisirs', type: 'Dépense', budget: 100, suivi: 'Mensuel' }, // depuis le lot H, Courses (essentiel) ne sert plus de défi
       { ligne: 12, nom: 'Loyer', groupe: 'Charges fixes', type: 'Dépense', budget: null, suivi: '' }],
     mois: MOIS.map(m => m + ' 2026').concat(MOIS.map(m => m + ' 2027')), soldes: { '2026': 1000 }, debut: null,
     echeancier: [], journal: [{ row: 5, mois: 'Novembre 2026', lib: 'Café', cat: 'Courses', montant: 3, date: '2026-11-02' }], libres: 5,
@@ -79,7 +80,7 @@ let echecs = 0; const ok = (c, m, v) => { if (!c) echecs++; console.log((c ? 'OK
   await clic('[data-act="go:cats"]'); ok(/NOUVELLE CATÉGORIE/.test(await txt()), 'Catégories et favorites'); await clic('[data-act="go:reglages"]');
   await clic('#sheetIn [data-act=exclus]'); t = await txt(); ok(/JOURS SANS DÉPENSE/.test(t), 'Catégories qui ne cassent pas les séries');
   await clic('[data-act=exclus-tog][data-cat=Courses]'); await clic('[data-act=exclus-ok]'); t = await txt(); ok(/CHAQUE MOIS/.test(t) && /aucune pour l'instant/.test(t), 'enregistrer revient aux Réglages, liste à jour (Courses retirée)', t.slice(0, 400));
-  await clic('[data-act=achats-reglages]'); ok(true, 'Achats plaisir cliqué (sans G2 : rien)');
+  await clic('#sheetIn [data-act=achats-reglages]'); ok(/ACHATS PLAISIR|TAUX HORAIRE/i.test(await txt()), 'Achats plaisir (Réglages) s\'ouvre');
   await p.evaluate(() => { S.form = { mode: 'reglages' }; rendreForm(); ouvrirSheet(); });
   await clic('#sheetIn [data-act="go:aide"]'); t = await txt(); ok(/CHAQUE MOIS/.test(t) || t.length > 200, "Mode d'emploi s'ouvre"); await p.evaluate(() => { S.form = { mode: 'reglages' }; rendreForm(); });
   await clic('[data-act="go:lien"]'); await p.evaluate(() => { S.form = { mode: 'reglages' }; rendreForm(); });
