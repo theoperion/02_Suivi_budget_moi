@@ -15,7 +15,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.28'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.29'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
 | `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
