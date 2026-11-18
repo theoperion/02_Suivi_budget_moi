@@ -67,7 +67,7 @@ function donnees() {
   await p.click('#sheetIn [data-act=sens][data-s=retrait]'); await p.waitForTimeout(200);
   R.retraitCats = await p.evaluate(() => [...document.querySelectorAll('#sheetIn [data-act=cat]')].map(b => b.innerText));
   R.note = await p.evaluate(() => [...document.querySelectorAll('#sheetIn .note')].map(n => n.innerText).join(' | ').slice(0, 160));
-  await p.click('#sheetIn [data-act=cat]'); for (const k of ['5', '0', '0']) await p.click(`#sheetIn .pad [data-k="${k}"]`);
+  R.catAuto = await p.evaluate(() => S.form.cat); if (await p.$('#sheetIn [data-act=cat]')) await p.click('#sheetIn [data-act=cat]'); for (const k of ['5', '0', '0']) await p.click(`#sheetIn .pad [data-k="${k}"]`);
   await p.screenshot({ path: path.join(SHOTS, 'saisie-retrait.png') });
   await p.click('#sheetIn [data-act=save]'); await attendre(); await p.waitForTimeout(500);
   R.envoi = srv.adds.map(a => a.cat + ' ' + a.montant);
