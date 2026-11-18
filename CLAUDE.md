@@ -15,7 +15,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.25'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.26'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
 | `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
@@ -70,7 +70,8 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 - Les 5 boutons du haut restent tels quels. « Budgets tenus » = 3 mois verts. Ancien succès « Régulier » renommé « Semainier ».
 - Idée « mettre de côté chaque mois pour les budgets annuels » : écartée (trop lourd).
 - Mode d'emploi : seulement dans Réglages (pas sur l'accueil).
-- Prêts à des proches : se saisissent dans DÉPENSE › « Payé pour d'autres aussi » (ma part 0 €), plus dans ÉPARGNE. « Autres revenus » = vrais revenus en plus (cadeau, vente…), jamais un retrait d'épargne.
+- Saisie : montant d'abord (libellé bloqué tant qu'il est à 0), puis libellé au clavier du téléphone ; « Entrée » enregistre.
+- Prêts à des proches : se saisissent dans DÉPENSE › « Payé pour d'autres » (« J'avance tout (0 €) »), plus dans ÉPARGNE. « Autres revenus » = vrais revenus en plus (cadeau, vente…), jamais un retrait d'épargne.
 
 ## À faire / en attente
 

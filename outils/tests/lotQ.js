@@ -61,6 +61,7 @@ function donnees() {
   await p.evaluate(() => { S.tab = 'home'; rendre(); }); await p.click('.fab'); await p.waitForTimeout(400);
   await p.click('#sheetIn [data-act=type][data-t="Dépense"]'); await p.waitForTimeout(150);
   await p.evaluate(() => { S.form.cat = null; rendreForm(); });
+  for (const k of ['1', '2']) await p.click(`#sheetIn .pad [data-k="${k}"]`);
   await p.fill('#lib', 'li'); await p.waitForTimeout(150);
   R.sansCat = await p.evaluate(() => [...document.querySelectorAll('#libsug .chip')].map(b => b.innerText));
   await p.click('#libsug .chip'); await p.waitForTimeout(200);
