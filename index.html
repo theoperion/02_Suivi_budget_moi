@@ -1295,9 +1295,15 @@ function exclusDefaut() { return cats().filter(c => estCourante(c.nom) && RE_COU
 function exclusHist() {
   const p = getPref('jeu', null), H = [];
   if (p && Array.isArray(p.exH)) p.exH.forEach(x => { if (Array.isArray(x) && typeof x[0] === 'string' && Array.isArray(x[1])) H.push([x[0], x[1].filter(n => typeof n === 'string')]); });
-  if (!H.length) return [['', p && Array.isArray(p.exclus) ? p.exclus : exclusDefaut()]];
-  return H.sort((a, b) => a[0].localeCompare(b[0]));
+  if (!H.length) H.push(['', p && Array.isArray(p.exclus) ? p.exclus : exclusDefaut()]);
+  H.sort((a, b) => a[0].localeCompare(b[0]));
+  // (Théo, 9.33) À partir du 19/11/2026, seules les dépenses essentielles restent exclues ; avant, rien ne change.
+  const ess = l => l.filter(estEssentielle);
+  let av = H[0][1]; H.forEach(x => { if (x[0] < EXCLUS_ESS_DEPUIS) av = x[1]; });
+  const out = H.filter(x => x[0] < EXCLUS_ESS_DEPUIS).concat(ess(av).length !== av.length ? [[EXCLUS_ESS_DEPUIS, ess(av)]] : [], H.filter(x => x[0] >= EXCLUS_ESS_DEPUIS).map(x => [x[0], ess(x[1])]));
+  return out.length ? out : [['', []]];
 }
+const EXCLUS_ESS_DEPUIS = '2026-11-19';
 // Liste valable à une date (aujourd'hui par défaut)
 function exclusSerie(iso) { const H = exclusHist(), d = iso || auj(); let l = H[0][1]; H.forEach(x => { if (x[0] <= d) l = x[1]; }); return l; }
 // Même chose, pour beaucoup de dates d'un coup (calcul des jours)
@@ -2137,7 +2143,7 @@ function sectionsModeEmploi() {
     ['progres', '🏆', 'PROGRÈS ET DÉFIS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection. Pour rendre le budget un peu plus amusant.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
       ['🎯', 'DÉFIS', "Stats › Progrès › Défis : tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail juste en dessous)."],
-      ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>jamais au-dessus du budget</b>. Il se lance <b>du 1er au 5 du mois</b> ; jusqu'au 5 tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner), et un défi qui n'a pas été lancé attend le mois suivant. Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
+      ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>au moins 10 % sous le budget</b> (Loisirs 100 € → 90 € au plus). Il se lance <b>du 1er au 5 du mois</b> ; jusqu'au 5 tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner), et un défi qui n'a pas été lancé attend le mois suivant. Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
       ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
       ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
       ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
@@ -3038,7 +3044,7 @@ function rendreDefi() {
   $('#sheetIn').innerHTML = `<div class="grab"></div>
     <div class="shead"><span>DÉFI ${deMois(f.m)}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     ${verrou ? '' : `<div class="note" style="margin-top:4px">Choisis un budget et un plafond plus serré que d'habitude pour ce mois-ci. Verdict le 1er.</div>`}
-    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Après le ${DEFI_JOUR_LIBRE} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au plus égal à ton budget. Un défi se lance du 1er au ${DEFI_JOUR_LIBRE} du mois ; jusque-là tu peux tout changer ; ensuite, seulement le baisser.</div>`}
+    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Après le ${DEFI_JOUR_LIBRE} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au moins 10 % sous ton budget. Un défi se lance du 1er au ${DEFI_JOUR_LIBRE} du mois ; jusque-là tu peux tout changer ; ensuite, seulement le baisser.</div>`}
     <div class="chips" style="margin-top:12px">${budgetsDefiables().filter(b => !verrou || b.nom === d0.cat).map(b => `<button class="chip ${f.cat === b.nom ? 'on' : ''}" data-act="defi-cat" data-cat="${esc(b.nom)}">${esc(b.nom)}</button>`).join('')}</div>
     ${c ? `<div class="note">Budget ${e0(c.budget)}/mois${moy != null ? ` · tu dépenses en moyenne ${e0(moy)}/mois (6 derniers mois)` : ''} · déjà ${e0(depenseMois(f.cat, f.y, f.m))} ce mois-ci</div>
     <input class="libin" data-f="montant" inputmode="decimal" placeholder="${verrou ? 'Plafond en €' : 'Plafond du défi en €'}" value="${esc(f.montant)}" style="margin-top:10px">` : ''}
@@ -3048,6 +3054,8 @@ function rendreDefi() {
   lierChamps();
   const i = $('[data-f="montant"]'); if (i) i.addEventListener('input', () => { S.form.touche = true; });
 }
+const DEFI_MAX = 0.9; // (Théo, 9.33) un défi = au moins 10 % sous le budget
+const plafondMaxDefi = b => Math.floor(b * DEFI_MAX * 100) / 100;
 function okDefi() {
   const f = S.form, v = numTxt(f.montant); // « 1 000 » = 1000 € (E3)
   if (!defiDe(f.y, f.m) && defiVerrouille(f.y, f.m)) { const z = $('#ferr'); if (z) z.textContent = MSG_DEFI_FERME; return; } // nouveau défi : du 1er au 5 seulement
@@ -3055,7 +3063,7 @@ function okDefi() {
   if (!(v >= 0)) { $('#ferr').textContent = 'Tape un plafond'; return; }
   const k = cleMois(f.y, f.m), m = Math.round(v * 100) / 100, c = catMap()[f.cat], d0 = defiDe(f.y, f.m);
   if (!c || !(c.budget > 0)) { $('#ferr').textContent = "Ce budget n'a pas de montant : choisis-en un autre"; return; }
-  if (m > c.budget + 0.005) { $('#ferr').textContent = `Le plafond ne peut pas dépasser ton budget ${f.cat} (${e0(c.budget)}). Un défi, c'est faire mieux que le budget.`; return; }
+  if (m > plafondMaxDefi(c.budget) + 0.005) { $('#ferr').textContent = `Plafond trop proche du budget : ${e0(plafondMaxDefi(c.budget))} au plus pour ${f.cat} (budget ${e0(c.budget)}). Un défi, c'est au moins 10 % de moins que le budget.`; return; }
   if (d0 && defiVerrouille(f.y, f.m)) {
     if (f.cat !== d0.cat) { $('#ferr').textContent = `Après le ${DEFI_JOUR_LIBRE} du mois, tu ne peux plus changer de budget : seulement baisser le plafond.`; return; }
     if (m > d0.montant + 0.005) { $('#ferr').textContent = `Après le ${DEFI_JOUR_LIBRE} du mois, tu peux seulement baisser le plafond (${e0(d0.montant)} au plus).`; return; }
@@ -3545,7 +3553,7 @@ function rendreXpInfo() {
     ['🍂 SAISONS (UNE FOIS PAR AN CHACUNE)', [['🍂', 'Novembre sobre', 150], ['🎄', "Calendrier de l'avent", 250], ...SAISONS_EV.map(d => ['🎟️', d.nom, d.xp]), ['🏁', "Objectif d'épargne annuel", 200]]],
     ['🏆 SUCCÈS (UNE FOIS CHACUN)', [['🥉', 'Facile', 20], ['🥈', 'Moyen', 50], ['🥇', 'Difficile', 120], ['💎', 'Extrême', 300]]]];
   $('#sheetIn').innerHTML = enteteSheet("COMMENT GAGNER DE L'XP", null) + G.map(([t, L]) => `<div class="grp" style="margin-top:14px">${t}</div><div class="ticket">${L.map(r => `<div class="tl"><span>${r[0]} ${esc(r[1])}</span><span class="c-ok">+${r[2]}</span></div>`).join('')}</div>`).join('')
-    + `<div class="note" style="display:block;margin-top:14px">Ne rapportent rien par eux-mêmes : saisir un revenu, un retrait d'épargne ou un versement.<br><br><b>Jour sans dépense</b> : compté le lendemain, et seulement si tu tiens ton budget à jour, c'est-à-dire avec au moins une dépense saisie (courses comprises) dans la semaine avant ou la semaine après ce jour. Sans aucune dépense saisie autour, le jour reste en attente, puis ne compte pas. Même règle pour les événements, saisons et défis de la semaine : une dépense saisie dans la semaine avant ou après, sinon « en attente ». Seuls une dépense courante ou une charge fixe saisie à la main cassent la journée (pas l'Échéancier, ni les lignes « Écart »).<br><br><b>Récompenses du mois</b> (vert, sans faute, 10 % / 25 % non dépensés, défi, mois bouclé) : seulement pour un mois où tu as saisi des dépenses. Un retrait d'épargne ne compte pas comme un revenu : il ne rend pas un mois « vert ». Les succès d'épargne comptent le plus haut niveau atteint par ton épargne <b>nette</b> (versé − retiré, sans les prêts) : utiliser ton épargne plus tard ne retire pas un succès déjà gagné, mais verser puis retirer le même mois ne compte pas.<br><br><b>Envie abandonnée</b> : +10 XP si tu y renonces une fois sa date arrivée (mûre), 2 par semaine au plus. Tu peux renoncer avant, mais sans XP.<br><br>Tout est compté depuis le 1er novembre 2026, et recalculé si tu corriges une ligne (l'XP peut donc aussi baisser).</div>
+    + `<div class="note" style="display:block;margin-top:14px">Ne rapportent rien par eux-mêmes : saisir un revenu, un retrait d'épargne ou un versement.<br><br><b>Jour sans dépense</b> : compté le lendemain, et seulement si tu tiens ton budget à jour, c'est-à-dire avec au moins une dépense saisie (courses comprises) dans la semaine avant ou la semaine après ce jour. Sans aucune dépense saisie autour, le jour reste en attente, puis ne compte pas. Même règle pour les événements, saisons et défis de la semaine : une dépense saisie dans la semaine avant ou après, sinon « en attente ». Seuls une dépense courante ou une charge fixe saisie à la main cassent la journée (pas l'Échéancier, ni les lignes « Écart »).<br><br><b>Récompenses du mois</b> (vert, sans faute, 10 % / 25 % non dépensés, défi, mois bouclé) : seulement pour un mois où tu as saisi des dépenses. Un retrait d'épargne ne compte pas comme un revenu : il ne rend pas un mois « vert ». Les succès d'épargne comptent le plus haut niveau atteint par ton épargne <b>nette</b> (versé − retiré, sans les prêts) : utiliser ton épargne plus tard ne retire pas un succès déjà gagné, mais verser puis retirer le même mois ne compte pas.<br><br><b>Envie abandonnée</b> : +10 XP si tu y renonces une fois sa date arrivée (mûre), après <b>au moins 7 jours</b> d'attente et pour une envie d'<b>au moins 20 €</b> ; 2 par semaine au plus. Tu peux renoncer avant, mais sans XP.<br><br>Tout est compté depuis le 1er novembre 2026, et recalculé si tu corriges une ligne (l'XP peut donc aussi baisser).</div>
     <button class="go" data-act="xpjournal" style="margin-top:12px">📜 VOIR MON JOURNAL D'XP</button>`;
 }
 function rendreXpLog() { $('#sheetIn').innerHTML = enteteSheet("JOURNAL D'XP", null) + `<div class="xpcompact">${blocDetailXP(etatJeu())}</div>`; }
@@ -5261,10 +5269,11 @@ function reglAchats() {
 const envieMure = x => x.s === 'att' && String(x.f) <= auj();
 // (lot L2) +10 XP par envie abandonnée seulement si elle était MÛRE (sa date atteinte) et au plus ENV_XP_SEMAINE par semaine (lundi → dimanche).
 // On peut toujours renoncer avant la date, mais sans XP. Calculé depuis la liste (rien de mémorisé) ; ren.g = celles déjà compactées.
-const ENV_XP_SEMAINE = 2;
+const ENV_XP_SEMAINE = 2, ENV_XP_JOURS = 7; // (Théo, 9.33) XP seulement si l'envie a attendu 7 jours et coûte au moins ACH_SEUIL (20 €)
+const envieXpOk = x => +x.p >= ACH_SEUIL && (!x.d || ecartJ(String(x.d), String(x.x)) >= ENV_XP_JOURS);
 function enviesAvecXp(p) {
   const W = {}, out = [];
-  p.l.filter(x => x.s === 'ren' && x.x && x.f && String(x.f) <= String(x.x)).sort((a, b) => String(a.x).localeCompare(String(b.x)))
+  p.l.filter(x => x.s === 'ren' && x.x && x.f && String(x.f) <= String(x.x) && envieXpOk(x)).sort((a, b) => String(a.x).localeCompare(String(b.x)))
     .forEach(x => { const k = isoJ(lundi(new Date(x.x + 'T00:00:00'))); W[k] = (W[k] || 0) + 1; if (W[k] <= ENV_XP_SEMAINE) out.push(x); });
   return out;
 }
@@ -5450,7 +5459,7 @@ function clicAchats(a, el) {
     const xp0 = enviesXp(p), mure = String(x.f) <= auj();
     x.s = 'ren'; x.x = auj(); const gagne = enviesXp(p) > xp0; sauverEnvies(p); vibrer(); rendreEnvies(); rendre(true);
     if (on('jeu') && gagne) try { xpFlottante(10); } catch (e) {}
-    const tx = !on('jeu') ? '' : gagne ? ' · +10 XP' : !mure ? " · pas d'XP avant la date prévue" : ' · XP : 2 envies par semaine au plus';
+    const tx = !on('jeu') ? '' : gagne ? ' · +10 XP' : !mure ? " · pas d'XP avant la date prévue" : +x.p < ACH_SEUIL ? ` · XP à partir de ${ACH_SEUIL} €` : !envieXpOk(x) ? ` · XP après ${ENV_XP_JOURS} jours d'attente` : ' · XP : 2 envies par semaine au plus';
     toast(`💚 ${e2(+x.p)} € économisés${tx}`, 'ANNULER', () => { setPref('envies', avant); if (S.form && S.form.mode === 'envies') rendreEnvies(); rendre(true); });
     return;
   }
