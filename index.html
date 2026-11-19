@@ -866,7 +866,7 @@ function api(action, extra) {
     .then(async r => { const t = await r.text(); if (!r.ok) throw new Error('HTTP ' + r.status + ' · ' + t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120));
       try { return JSON.parse(t); } catch (e) { throw new Error('Réponse inattendue du script (souvent : autorisation Google à redonner ou déploiement à refaire) · ' + t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)); } });
 }
-function setSync(s) { $('#dot').className = 'dot' + (s === 'sync' ? ' sync' : s === 'off' ? ' off' : ''); }
+function setSync(s) { const d = $('#dot'); if (d) d.className = 'dot' + (s === 'sync' ? ' sync' : s === 'off' ? ' off' : ''); } // 9.36 : le point peut manquer pendant un nouvel affichage de l'en-tête (erreur rare vue dans les tests)
 
 async function rafraichir(force) {
   if (!S.key) return;
