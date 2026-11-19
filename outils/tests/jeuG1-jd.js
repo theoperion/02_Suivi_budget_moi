@@ -37,7 +37,8 @@ function journal(debut, fin, casse, extra) {
   const J = []; let row = 5;
   for (let d = new Date(debut + 'T00:00:00'); iso(d) < fin; d.setDate(d.getDate() + 1)) { const k = iso(d), y = d.getFullYear(), m = d.getMonth() + 1, mois = MOIS[m - 1] + ' ' + y;
     if (d.getDate() === 1) J.push({ row: row++, mois, lib: 'Salaire', cat: 'Salaire', montant: 2000, date: k });
-    if (casse(k)) J.push({ row: row++, mois, lib: 'Bus', cat: 'Transport', montant: 2, date: k }); }
+    if (casse(k)) J.push({ row: row++, mois, lib: 'Bus', cat: 'Transport', montant: 2, date: k });
+    if (d.getDate() % 4 === 2) J.push({ row: row++, mois, lib: 'Pain', cat: 'Courses', montant: 1, date: k }); } // (lot L2) preuve d'utilisation : une petite course (ne casse rien) tous les 4 jours
   (extra || []).forEach(([k, cat, montant, o]) => { const [y, m] = k.split('-').map(Number); J.push(Object.assign({ row: row++, mois: MOIS[m - 1] + ' ' + y, lib: cat, cat, montant, date: k }, o || {})); });
   return J;
 }
