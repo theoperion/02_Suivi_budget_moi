@@ -13,6 +13,7 @@ Pour chaque changement, applique le **conseil de relecture** (agents dans .claud
    - conseil-jeu : XP, défis, séries justes et motivants ?
    - conseil-fiabilite : aucune donnée perdue, mises à jour OK ?
    Petit changement de texte ou d'affichage : conseil-code + conseil-ergonomie suffisent. Gros changement ou calcul : les 5.
+   Quand je demande des idées : lance conseil-creativite, puis fais contester ses idées par conseil-avocat-du-diable, et présente-moi seulement celles qui tiennent, avec les deux avis.
 4. Tu corriges ce qu'ils signalent, puis tu publies les 3 applis (procédure de CLAUDE.md) et tu vérifies la mise en ligne.
 5. Tu me fais un récap court : ce qui change, un exemple chiffré, les avis du conseil, et leurs idées d'amélioration (que tu ne mets en place qu'avec mon accord).
 6. Tu mets à jour CLAUDE.md si une décision nouvelle est prise.
