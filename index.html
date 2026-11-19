@@ -4459,8 +4459,9 @@ function alertes() {
   occurrences(y, m).filter(o => o.type !== 'Revenu' && o.type !== 'Retrait' && o.v >= 150 && o.jour > d && o.jour <= d + 3).forEach(o => out.push({ id: 'gros' + o.lib + y + m, ico: '🏦', txt: `${esc(o.lib)} : <b>${e2(o.v)}</b> prélevés le ${o.jour}` }));
   // 9.34 : rappel discret quand rien n'est noté depuis 4 jours (jamais lié au jeu ; une fois par trou de saisie ; pas les 7 premiers jours)
   const A = auj(), dd = S.journal.filter(e => !e.deleted && e.date && e.date <= A).map(e => e.date).sort();
-  if (dd.length && ecartJ(dd[0], A) >= 7 && ecartJ(dd[dd.length - 1], A) >= RAPPEL_SAISIE_J)
-    out.push({ id: 'rien' + dd[dd.length - 1], ico: '📝', txt: `Rien noté depuis <b>${ecartJ(dd[dd.length - 1], A)} jours</b>. Un oubli ? Ajoute-le avec ＋. Rien dépensé ? Bravo, touche ✕.` });
+  const vide = dd.length ? ecartJ(dd[dd.length - 1], A) - 1 : 0; // jours entiers sans rien noté (aujourd'hui n'est pas fini)
+  if (dd.length && ecartJ(dd[0], A) >= 7 && vide >= RAPPEL_SAISIE_J)
+    out.push({ id: 'rien' + dd[dd.length - 1], ico: '📝', txt: `Rien noté depuis <b>${vide} jours</b>. Un oubli ? Ajoute-le avec ＋. Rien dépensé ? Bravo, touche ✕.` });
   const vues = LS.get('alertesVues', []); return out.filter(a => !vues.includes(a.id));
 }
 function blocAlertes() {

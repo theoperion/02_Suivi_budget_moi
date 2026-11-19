@@ -1,5 +1,5 @@
 {
-  "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle. « jd_defaut » : périodes de jours avec dépenses non saisies proposées au départ (le voyage du 7 au 15 novembre 2026 : Devlin en était, pas Clément). « jd_retires » : périodes à retirer une seule fois de la préférence déjà enregistrée (le voyage, posé par erreur chez Clément par une ancienne version).",
+  "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle. « jd_defaut » : périodes de jours avec dépenses non saisies proposées au départ (le voyage du 7 au 15 novembre 2026 : Clément et Devlin en étaient). « jd_retires » : périodes à retirer une seule fois de la préférence déjà enregistrée (vide ; le retrait fait par erreur chez Clément en 9.33 est annulé en 9.34 : jdMig 1 → 2, voyage remis).",
   "clement": {
     "depot": "05_Suivi_budget_Clement",
     "titre": "Budget · Clément",
