@@ -2180,7 +2180,8 @@ function rendreModeEmploi() {
     ${o ? `<div style="margin-top:2px">${L.map(ligneTuto).join('')}</div>` : ''}`; }).join('')}
     <button class="go" data-act="${f.retour ? 'go:' + f.retour : 'close'}" style="margin-top:20px">COMPRIS</button>`;
 }
-function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
+function fermer() { const ro = S.retourObj; S.retourObj = null; if (ro) { S.form = { mode: 'objdetail', y: ro }; rendreForm(); return; } // 9.36 : fiche ouverte depuis le détail de l'objectif → on y revient
+  $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
 // (L4) Montant affiché avec espace des milliers (« 1 250,5 € ») : la valeur saisie (f.montant) ne change pas
 const montantAff = s => { const [a, d] = String(s || '0').split(','); return a.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + (d != null ? ',' + d : '') + '\u00a0€'; };
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
@@ -4522,10 +4523,10 @@ function epAnnee(y, retraits) {
 }
 function rendreObjDetail() {
   const y = S.form.y, L = versementsEpargne(y), C = L.filter(x => !x.pret), P = L.filter(x => x.pret), sg = x => x.retrait ? -x.v : x.v;
-  let h = enteteSheet("ÉPARGNE " + y + " · DÉTAIL", null) + `<div class="note" style="display:block;margin-top:10px">Chaque versement (+) et chaque retrait d'épargne (−) compté dans ta jauge, mois par mois. « Échéancier » = virement automatique (compté à sa date). <b>Touche une ligne</b> pour la corriger ou la supprimer.</div>`;
+  let h = enteteSheet("ÉPARGNE " + y + " · DÉTAIL", null) + `<div class="note" style="display:block;margin-top:10px">Chaque versement (+) et chaque retrait d'épargne (−) compté dans ta jauge, mois par mois. <b>Touche une ligne</b> pour la corriger ou la supprimer. « auto » = virement automatique : il se modifie dans Prévu.</div>`;
   if (!C.length) h += `<div class="empty">Aucun mouvement d'épargne compté en ${y}.</div>`;
   for (let m = 1; m <= 12; m++) { const Z = C.filter(x => x.m === m); if (!Z.length) continue;
-    const tm = Z.reduce((t, x) => t + sg(x), 0); h += `<div class="sec"><span>${MOIS[m - 1].toUpperCase()}</span><span class="${tm < 0 ? 'c-bad' : ''}">${tm < 0 ? '−' + e0(-tm) : '+' + e0(tm)}</span></div>` + Z.map(x => `<button class="tl objl" data-act="${x.act}" data-id="${esc(x.id)}" aria-label="Modifier cette ligne"><span>${esc(x.lib)}<small class="muted" style="display:block;font-size:11px">${esc(x.cat)} · ${x.retrait ? 'retrait' : 'versement'} · ${x.src}</small></span><span class="${x.retrait ? 'c-bad' : ''}">${x.retrait ? '−' : '+'}${e2(x.v)} ›</span></button>`).join(''); }
+    const tm = Z.reduce((t, x) => t + sg(x), 0); h += `<div class="sec"><span>${MOIS[m - 1].toUpperCase()}</span><span class="${tm < 0 ? 'c-bad' : ''}">${tm < 0 ? '−' + e0(-tm) : '+' + e0(tm)}</span></div>` + Z.map(x => x.act !== 'edit' ? `<div class="tl"><span>${esc(x.lib)}<small class="muted" style="display:block;font-size:11px">${esc(x.cat)} · ${x.retrait ? 'retrait' : 'versement'} · auto (Prévu)</small></span><span class="${x.retrait ? 'c-bad' : ''}">${x.retrait ? '−' : '+'}${e2(x.v)}</span></div>` : `<button class="tl objl" data-act="obj-ligne" data-id="${esc(x.id)}"><span>${esc(x.lib)}<small class="muted" style="display:block;font-size:11px">${esc(x.cat)} · ${x.retrait ? 'retrait' : 'versement'} · ${x.src}</small></span><span class="${x.retrait ? 'c-bad' : ''}">${x.retrait ? '−' : '+'}${e2(x.v)} ›</span></button>`).join(''); }
   const B = bilanEpargne(y);
   h += `<hr class="dash"><div class="tl"><span>VERSÉ</span><span>+${e2(B.verse)}</span></div><div class="tl"><span>RETIRÉ</span><span>−${e2(B.retire)}</span></div><div class="tl tot"><span>ÉPARGNE NETTE</span><span class="${B.net < 0 ? 'c-bad' : ''}">${B.net < 0 ? '−' + e2(-B.net) : e2(B.net)}</span></div>`;
   if (P.length) h += `<div class="note" style="display:block;margin-top:12px">Non comptés : tes prêts à des proches (${e0(P.reduce((t, x) => t + x.v, 0))} en ${y}). Prêter n'est pas épargner : cet argent revient quand on te rembourse.</div>`;
@@ -5542,6 +5543,7 @@ document.addEventListener('click', ev => {
     case 'budget': S.filtre.cat = el.dataset.cat; S.filtre.q = ''; S.filtre.grp = null; S.tab = 'journal'; rendre(); scrollTo(0, 0); break;
     case 'clearcat': S.filtre.cat = null; S.filtre.grp = null; rendre(true); break;
     case 'edit': { const e = trouver(el.dataset.id); if (e) ouvrirSaisie(e); break; }
+    case 'obj-ligne': { const e = trouver(el.dataset.id), y = S.form && S.form.y; if (e) { ouvrirSaisie(e); S.retourObj = y; } break; } // 9.36 : retour au détail après la fiche
     case 'sens': S.form.sens = el.dataset.s; if (S.form.cat && (S.form.sens === 'retrait') !== estRetraitEp(S.form.cat)) S.form.cat = null; rendreForm(); break;
     case 'type': S.form.type = el.dataset.t; S.form.sens = null; if (S.form.cat && typeDe(S.form.cat) !== S.form.type) S.form.cat = null; rendreForm(); break;
     case 'cat': S.form.cat = el.dataset.cat; if (S.form.all) { S.form.all = false; rendreForm(); break; } document.querySelectorAll('#sheetIn [data-act=cat]').forEach(c => c.classList.toggle('on', c.dataset.cat === S.form.cat)); majHint(); majSugLib(); break;

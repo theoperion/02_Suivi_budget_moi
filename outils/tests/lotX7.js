@@ -58,8 +58,18 @@ const VU = { nivVu: 1, xpVu: 0, echelle100: true, regles933: true }; // joueur d
   await p.screenshot({ path: path.join(SHOTS, 'x7-detail.png') });
   await p.evaluate(() => [...document.querySelectorAll('#sheetIn .objl')].find(x => /Retrait vacances/.test(x.innerText)).click()); await p.waitForTimeout(400);
   R.fiche = await p.evaluate(() => ({ mode: S.form && S.form.mode, lib: S.form && S.form.lib, montant: S.form && S.form.montant, txt: document.querySelector('#sheetIn').innerText.slice(0, 60) }));
-  await p.screenshot({ path: path.join(SHOTS, 'x7-fiche.png') }); await ctx.close();
-  ok(R.lignes.length === 2 && R.lignes.every(t => /^edit:/.test(t)), `2 lignes touchables (${R.lignes.join(' | ')})`);
+  await p.screenshot({ path: path.join(SHOTS, 'x7-fiche.png') });
+  // ✕ → retour au détail ; ENREGISTRER (montant 150) → retour au détail avec le nouveau total ; ✕ du détail → fermé
+  await p.evaluate(() => fermer()); await p.waitForTimeout(200); R.apresX = await p.evaluate(() => S.form && S.form.mode);
+  await p.evaluate(() => [...document.querySelectorAll('#sheetIn .objl')].find(x => /Retrait vacances/.test(x.innerText)).click()); await p.waitForTimeout(300);
+  await p.evaluate(() => { S.form.montant = '150'; const b = [...document.querySelectorAll('#sheetIn button')].find(x => /ENREGISTRER/.test(x.textContent)); b.click(); }); await p.waitForTimeout(500);
+  R.apresSave = await p.evaluate(() => ({ mode: S.form && S.form.mode, txt: (document.querySelector('#sheetIn') || {}).innerText || '' }));
+  await p.evaluate(() => fermer()); await p.waitForTimeout(200); R.fin = await p.evaluate(() => ({ form: S.form, on: $('#sheet').classList.contains('on'), ro: S.retourObj || null }));
+  await ctx.close();
+  ok(R.apresX === 'objdetail', `✕ sur la fiche → retour au détail (${R.apresX})`);
+  ok(R.apresSave.mode === 'objdetail' && /150,00/.test(R.apresSave.txt), `après ENREGISTRER → détail à jour (${R.apresSave.mode})`);
+  ok(!R.fin.form && !R.fin.on && !R.fin.ro, `✕ du détail → tout est fermé (${JSON.stringify(R.fin)})`);
+  ok(R.lignes.length === 2 && R.lignes.every(t => /^obj-ligne:/.test(t)), `2 lignes touchables (${R.lignes.join(' | ')})`);
   ok(R.fiche.mode === 'edit' && /Retrait vacances/.test(R.fiche.lib || ''), `toucher « Retrait vacances » ouvre sa fiche (${JSON.stringify(R.fiche)})`);
   await b.close();
   console.log('VERDICT:', KO.length ? 'ÉCHEC' : 'OK');
