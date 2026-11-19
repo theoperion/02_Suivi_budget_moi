@@ -88,7 +88,7 @@ function donnees() {
       rev10: c10.rev, restant10: c10.restant, ep10: c10.ep, epN10: c10.epN, epR10: c10.epR, nd10: r2(c10.restant + c10.ep + c10.av), rev11: c11.rev,
       ticket: (acc.match(/REVENUS [^A-Z]*|ÉPARGNE (VERSÉE|RETIRÉE) [^A-Z]*|PRÊTS À DES PROCHES [^A-Z]*|RESTE [^A-Z]*/g) || []).map(s => s.trim()),
       bilanMoisEp: bm.c.epN, bilanAnneeEp: ba.ep, bilanAnneeRev: ba.rev, listeBilans: (lb.match(/OCTOBRE 2026[^€]*€[^€]*épargnés/) || [''])[0],
-      statsEp: (st.match(/MON ÉPARGNE [^«]*?PLACÉS( · [^R]*RETIRÉS)?/) || [''])[0],
+      statsEp: (st.match(/Dont [^.]*? placés en épargne( · [^.]*? retirés)?/) || [''])[0],
       decDep: r2(lA[11].dep), decAttendu: r2(lA[11].b.fix + lA[11].b.prevVar), taux: tauxHoraire().salaire
     };
   });
@@ -102,7 +102,7 @@ function donnees() {
     nonDepense: Math.abs(R.nd10 - (2000 - 250 - 500 - 40)) < 0.01, // le retrait n'est plus « non dépensé »
     ticket: R.ticket.some(s => /^REVENUS 2 000,00/.test(s)) && R.ticket.some(s => /^ÉPARGNE VERSÉE −200,00/.test(s)) && R.ticket.some(s => /^PRÊTS À DES PROCHES −200,00/.test(s)),
     bilans: R.bilanMoisEp === 200 && R.bilanAnneeEp === 200 && R.bilanAnneeRev === 2000 && /200 € épargnés/.test(R.listeBilans),
-    stats: /200 € PLACÉS · 100 € RETIRÉS|200 € PLACÉS$/.test(R.statsEp),
+    stats: /^Dont 200 € placés en épargne/.test(R.statsEp),
     decSansEpargne: Math.abs(R.decDep - R.decAttendu) < 0.01, // le Livret prévu en décembre n'est pas une dépense
     taux: R.taux === 2000
   };
