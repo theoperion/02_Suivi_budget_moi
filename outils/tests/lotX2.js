@@ -110,32 +110,32 @@ const FAITS = () => { const e = etatJeu(), f = e.f, g = id => e.succes.find(s =>
     await p.screenshot({ path: path.join(SHOTS, 'x2-defi-verrou.png') });
     await p.evaluate(() => retirerDefi()); await p.waitForTimeout(200); R.defDel = await p.evaluate(() => JSON.stringify(S.data.defis['2027-1'] || null));
     R.def70 = await essai('Loisirs', '70'); await ctx.close();
-    ok(/ne peut pas dépasser ton budget/.test(R.def150.err) && /80/.test(R.def150.d), `plafond 150 € > budget 100 € → refusé (${R.def150.err})`);
+    ok(/90.€ au plus/.test(R.def150.err) && /80/.test(R.def150.d), `plafond 150 € > budget 100 € → refusé (${R.def150.err})`);
     ok(/seulement baisser/.test(R.def90.err) && /80/.test(R.def90.d), `le 19, relever 80 → 90 € → refusé (${R.def90.err})`);
     ok(!R.defUI.del && R.defUI.chips.join() === 'Loisirs' && /verrouillé/.test(R.defUI.note), `le 19 : pas de bouton abandonner, un seul budget proposé (${R.defUI.chips.join()})`);
     ok(/80/.test(R.defDel), 'le 19 : abandon refusé');
     ok(R.def70.err === '' && /"montant":70/.test(R.def70.d), `le 19, baisser à 70 € → accepté (${R.def70.d})`); }
   { const defis = { '2027-1': { cat: 'Loisirs', montant: 80 } };
     const { p, ctx } = await page('2027-01-04T10:00:00+01:00', SAL, {}, null, defis);
-    R.libre = await p.evaluate(() => { ouvrirDefi(); S.form.montant = '95'; okDefi(); const a = JSON.stringify(S.data.defis['2027-1']); ouvrirDefi(); const del = !!document.querySelector('#sheetIn [data-act=defi-del]'); retirerDefi(); return { a, del, apres: JSON.stringify(S.data.defis['2027-1'] || null) }; });
+    R.libre = await p.evaluate(() => { ouvrirDefi(); S.form.montant = '90'; okDefi(); const a = JSON.stringify(S.data.defis['2027-1']); ouvrirDefi(); const del = !!document.querySelector('#sheetIn [data-act=defi-del]'); retirerDefi(); return { a, del, apres: JSON.stringify(S.data.defis['2027-1'] || null) }; });
     await ctx.close();
-    ok(/"montant":95/.test(R.libre.a) && R.libre.del && R.libre.apres === 'null', `le 4 : relever à 95 € et abandonner restent possibles (${JSON.stringify(R.libre)})`); }
+    ok(/"montant":90/.test(R.libre.a) && R.libre.del && R.libre.apres === 'null', `le 4 : relever à 90 € (max 90 % du budget) et abandonner restent possibles (${JSON.stringify(R.libre)})`); }
   // 7. « Ne cassent pas les séries » : essentiels seulement, changement à partir d'aujourd'hui, ancienne valeur compatible
-  { const J = SAL.concat(serie('2026-11-02', '2027-01-17', 4, 'Courses', 40, 100), [L(330, '2026-12-10', 'Restaurants', 25)]);
+  { const J = SAL.concat(serie('2026-11-02', '2027-01-17', 4, 'Courses', 40, 100), [L(330, '2026-11-17', 'Restaurants', 25)]);
     const { p, ctx, PRF } = await page(T, J, { jeu: { exclus: ['Courses', 'Restaurants'] } });
-    R.ex0 = await p.evaluate(() => ({ d10: new Map(joursJeu()).get('2026-12-10'), n: joursJeu().filter(x => x[1] === true).length }));
+    R.ex0 = await p.evaluate(() => ({ d10: new Map(joursJeu()).get('2026-11-17'), n: joursJeu().filter(x => x[1] === true).length }));
     await p.evaluate(() => { const el = document.querySelector('[data-act=exclus]'); if (el) el.click(); else { S.form = { mode: 'exclus', ex: exclusSerie().slice(), retour: null }; rendreForm(); ouvrirSheet(); } }); await p.waitForTimeout(300);
     R.exChips = await p.evaluate(() => [...document.querySelectorAll('#sheetIn [data-act=exclus-tog]')].map(x => x.dataset.cat));
     await p.screenshot({ path: path.join(SHOTS, 'x2-exclus.png') });
     await p.evaluate(() => { const b = [...document.querySelectorAll('#sheetIn [data-act=exclus-tog]')].find(x => x.dataset.cat === 'Courses'); b.click(); }); await p.waitForTimeout(150);
-    await p.evaluate(() => { const b = [...document.querySelectorAll('#sheetIn [data-act=exclus-tog]')].find(x => x.dataset.cat === 'Restaurants'); b.click(); }); await p.waitForTimeout(150);
+    await p.evaluate(() => { const b = [...document.querySelectorAll('#sheetIn [data-act=exclus-tog]')].find(x => x.dataset.cat === 'Restaurants'); if (b) b.click(); }); await p.waitForTimeout(150);
     await p.click('#sheetIn [data-act=exclus-ok]'); await p.waitForTimeout(500);
-    R.ex1 = await p.evaluate(() => ({ d10: new Map(joursJeu()).get('2026-12-10'), n: joursJeu().filter(x => x[1] === true).length, auj: exclusSerie(), hier: exclusSerie('2027-01-18'), loisirs: (() => { S.form = { mode: 'exclus', ex: [], retour: null }; rendreForm(); const b = document.querySelector('#sheetIn [data-cat=Loisirs]'); return !!b; })() }));
+    R.ex1 = await p.evaluate(() => ({ d10: new Map(joursJeu()).get('2026-11-17'), n: joursJeu().filter(x => x[1] === true).length, auj: exclusSerie(), hier: exclusSerie('2027-01-18'), loisirs: (() => { S.form = { mode: 'exclus', ex: [], retour: null }; rendreForm(); const b = document.querySelector('#sheetIn [data-cat=Loisirs]'); return !!b; })() }));
     R.exPref = PRF.jeu; await ctx.close();
-    ok(R.ex0.d10 === true, `ancienne valeur { exclus: [Courses, Restaurants] } lue comme avant : le 10/12 (resto) gagné (${R.ex0.d10})`);
-    ok(R.exChips.includes('Courses') && R.exChips.includes('Pharmacie') && R.exChips.includes('Restaurants') && !R.exChips.includes('Loisirs') && !R.exChips.includes('Loyer'), `liste proposée : essentiels + déjà coché (${R.exChips.join(', ')})`);
+    ok(R.ex0.d10 === true, `ancienne valeur { exclus: [Courses, Restaurants] } lue comme avant jusqu'au 18/11/2026 : le 17/11 (resto) gagné (${R.ex0.d10})`);
+    ok(R.exChips.includes('Courses') && R.exChips.includes('Pharmacie') && !R.exChips.includes('Restaurants') && !R.exChips.includes('Loisirs') && !R.exChips.includes('Loyer'), `liste proposée : essentiels seulement (Restaurants plus proposé depuis le 19/11) (${R.exChips.join(', ')})`);
     ok(R.ex1.d10 === true && R.ex1.n === R.ex0.n, `décocher Courses et Restaurants le 19/01 → le passé ne bouge pas (${R.ex0.n} → ${R.ex1.n} jours)`);
-    ok(R.ex1.auj.length === 0 && R.ex1.hier.join() === 'Courses,Restaurants' && !R.ex1.loisirs, `liste du jour vide, celle d'hier gardée ; Loisirs jamais proposé (${JSON.stringify(R.exPref)})`); }
+    ok(R.ex1.auj.length === 0 && R.ex1.hier.join() === 'Courses' && !R.ex1.loisirs, `liste du jour vide, celle d'hier gardée ; Loisirs jamais proposé (${JSON.stringify(R.exPref)})`); }
   // 8. Restes mis de côté : l'XP compte par mois, pas par ligne
   { const J = SAL.concat(serie('2026-11-02', '2027-01-17', 5, 'Courses', 40, 100), [L(340, '2026-12-28', 'Livret A', 50, 'Reste mis de côté'), L(341, '2026-12-29', 'Livret A', 50, 'Reste mis de côté'), L(342, '2026-12-30', 'Livret A', 50, 'Reste mis de côté')]);
     const { p, ctx } = await page(T, J); R.cote = await p.evaluate(FAITS); await ctx.close();
