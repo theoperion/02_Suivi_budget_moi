@@ -7,7 +7,7 @@ const DIR = process.argv[2], SHOTS = process.argv[3] || path.join(__dirname, 'x2
 fs.mkdirSync(SHOTS, { recursive: true });
 const html = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
 const API = (html.match(/const API_DEFAUT = '([^']+)'/) || [])[1];
-const PRE = (html.match(/const PREFIXE = '([^']+)'/) || [])[1] || 'jauge.';
+const PRE = (html.match(/localStorage\.getItem\('([^']+)' \+ k\)/) || [])[1] || 'jauge.'; // préfixe de stockage (jauge., jauge-clem., jauge-devlin.)
 const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const CATS = [
   { ligne: 10, nom: 'Salaire', groupe: 'Revenus', type: 'Revenu', budget: null, suivi: '' },
@@ -73,10 +73,10 @@ const FAITS = () => { const e = etatJeu(), f = e.f, g = id => e.succes.find(s =>
     const { p, ctx } = await page(T, J, { jeu: { exclus: ['Courses'] } }); const f = await p.evaluate(FAITS);
     const dec = f.M.find(x => x[0] === 12); R['retrait_' + cat] = dec; await ctx.close();
     ok(dec && dec[1] === false && dec[2] < 10, `retrait 1 500 € (${cat}) → décembre pas vert, pas 10 % non dépensé (${JSON.stringify(dec)})`); }
-  // 4. Épargne nette : verser 1 000 € puis les retirer → pas de « Tirelire pleine » ; verser seulement → oui
+  // 4. Épargne nette (9.33 : plus haut niveau atteint) : verser 1 000 € puis les retirer le même mois → pas de « Tirelire pleine » ; verser seulement → oui
   { const base = SAL.concat(serie('2026-11-02', '2027-01-17', 5, 'Courses', 40, 100));
-    const a = await page(T, base.concat([L(310, '2026-11-20', 'Livret A', 1000), L(311, '2026-12-05', 'Retrait livret', 1000)])); R.epNet = await a.p.evaluate(FAITS); await a.ctx.close();
-    const a2 = await page(T, base.concat([L(310, '2026-11-20', 'Livret A', 1000), L(311, '2026-12-05', "Retraits d'épargne (Livret A)", 1000)])); R.epNet2 = await a2.p.evaluate(FAITS); await a2.ctx.close();
+    const a = await page(T, base.concat([L(310, '2026-11-20', 'Livret A', 1000), L(311, '2026-11-25', 'Retrait livret', 1000)])); R.epNet = await a.p.evaluate(FAITS); await a.ctx.close();
+    const a2 = await page(T, base.concat([L(310, '2026-11-20', 'Livret A', 1000), L(311, '2026-11-25', "Retraits d'épargne (Livret A)", 1000)])); R.epNet2 = await a2.p.evaluate(FAITS); await a2.ctx.close();
     const c = await page(T, base.concat([L(310, '2026-11-20', 'Livret A', 1000)])); R.epVerse = await c.p.evaluate(FAITS); await c.ctx.close();
     ok(!R.epNet.cote1000 && R.epNet.epargne === 0 && !R.epNet2.cote1000 && R.epNet2.epargne === 0, `versé 1 000 puis retiré 1 000 → épargne nette 0, pas de Tirelire pleine (${R.epNet.epargne} / ${R.epNet2.epargne})`);
     ok(R.epVerse.cote1000 && R.epVerse.epargne === 1000, `versé 1 000 → Tirelire pleine (${R.epVerse.epargne})`); }

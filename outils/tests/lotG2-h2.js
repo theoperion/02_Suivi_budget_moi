@@ -16,7 +16,7 @@ const srv = {
     // novembre : 4 petits achats (3 + 12 + 12 + 10 = 37 €) ; 30 € pile et 40 € ne comptent pas
     J(12, 'Novembre', 'Café', 'Courses', 3, '2026-11-02'), J(13, 'Novembre', 'Ciné', 'Loisirs', 12, '2026-11-08'), J(14, 'Novembre', 'Cadeau', 'Courses', 30, '2026-11-03'),
     J(15, 'Novembre', 'Bowling', 'Loisirs', 12, '2026-11-16'), J(16, 'Novembre', 'Courses', 'Courses', 40, '2026-11-17'), J(17, 'Novembre', 'Appli', 'Divers', 10, '2026-11-18')],
-  prefs: {}, calls: [], adds: [], updates: [], prefsSet: []
+  prefs: { jeu: { jd: [['2026-11-07', '2026-11-15']], jdMig: 1 } }, calls: [], adds: [], updates: [], prefsSet: [] // jd fixé : même jeu sur toutes les copies
 };
 function donnees() {
   return { categories: [

@@ -53,8 +53,9 @@ async function cas(b, nom, date, J, id, y, prefs, ech, apres) {
   const ETATJ = `(() => { const e = etatJeu(), g = id => e.succes.find(s => s.id === id).ok; return { jd: JSON.stringify(joursAvecDep()), serie: e.f.serieJours, joursSans: e.f.joursSans, j3: g('jours-3'), j7: g('jours-7'), j14: g('jours-14'), nov: e.f.novOk, semOk: e.f.semOk, ev: e.f.evOk.map(x => x.cle).join(','), serieAccueil: joursSansDepense(), xp: e.xp, mission: (etatMission(2026, 11) || {}).id + ' ' + (etatMission(2026, 11) || {}).ok }; })()`;
   // A : seulement des salaires ; on regarde le 20 novembre 2026 (sans période / avec la période par défaut)
   const J = journal('2026-11-01', '2026-11-20', () => false);
+  // La période du voyage est fixée dans les données (et pas prise par défaut) : le test vaut aussi pour les copies sans voyage (Clément).
   const sem = { '2026-11-09': { cat: 'Courses', montant: 50 }, '2026-11-02': { cat: 'Courses', montant: 50 } };
-  for (const [nom, prefs] of [['sansPeriode', { semaines: sem, jeu: { anticipe: true, jd: [] } }], ['parDefaut', { semaines: sem }]]) {
+  for (const [nom, prefs] of [['sansPeriode', { semaines: sem, jeu: { anticipe: true, jd: [] } }], ['parDefaut', { semaines: sem, jeu: { jd: [['2026-11-07', '2026-11-15']], jdMig: 1 } }]]) {
     const { p, ctx, errs, PRF } = await page(b, '2026-11-20T12:00:00', J, prefs, { nivVu: 1, xpVu: 0, echelle100: true });
     R[nom] = await p.evaluate(ETATJ); R[nom].prefEcrite = JSON.stringify((PRF.jeu || {}).jd);
     if (nom === 'parDefaut') {
@@ -67,7 +68,7 @@ async function cas(b, nom, date, J, id, y, prefs, ech, apres) {
     ERR.push(...errs); await ctx.close(); }
   // B : Novembre sobre gagné uniquement grâce aux jours 7 → 16 → perdu avec la période
   const J2 = journal('2026-11-01', '2026-12-01', k => !(k >= '2026-11-07' && k <= '2026-11-16'));
-  for (const [nom, prefs] of [['novSans', { jeu: { anticipe: true, jd: [] } }], ['novAvec', {}]]) {
+  for (const [nom, prefs] of [['novSans', { jeu: { anticipe: true, jd: [] } }], ['novAvec', { jeu: { jd: [['2026-11-07', '2026-11-15']], jdMig: 1 } }]]) {
     const { p, ctx, errs } = await page(b, '2026-12-01T12:00:00', J2, prefs, { nivVu: 1, xpVu: 0, echelle100: true });
     R[nom] = await p.evaluate(ETATJ); ERR.push(...errs); await ctx.close(); }
   // C : indices — chaque succès, éclair et saison en a un ; vidéothèque et grille

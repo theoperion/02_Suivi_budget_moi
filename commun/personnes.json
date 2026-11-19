@@ -1,5 +1,5 @@
 {
-  "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle. « jd_defaut » : périodes de jours avec dépenses non saisies proposées au départ (le voyage du 7 au 15 novembre 2026 : Devlin en était, pas Clément).",
+  "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle. « jd_defaut » : périodes de jours avec dépenses non saisies proposées au départ (le voyage du 7 au 15 novembre 2026 : Devlin en était, pas Clément). « jd_retires » : périodes à retirer une seule fois de la préférence déjà enregistrée (le voyage, posé par erreur chez Clément par une ancienne version).",
   "clement": {
     "depot": "05_Suivi_budget_Clement",
     "titre": "Budget · Clément",
@@ -10,6 +10,7 @@
     "prefixe_cache": "jauge-clement-v",
     "acces_anticipe": false,
     "jd_defaut": [],
+    "jd_retires": [["2026-11-07", "2026-11-15"]],
     "nom_script": "du budget de Clément",
     "id_fichier": "1-KW7FXImyYXkgsRFlB0O894FG9E0luqf7KD9-eFdsCs",
     "commentaire_fichier": "fichier budget de Clément",
@@ -31,6 +32,7 @@
         "2026-11-15"
       ]
     ],
+    "jd_retires": [],
     "nom_script": "du budget de Devlin",
     "id_fichier": "1TFXRVMLuVv_NauUH7VyJ4Pgd-Us5JuD3_3lzN_ojfvQ",
     "commentaire_fichier": "fichier budget de Devlin",
