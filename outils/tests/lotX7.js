@@ -64,6 +64,12 @@ const VU = { nivVu: 1, xpVu: 0, echelle100: true, regles933: true }; // joueur d
   await p.evaluate(() => [...document.querySelectorAll('#sheetIn .objl')].find(x => /Retrait vacances/.test(x.innerText)).click()); await p.waitForTimeout(300);
   await p.evaluate(() => { S.form.montant = '150'; const b = [...document.querySelectorAll('#sheetIn button')].find(x => /ENREGISTRER/.test(x.textContent)); b.click(); }); await p.waitForTimeout(500);
   R.apresSave = await p.evaluate(() => ({ mode: S.form && S.form.mode, txt: (document.querySelector('#sheetIn') || {}).innerText || '' }));
+  // SUPPRIMER depuis le détail → la ligne disparaît et le total est recalculé
+  await p.evaluate(() => [...document.querySelectorAll('#sheetIn .objl')].find(x => /Retrait vacances/.test(x.innerText)).click()); await p.waitForTimeout(300);
+  await p.evaluate(async () => { for (let i = 0; i < 2; i++) { const b = [...document.querySelectorAll('#sheetIn button')].find(x => /SUPPRIMER/.test(x.textContent)); if (!b) break; b.click(); await new Promise(r => setTimeout(r, 300)); } });
+  await p.waitForTimeout(400);
+  R.apresDel = await p.evaluate(() => ({ mode: S.form && S.form.mode, txt: (document.querySelector('#sheetIn') || {}).innerText || '' }));
+  ok(R.apresDel.mode === 'objdetail' && !/Retrait vacances/.test(R.apresDel.txt) && /ÉPARGNE NETTE\s*300,00/.test(R.apresDel.txt), `après SUPPRIMER → ligne partie, épargne nette 300 (${R.apresDel.txt.replace(/\s+/g, ' ').slice(-60)})`);
   await p.evaluate(() => fermer()); await p.waitForTimeout(200); R.fin = await p.evaluate(() => ({ form: S.form, on: $('#sheet').classList.contains('on'), ro: S.retourObj || null }));
   await ctx.close();
   ok(R.apresX === 'objdetail', `✕ sur la fiche → retour au détail (${R.apresX})`);

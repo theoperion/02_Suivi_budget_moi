@@ -2180,7 +2180,7 @@ function rendreModeEmploi() {
     ${o ? `<div style="margin-top:2px">${L.map(ligneTuto).join('')}</div>` : ''}`; }).join('')}
     <button class="go" data-act="${f.retour ? 'go:' + f.retour : 'close'}" style="margin-top:20px">COMPRIS</button>`;
 }
-function fermer() { const ro = S.retourObj; S.retourObj = null; if (ro) { S.form = { mode: 'objdetail', y: ro }; rendreForm(); return; } // 9.36 : fiche ouverte depuis le détail de l'objectif → on y revient
+function fermer() { const ro = S.retourObj; S.retourObj = null; if (ro) { S.form = { mode: 'objdetail', y: ro }; rendreForm(); setTimeout(() => { if (S.form && S.form.mode === 'objdetail') rendreForm(); }, 0); return; } // 9.36 : fiche ouverte depuis le détail de l'objectif → on y revient
   $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
 // (L4) Montant affiché avec espace des milliers (« 1 250,5 € ») : la valeur saisie (f.montant) ne change pas
 const montantAff = s => { const [a, d] = String(s || '0').split(','); return a.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + (d != null ? ',' + d : '') + '\u00a0€'; };
