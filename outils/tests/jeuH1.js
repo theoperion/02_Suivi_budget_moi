@@ -65,8 +65,8 @@ const nettoie = p => p.evaluate(() => { try { fermer(); } catch (e) {} document.
       const mis = []; for (let m = 1; m <= 12; m++) { const x = missionDe(2027, m); if (x && x.cat) mis.push(x.cat); }
       // catégorie « Sans alerte » ajoutée à la volée
       const CA = cats(); const cantine = { nom: 'Cantine pro', groupe: 'Vie courante', type: 'Dépense', budget: 80, suivi: 'Sans alerte' };
-      return { bd, ps, E, panier: plan.filter(x => x === 'panier').length, nplan: plan.length, pocheCourses: f({ cat: 'Courses' }), pocheResto: f({ cat: 'Restaurants' }), folieCourses: folie({ cat: 'Courses' }), mis, chips: (() => { ouvrirDefi(); const t = [...document.querySelectorAll('#sheetIn [data-act=defi-cat]')].map(x => x.dataset.cat); fermer(); return t; })() }; });
-    ok(!r.bd.includes('Courses') && !r.chips.includes('Courses'), 'défi du mois : pas les courses', r.chips);
+      return { bd, ps, E, panier: plan.filter(x => x === 'panier').length, nplan: plan.length, pocheCourses: f({ cat: 'Courses' }), pocheResto: f({ cat: 'Restaurants' }), folieCourses: folie({ cat: 'Courses' }), mis, chips: (() => { const n0 = now; now = new Date(n0.getFullYear(), n0.getMonth(), 3, 12); ouvrirDefi(); const t = [...document.querySelectorAll('#sheetIn [data-act=defi-cat]')].map(x => x.dataset.cat); fermer(); now = n0; return t; })() }; }); // (9.33) un défi se lance du 1er au 5 : on regarde la liste un 3 du mois
+    ok(!r.bd.includes('Courses') && r.chips.length > 0 && !r.chips.includes('Courses'), 'défi du mois : pas les courses', r.chips);
     ok(r.ps && r.ps.cat !== 'Courses', 'défi de la semaine : pas les courses', r.ps);
     ok(!r.mis.includes('Courses'), 'mission coup de frein : pas les courses', r.mis);
     ok(r.panier === 0 && !r.pocheCourses && r.pocheResto && !r.folieCourses, 'événements à plafond : essentiels ignorés, Petit panier plus tiré', r);

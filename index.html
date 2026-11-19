@@ -1332,6 +1332,8 @@ function rendreExclus() {
 // Jours avec dépenses NON saisies (voyage, dépenses partagées) : comptés comme jours AVEC dépense pour tout le jeu.
 // Périodes [début, fin] (iso, inclus) dans la préférence « jeu » (synchronisée) ; valeur initiale : le voyage du 7 au 15 novembre 2026.
 const JD_DEFAUT = [['2026-11-07', '2026-11-15']];
+// (9.33) Périodes à retirer une seule fois de la préférence (posées par erreur par JD_DEFAUT dans une copie) : remplacé par le générateur.
+const JD_RETIRES = [];
 function joursAvecDep() {
   const p = getPref('jeu', null), L = p && Array.isArray(p.jd) ? p.jd : JD_DEFAUT;
   return L.filter(x => Array.isArray(x) && /^\d{4}-\d\d-\d\d$/.test(x[0]) && /^\d{4}-\d\d-\d\d$/.test(x[1]) && x[0] <= x[1]);
@@ -1348,7 +1350,8 @@ function rendreJD() {
     <div class="ferr" id="ferr"></div><button class="go" data-act="jd-add">AJOUTER</button>`;
 }
 function enregistrerJD(L) { majPrefJeu({ jd: L }); S._jeu = null; S._jours = null; memo = new Map(); rendreJD(); rendre(true); }
-function recordSans() { const j = joursSansDepense(), r = Math.max(LS.get('recordSans', 0), j); if (r !== LS.get('recordSans', 0)) LS.set('recordSans', r); return r; }
+// (9.33) Record calculé depuis les lignes (l'ancien record gardé sur le téléphone avait été gonflé par l'ancien calcul)
+function recordSans() { return Math.max(joursSansDepense(), maxSerie(joursJeu().map(x => x[1]))); }
 // ---- Avances : qui te doit combien (tous mois confondus) ----
 const personne = lib => String(lib || '').split(' · ')[0].trim();
 function avances() {
@@ -2134,7 +2137,7 @@ function sectionsModeEmploi() {
     ['progres', '🏆', 'PROGRÈS ET DÉFIS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection. Pour rendre le budget un peu plus amusant.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
       ['🎯', 'DÉFIS', "Stats › Progrès › Défis : tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail juste en dessous)."],
-      ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>jamais au-dessus du budget</b>. Jusqu'au 5 du mois tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner). Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
+      ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>jamais au-dessus du budget</b>. Il se lance <b>du 1er au 5 du mois</b> ; jusqu'au 5 tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner), et un défi qui n'a pas été lancé attend le mois suivant. Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
       ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
       ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
       ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
@@ -2534,7 +2537,12 @@ function renommerLocal(ancien, nouveau) {
   ['ordre', 'pins'].forEach(k => LS.set(k, [...new Set(LS.get(k, []).map(n => n === ancien ? nouveau : n))]));
   const u = LS.get('usage', {}); if (u[ancien]) { u[nouveau] = (u[nouveau] || 0) + u[ancien]; delete u[ancien]; LS.set('usage', u); }
   Object.values(S.data.defis || {}).forEach(d => { if (d && d.cat === ancien) d.cat = nouveau; });
-  const j = getPref('jeu', null); if (j && Array.isArray(j.exclus) && j.exclus.includes(ancien)) setPref('jeu', Object.assign({}, j, { exclus: [...new Set(j.exclus.map(n => n === ancien ? nouveau : n))] }));
+  { const j = getPref('jeu', null), ren = L => [...new Set(L.map(n => n === ancien ? nouveau : n))];
+    const dansH = j && Array.isArray(j.exH) && j.exH.some(x => Array.isArray(x) && Array.isArray(x[1]) && x[1].includes(ancien));
+    if (j && ((Array.isArray(j.exclus) && j.exclus.includes(ancien)) || dansH)) { const maj = {}; // listes actuelle et historique (exH)
+      if (Array.isArray(j.exclus)) maj.exclus = ren(j.exclus);
+      if (Array.isArray(j.exH)) maj.exH = j.exH.map(x => Array.isArray(x) && Array.isArray(x[1]) ? [x[0], ren(x[1])] : x);
+      setPref('jeu', Object.assign({}, j, maj)); } }
 }
 function enregistrerCat() {
   const f = S.form, nom = String(f.nom || '').trim();
@@ -3013,6 +3021,8 @@ function defiSuggere(cat) { const c = catMap()[cat]; return c && c.budget > 0 ? 
 // ni le relever, ni changer de budget, ni abandonner (sinon on échapperait à un défi en passe d'être raté).
 const DEFI_JOUR_LIBRE = 5;
 const defiVerrouille = (y, m) => statut(y, m) !== 'cours' || now.getDate() > DEFI_JOUR_LIBRE;
+// (9.33) Un NOUVEAU défi ne se lance que du 1er au 5 du mois (sinon on le lancerait le 28, déjà gagné d'avance)
+const MSG_DEFI_FERME = 'Prochain défi à lancer du 1er au ' + DEFI_JOUR_LIBRE + ' du mois';
 function ouvrirDefi() {
   const y = now.getFullYear(), m = now.getMonth() + 1, d = defiDe(y, m);
   S.form = { mode: 'defi', y, m, cat: d ? d.cat : null, montant: d ? String(d.montant).replace('.', ',') : '', touche: !!d, arm: false, existe: !!d };
@@ -3020,11 +3030,15 @@ function ouvrirDefi() {
 }
 function rendreDefi() {
   const f = S.form, c = f.cat ? catMap()[f.cat] : null, d0 = f.existe ? defiDe(f.y, f.m) : null, verrou = !!d0 && defiVerrouille(f.y, f.m);
+  if (!d0 && defiVerrouille(f.y, f.m)) { $('#sheetIn').innerHTML = `<div class="grab"></div>
+    <div class="shead"><span>DÉFI ${deMois(f.m)}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
+    <div class="note" style="display:block;margin-top:8px"><b>${MSG_DEFI_FERME}.</b> Un défi se choisit en début de mois, pour tout le mois : rendez-vous le 1er ${MOIS[f.m % 12].toLowerCase()}.</div>
+    <button class="go" data-act="close">OK</button>`; return; }
   const moy = f.cat ? (() => { let t = 0, n = 0; for (let k = 1; k <= 6; k++) { const z = f.y * 12 + f.m - 1 - k, yy = Math.floor(z / 12), mm = (z % 12) + 1; if (moisActif(yy, mm)) { t += depenseMois(f.cat, yy, mm); n++; } } return n ? t / n : null; })() : null;
   $('#sheetIn').innerHTML = `<div class="grab"></div>
     <div class="shead"><span>DÉFI ${deMois(f.m)}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     ${verrou ? '' : `<div class="note" style="margin-top:4px">Choisis un budget et un plafond plus serré que d'habitude pour ce mois-ci. Verdict le 1er.</div>`}
-    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Après le ${DEFI_JOUR_LIBRE} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au plus égal à ton budget. Jusqu'au ${DEFI_JOUR_LIBRE} du mois tu peux tout changer ; ensuite, seulement le baisser.</div>`}
+    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Après le ${DEFI_JOUR_LIBRE} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au plus égal à ton budget. Un défi se lance du 1er au ${DEFI_JOUR_LIBRE} du mois ; jusque-là tu peux tout changer ; ensuite, seulement le baisser.</div>`}
     <div class="chips" style="margin-top:12px">${budgetsDefiables().filter(b => !verrou || b.nom === d0.cat).map(b => `<button class="chip ${f.cat === b.nom ? 'on' : ''}" data-act="defi-cat" data-cat="${esc(b.nom)}">${esc(b.nom)}</button>`).join('')}</div>
     ${c ? `<div class="note">Budget ${e0(c.budget)}/mois${moy != null ? ` · tu dépenses en moyenne ${e0(moy)}/mois (6 derniers mois)` : ''} · déjà ${e0(depenseMois(f.cat, f.y, f.m))} ce mois-ci</div>
     <input class="libin" data-f="montant" inputmode="decimal" placeholder="${verrou ? 'Plafond en €' : 'Plafond du défi en €'}" value="${esc(f.montant)}" style="margin-top:10px">` : ''}
@@ -3036,6 +3050,7 @@ function rendreDefi() {
 }
 function okDefi() {
   const f = S.form, v = numTxt(f.montant); // « 1 000 » = 1000 € (E3)
+  if (!defiDe(f.y, f.m) && defiVerrouille(f.y, f.m)) { const z = $('#ferr'); if (z) z.textContent = MSG_DEFI_FERME; return; } // nouveau défi : du 1er au 5 seulement
   if (!f.cat) { $('#ferr').textContent = 'Choisis un budget'; return; }
   if (!(v >= 0)) { $('#ferr').textContent = 'Tape un plafond'; return; }
   const k = cleMois(f.y, f.m), m = Math.round(v * 100) / 100, c = catMap()[f.cat], d0 = defiDe(f.y, f.m);
@@ -3162,6 +3177,9 @@ function joursJeu() { // [jour iso, sans dépense ?] du début du jeu à hier
 const JOURS_PREUVE = 7;
 // (lot L2) Au moins une dépense saisie entre deux dates (incluses) : sans elle, un plafond « tenu » ne prouve rien.
 const saisiEntre = (a, b) => S.journal.some(e => estDepenseSaisie(e) && e.date >= a && e.date <= b);
+// (9.33) Preuve d'usage d'une période [a, b] (événement, saison, semaine) : même règle que les jours sans dépense,
+// une dépense saisie entre a − 7 j et b + 7 j. 'ok' = prouvée ; 'attente' = pas encore, mais b + 7 j n'est pas passé ; 'non' = jamais saisie.
+function preuvePeriode(a, b) { if (saisiEntre(addJ(a, -JOURS_PREUVE), addJ(b, JOURS_PREUVE))) return 'ok'; return addJ(b, JOURS_PREUVE) >= auj() ? 'attente' : 'non'; }
 const estDepenseSaisie = e => { const c = catMap()[e.cat]; return !e.deleted && !!e.date && e.montant > 0 && !!c && c.type === 'Dépense'; };
 function joursJeuCalc() {
   const exA = exclusParDate(), datees = S.journal.filter(e => !e.deleted && e.date && e.montant > 0);
@@ -3195,7 +3213,10 @@ function epNetParMois() {
   S._epn = { k: memo, q: S.journal.length, v }; return v;
 }
 const epNetJeu = (y, m) => epNetParMois()[ymNum(y, m)] || 0;
-function epargneNetteJeu() { const v = epNetParMois(), d = ymNum(JEU_DEBUT.y, JEU_DEBUT.m); return Object.keys(v).filter(k => +k >= d && +k <= nowYM()).reduce((t, k) => t + v[k], 0); }
+// (9.33) Succès d'épargne cumulée et mascotte : le PLUS HAUT niveau atteint par l'épargne nette cumulée, mois par mois depuis les lignes.
+// Utiliser son épargne plus tard ne retire rien ; verser puis retirer le même mois ne donne rien (net du mois = 0).
+function epargneNetteJeu() { const v = epNetParMois(), d = ymNum(JEU_DEBUT.y, JEU_DEBUT.m); let t = 0, max = 0;
+  Object.keys(v).map(Number).filter(k => k >= d && k <= nowYM()).sort((a, b) => a - b).forEach(k => { t += v[k]; if (t > max) max = t; }); return max; }
 function faitsJeu() {
   if (S._jeu && S._jeu.k === memo && S._jeu.q === S.journal.length) return S._jeu.v;
   const M = moisJeu().map(([y, m]) => {
@@ -3401,11 +3422,19 @@ function annoncerJeu() {
   const e = etatJeu();
   // première fois : on mémorise sans rien annoncer
   try { nettoyerVitrine(); verifierCosmetiques(); } catch (err) {}
-  if (LS.get('nivVu', null) == null) { journaliserXP(e); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('xpVu', e.xp); LS.set('cosmVus', tousCosm().filter(o => debloque(o, e.niv)).map(o => o.t + ':' + o.id)); nouveautes(e); LS.set('echelle100', true); return; }
+  if (LS.get('nivVu', null) == null) { journaliserXP(e); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('xpVu', e.xp); LS.set('cosmVus', tousCosm().filter(o => debloque(o, e.niv)).map(o => o.t + ':' + o.id)); nouveautes(e); LS.set('echelle100', true); LS.set('regles933', true); return; }
   if (!LS.get('echelle100', false)) { // 9.6 : une seule fois après le passage à 100 niveaux (le niveau baisse, l'XP ne bouge pas)
-    LS.set('echelle100', true); journaliserXP(e); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('prestVu', e.prest); LS.set('xpVu', e.xp);
+    LS.set('echelle100', true); LS.set('regles933', true); journaliserXP(e, true); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('prestVu', e.prest); LS.set('xpVu', e.xp);
     const n = nouveautes(e); if (n.length) LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
     carteGains('NOUVELLE ÉCHELLE : 100 NIVEAUX', ['Ton XP est conservée (' + e.xp + ' XP), ton niveau est recalculé : niveau ' + e.niv + (e.rang ? ' · rang ' + e.rang[1] : '') + ' sur 100', '🏅 Un rang tous les 10 niveaux, 20 titres, et chaque saison se rejoue tous les ans'], [],
+      () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; rendre(); scrollTo(0, 0); }, 12000);
+    return; }
+  if (!LS.get('regles933', false)) { // 9.33 : une seule fois, l'XP est recalculée selon les nouvelles règles (ce n'est pas une ligne corrigée)
+    const xa = LS.get('xpVu', e.xp), dx = e.xp - xa;
+    LS.set('regles933', true); journaliserXP(e, true); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('prestVu', e.prest); LS.set('xpVu', e.xp);
+    const n = nouveautes(e); if (n.length) LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
+    if (dx) carteGains('NOUVELLES RÈGLES DU JEU', ['Ton XP a été recalculée (' + (dx < 0 ? '−' : '+') + Math.abs(dx) + ' XP) : niveau ' + e.niv,
+      'Un jour sans dépense compte si tu saisis tes dépenses ; les envies rapportent seulement une fois mûres ; 1 reste mis de côté par mois.'], [],
       () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; rendre(); scrollTo(0, 0); }, 12000);
     return; }
   const ch = journaliserXP(e), dm = defisMoisChange(e);
@@ -3481,6 +3510,8 @@ function detailXP(e) {
 }
 // (9.30) Journal d'XP : pour un jour sans dépense gagné, préciser la journée concernée (la veille de l'inscription)
 function libXPLog(x) {
+  if (x.r) return (x.k.slice(2) === 'Jours sans dépense courante' ? 'Jours sans dépense' : libXP(x.k)) + ' · recalcul (nouvelles règles du jeu)'; // 9.33
+  if (x.p && x.k.slice(2) === 'Jours sans dépense courante') { const n = Math.max(1, Math.round(x.v / 5)); return n + ' jour' + (n > 1 ? 's' : '') + ' sans dépense validé' + (n > 1 ? 's' : '') + ' grâce à ta saisie'; }
   if (x.k.slice(2) === 'Jours sans dépense courante' && x.v > 0 && x.v <= 5) { const d = addJ(x.j, -1); return 'Journée du ' + (+d.slice(8)) + ' ' + MC[+d.slice(5, 7) - 1] + ' sans dépense courante'; }
   if (x.k.slice(2) === 'Jours sans dépense courante') return x.v > 0 ? 'Jours terminés sans dépense courante' : 'Jour sans dépense annulé (dépense ajoutée ou corrigée)';
   return libXP(x.k);
@@ -3490,12 +3521,19 @@ function libXP(k) {
   return k.slice(2);
 }
 const XP_LOG_MAX = 1500; // lot H : historique complet (avant : 100 lignes, les plus anciennes disparaissaient)
-function journaliserXP(e) {
+// regles : recalcul unique dû aux nouvelles règles (9.33), noté comme tel et pas comme une ligne corrigée
+function journaliserXP(e, regles) {
   const avant = LS.get('xpDetail', null), apres = detailXP(e); LS.set('xpDetail', apres);
+  const J = e.f.J || [], vu = LS.get('jxVu', null); LS.set('jxVu', J.length ? J[J.length - 1][0] : ''); // dernier jour terminé déjà vu
   if (!avant) return []; // premier passage : on pose juste la référence
   const L = LS.get('xpLog', []), d = new Date(), h = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-  const ch = [];
-  new Set(Object.keys(avant).concat(Object.keys(apres))).forEach(k => { const v = (apres[k] || 0) - (avant[k] || 0); if (v) { L.unshift({ j: auj(), h, k, v }); ch.push({ k, v }); } });
+  const ch = [], kJ = 'r:Jours sans dépense courante', rJ = e.rec.find(x => x[0] === 'Jours sans dépense courante'), uJ = rJ ? rJ[2] : 5;
+  new Set(Object.keys(avant).concat(Object.keys(apres))).forEach(k => { const v = (apres[k] || 0) - (avant[k] || 0); if (!v) return; ch.push({ k, v });
+    if (regles) { L.unshift({ j: auj(), h, k, v, r: 1 }); return; }
+    if (k === kJ && v > 0) { // jours nouvellement terminés (« Journée du … ») / jours en attente validés plus tard par une saisie
+      const neufs = Math.min(v, J.filter(x => x[1] === true && x[0] > (vu || addJ(auj(), -2))).length * uJ), tard = v - neufs;
+      if (tard > 0) { if (neufs > 0) L.unshift({ j: auj(), h, k, v: neufs }); L.unshift({ j: auj(), h, k, v: tard, p: 1 }); return; } }
+    L.unshift({ j: auj(), h, k, v }); });
   if (ch.length) LS.set('xpLog', L.slice(0, XP_LOG_MAX));
   return ch; // les changements, pour la carte des gains
 }
@@ -3507,7 +3545,7 @@ function rendreXpInfo() {
     ['🍂 SAISONS (UNE FOIS PAR AN CHACUNE)', [['🍂', 'Novembre sobre', 150], ['🎄', "Calendrier de l'avent", 250], ...SAISONS_EV.map(d => ['🎟️', d.nom, d.xp]), ['🏁', "Objectif d'épargne annuel", 200]]],
     ['🏆 SUCCÈS (UNE FOIS CHACUN)', [['🥉', 'Facile', 20], ['🥈', 'Moyen', 50], ['🥇', 'Difficile', 120], ['💎', 'Extrême', 300]]]];
   $('#sheetIn').innerHTML = enteteSheet("COMMENT GAGNER DE L'XP", null) + G.map(([t, L]) => `<div class="grp" style="margin-top:14px">${t}</div><div class="ticket">${L.map(r => `<div class="tl"><span>${r[0]} ${esc(r[1])}</span><span class="c-ok">+${r[2]}</span></div>`).join('')}</div>`).join('')
-    + `<div class="note" style="display:block;margin-top:14px">Ne rapportent rien par eux-mêmes : saisir un revenu, un retrait d'épargne ou un versement.<br><br><b>Jour sans dépense</b> : compté le lendemain, et seulement si tu tiens ton budget à jour, c'est-à-dire avec au moins une dépense saisie (courses comprises) dans la semaine avant ou la semaine après ce jour. Sans aucune dépense saisie autour, le jour reste en attente, puis ne compte pas. Seuls une dépense courante ou une charge fixe saisie à la main cassent la journée (pas l'Échéancier, ni les lignes « Écart »).<br><br><b>Récompenses du mois</b> (vert, sans faute, 10 % / 25 % non dépensés, défi, mois bouclé) : seulement pour un mois où tu as saisi des dépenses. Un retrait d'épargne ne compte pas comme un revenu : il ne rend pas un mois « vert ». Les succès d'épargne comptent l'épargne <b>nette</b> (versé − retiré, sans les prêts).<br><br><b>Envie abandonnée</b> : +10 XP si tu y renonces une fois sa date arrivée (mûre), 2 par semaine au plus. Tu peux renoncer avant, mais sans XP.<br><br>Tout est compté depuis le 1er novembre 2026, et recalculé si tu corriges une ligne (l'XP peut donc aussi baisser).</div>
+    + `<div class="note" style="display:block;margin-top:14px">Ne rapportent rien par eux-mêmes : saisir un revenu, un retrait d'épargne ou un versement.<br><br><b>Jour sans dépense</b> : compté le lendemain, et seulement si tu tiens ton budget à jour, c'est-à-dire avec au moins une dépense saisie (courses comprises) dans la semaine avant ou la semaine après ce jour. Sans aucune dépense saisie autour, le jour reste en attente, puis ne compte pas. Même règle pour les événements, saisons et défis de la semaine : une dépense saisie dans la semaine avant ou après, sinon « en attente ». Seuls une dépense courante ou une charge fixe saisie à la main cassent la journée (pas l'Échéancier, ni les lignes « Écart »).<br><br><b>Récompenses du mois</b> (vert, sans faute, 10 % / 25 % non dépensés, défi, mois bouclé) : seulement pour un mois où tu as saisi des dépenses. Un retrait d'épargne ne compte pas comme un revenu : il ne rend pas un mois « vert ». Les succès d'épargne comptent le plus haut niveau atteint par ton épargne <b>nette</b> (versé − retiré, sans les prêts) : utiliser ton épargne plus tard ne retire pas un succès déjà gagné, mais verser puis retirer le même mois ne compte pas.<br><br><b>Envie abandonnée</b> : +10 XP si tu y renonces une fois sa date arrivée (mûre), 2 par semaine au plus. Tu peux renoncer avant, mais sans XP.<br><br>Tout est compté depuis le 1er novembre 2026, et recalculé si tu corriges une ligne (l'XP peut donc aussi baisser).</div>
     <button class="go" data-act="xpjournal" style="margin-top:12px">📜 VOIR MON JOURNAL D'XP</button>`;
 }
 function rendreXpLog() { $('#sheetIn').innerHTML = enteteSheet("JOURNAL D'XP", null) + `<div class="xpcompact">${blocDetailXP(etatJeu())}</div>`; }
@@ -3776,14 +3814,14 @@ function compacterSemaines(W) {
   const l0 = isoJ(lundi(now)), ks = Object.keys(W).filter(k => k[0] !== '_').sort();
   if (ks.length <= SEM_DETAIL) return W;
   const r = Object.assign({ ok: 0, ko: 0 }, W._res);
-  ks.slice(0, ks.length - SEM_DETAIL).forEach(k => { if (k >= l0) return;
-    if (k >= JEU_DEBUT.iso) { if (!chevaucheJD(k, addJ(k, 6)) && depSemaine(W[k].cat, new Date(k + 'T00:00:00')) <= W[k].montant + 0.005) r.ok++; else r.ko++; } // même règle qu'etatSemaines
+  ks.slice(0, ks.length - SEM_DETAIL).forEach(k => { if (k >= l0 || preuvePeriode(k, addJ(k, 6)) === 'attente') return; // on attend la fin de la semaine de preuve
+    if (k >= JEU_DEBUT.iso) { if (!chevaucheJD(k, addJ(k, 6)) && depSemaine(W[k].cat, new Date(k + 'T00:00:00')) <= W[k].montant + 0.005 && preuvePeriode(k, addJ(k, 6)) === 'ok') r.ok++; else r.ko++; } // même règle qu'etatSemaines
     delete W[k]; });
   W._res = r; return W;
 }
 function etatSemaines() {
   const W = semaines(), l0 = isoJ(lundi(now)); let reussis = (W._res && W._res.ok) || 0;
-  Object.keys(W).forEach(k => { if (k[0] !== '_' && k < l0 && k >= JEU_DEBUT.iso && !chevaucheJD(k, addJ(k, 6))) { const d = new Date(k + 'T00:00:00'); if (depSemaine(W[k].cat, d) <= W[k].montant + 0.005 && saisiEntre(k, addJ(k, 6))) reussis++; } }); // semaine touchée par des dépenses non saisies : pas validée ; (lot L2) semaine sans aucune dépense saisie : pas validée non plus
+  Object.keys(W).forEach(k => { if (k[0] !== '_' && k < l0 && k >= JEU_DEBUT.iso && !chevaucheJD(k, addJ(k, 6))) { const d = new Date(k + 'T00:00:00'); if (depSemaine(W[k].cat, d) <= W[k].montant + 0.005 && preuvePeriode(k, addJ(k, 6)) === 'ok') reussis++; } }); // semaine touchée par des dépenses non saisies : pas validée ; sans dépense saisie de k − 7 j à dimanche + 7 j : pas (encore) validée
   return { cur: W[l0] ? Object.assign({ cle: l0 }, W[l0], { dep: depSemaine(W[l0].cat, lundi(now)) }) : null, reussis, cle: l0 };
 }
 // ================= 6.4 · MÉDAILLES ET VITRINE =================
@@ -3951,8 +3989,9 @@ const groupeDe = n => (catMap()[n] || {}).groupe, depDe = n => (catMap()[n] || {
 const lignesEntre = (a, b, f) => S.journal.filter(e => !e.deleted && e.date && e.date >= a && e.date <= b && e.montant > 0 && f(e));
 // État d'une saison à plafond (dépenses ≤ limite sur la période) : réussie une fois la période finie
 function etatPlafondSaison(d, y, a, b, dep, lim, txtLim) {
-  const A = auj(), vide = b < A && !saisiEntre(a, b), rate = dep > lim + 0.005 || chevaucheJD(a, b < A ? b : A) || vide; // jours avec dépenses non saisies : pas validée ; (lot L2) aucune dépense saisie sur la période non plus
-  return { d, y, a, b, cur: Math.round(dep), max: Math.round(lim), plafond: true, ok: b < A && !rate, rate, enCours: A >= a && A <= b && a >= JEU_DEBUT.iso, info: e0(dep) + ' sur ' + e0(lim) + (txtLim ? ' ' + txtLim : ' max') };
+  const A = auj(), pr = b < A ? preuvePeriode(a, b) : 'ok', vide = pr === 'non', attente = pr === 'attente';
+  const rate = dep > lim + 0.005 || chevaucheJD(a, b < A ? b : A) || vide; // jours avec dépenses non saisies : pas validée ; aucune dépense saisie de a − 7 j à b + 7 j non plus
+  return { d, y, a, b, cur: Math.round(dep), max: Math.round(lim), plafond: true, ok: b < A && !rate && !attente, rate, attente: attente && !rate, enCours: A >= a && A <= b && a >= JEU_DEBUT.iso, info: e0(dep) + ' sur ' + e0(lim) + (txtLim ? ' ' + txtLim : ' max') + (attente && !rate ? " · en attente d'une dépense saisie" : '') };
 }
 // Soldes : budgets Divers + Loisirs au prorata des jours de la période
 function etatSoldes(d, y) {
@@ -3989,8 +4028,9 @@ function etatMenage(d, y) {
 // Rentrée : tous les budgets de septembre tenus
 function etatRentree(d, y) {
   const bu = budgets(y, 9).filter(x => !x.sa); if (!bu.length) return null;
-  const a = y + '-09-01', b = y + '-09-30', A = auj(), ko = bu.filter(x => x.reste < -0.5).length + (b < A && !saisiEntre(a, b) ? 1 : 0); // (lot L2) septembre sans dépense saisie : raté
-  return { d, y, a, b, cur: bu.length - ko, max: bu.length, ok: !ko && b < A, rate: ko > 0, enCours: A >= a && A <= b && a >= JEU_DEBUT.iso, info: (bu.length - ko) + '/' + bu.length + ' budgets tenus' };
+  const a = y + '-09-01', b = y + '-09-30', A = auj(), pr = b < A ? preuvePeriode(a, b) : 'ok', nk = bu.filter(x => x.reste < -0.5).length;
+  const ko = nk + (pr === 'non' ? 1 : 0), attente = !ko && pr === 'attente'; // septembre sans dépense saisie (de fin août à début octobre) : raté
+  return { d, y, a, b, cur: bu.length - nk, max: bu.length, ok: !ko && !attente && b < A, rate: ko > 0, attente, enCours: A >= a && A <= b && a >= JEU_DEBUT.iso, info: (bu.length - nk) + '/' + bu.length + ' budgets tenus' + (attente ? " · en attente d'une dépense saisie" : '') };
 }
 // Black Friday : du jeudi (4e de novembre) au lundi, aucune dépense des groupes Divers/Loisirs (lot H : plus de critère « achat en ligne », option retirée)
 function etatBlackFriday(d, y) {
@@ -4231,30 +4271,35 @@ function figerJeu() {
   planEvenements(); const code = S._plan && S._plan.code, T = typeof p.tirages === 'string' ? p.tirages : '';
   if (code && code.length > T.length) maj.tirages = code;
   if (!Array.isArray(p.jd)) maj.jd = JD_DEFAUT; // 9.6 : le voyage du 7 au 15 novembre 2026 (dépenses partagées pas encore saisies)
+  else if (JD_RETIRES.length && !p.jdMig) { // nettoyage unique (drapeau jdMig synchronisé : une période remise ensuite à la main reste)
+    const ret = x => Array.isArray(x) && JD_RETIRES.some(r => r[0] === x[0] && r[1] === x[1]);
+    maj.jd = p.jd.filter(x => !ret(x)); maj.jdMig = 1; }
   if (Object.keys(maj).length) majPrefJeu(maj);
 }
 function etatEv(o) {
   const c = ctxEv(), d = o.def, A = auj(), fini = o.fin < A;
-  let cur = 0, max = d.max || 1, ok = false, rate = false, info = '';
+  let cur = 0, max = d.max || 1, ok = false, rate = false, attente = false, info = '';
   if (d.type === 'jours' || d.type === 'serie') {
     const v = []; for (let k = o.debut; k <= o.fin; k = addJ(k, 1)) v.push(c.J.has(k) ? c.J.get(k) : undefined); // undefined = pas encore fini
     const compte = arr => d.type === 'jours' ? arr.filter(x => x === true).length : maxSerie(arr);
     cur = compte(v.map(x => x === true)); ok = cur >= max;
     rate = !ok && compte(v.map(x => x === true || x == null)) < max; // même en réussissant tous les jours restants, c'est impossible
+    attente = fini && !ok && !rate; // jours en attente d'une dépense saisie
     info = `${Math.min(cur, max)}/${max} jour${max > 1 ? 's' : ''}`;
   } else {
     const f = d.filtre(c, o), b = A < o.fin ? A : o.fin, dep = somme(c.D, o.debut, b, f), jd = d.type !== 'min' && chevaucheJD(o.debut, b); // dépenses non saisies : rien de sûr
-    const vide = fini && !saisiEntre(o.debut, o.fin); // (lot L2) aucune dépense saisie pendant l'événement : rien à valider
-    if (d.type === 'plafond') { max = d.lim(c, o); cur = dep; rate = jd || vide || dep > max + 0.005; ok = fini && !rate; info = jd ? 'jours avec dépenses non saisies' : vide ? 'aucune dépense saisie' : `${e0(dep)} sur ${e0(max)} max`; }
-    else if (d.type === 'unique') { rate = jd || vide || c.D.some(e => e.date >= o.debut && e.date <= b && f(e) && e.montant > d.seuil); ok = fini && !rate; info = jd ? 'jours avec dépenses non saisies' : vide ? 'aucune dépense saisie' : rate ? 'une dépense a dépassé ' + e0(d.seuil) : 'aucune pour l\'instant'; }
+    // (9.33) preuve d'usage : une dépense saisie de début − 7 j à fin + 7 j (même règle que les jours sans dépense) ; avant fin + 7 j, en attente
+    const pr = fini ? preuvePeriode(o.debut, o.fin) : 'ok', vide = pr === 'non';
+    if (d.type === 'plafond') { max = d.lim(c, o); cur = dep; rate = jd || vide || dep > max + 0.005; attente = !rate && pr === 'attente'; ok = fini && !rate && !attente; info = jd ? 'jours avec dépenses non saisies' : vide ? 'aucune dépense saisie' : `${e0(dep)} sur ${e0(max)} max`; }
+    else if (d.type === 'unique') { rate = jd || vide || c.D.some(e => e.date >= o.debut && e.date <= b && f(e) && e.montant > d.seuil); attente = !rate && pr === 'attente'; ok = fini && !rate && !attente; info = jd ? 'jours avec dépenses non saisies' : vide ? 'aucune dépense saisie' : rate ? 'une dépense a dépassé ' + e0(d.seuil) : 'aucune pour l\'instant'; }
     else if (d.type === 'min') { max = d.lim(c, o); cur = dep; ok = dep >= max - 0.005; rate = fini && !ok; info = `${e0(dep)} sur ${e0(max)}`; }
   }
   const statut = ok ? 'reussi' : rate ? 'rate' : 'cours';
-  return Object.assign({}, o, { cur, max, ok, statut, info, txt: d.txt(c, o), reste: ecartJ(A, o.fin) + 1 });
+  return Object.assign({}, o, { cur, max, ok, statut, attente, info, txt: d.txt(c, o), reste: ecartJ(A, o.fin) + 1 });
 }
-const evEnCours = () => ouvert('saison') ? planEvenements().map(etatEv).filter(x => x.fin >= auj() || ecartJ(x.fin, auj()) <= 2) : [];
+const evEnCours = () => ouvert('saison') ? planEvenements().map(etatEv).filter(x => x.fin >= auj() || ecartJ(x.fin, auj()) <= 2 || x.attente) : [];
 function banniereEv() {
-  const cach = LS.get('evBanCaches', []), x = evEnCours().find(e => e.statut === 'cours' && !cach.includes(e.cle)); if (!x) return '';
+  const cach = LS.get('evBanCaches', []), x = evEnCours().find(e => e.statut === 'cours' && !e.attente && !cach.includes(e.cle)); if (!x) return '';
   return `<button class="evban" data-act="ev-ban" data-k="${esc(x.cle)}">${ecusson(x.def.id, x.def.nom, RAR[x.def.rar].n, 36)}<span style="flex:1"><b>⚡ ÉVÉNEMENT · ${esc(x.def.nom.toUpperCase())}</b>${esc(x.info)} · ${x.reste > 1 ? 'encore ' + x.reste + ' jours' : 'dernier jour'}</span><span class="muted" style="font-size:16px">×</span></button>`;
 }
 // Lot H : accès direct aux écussons (événements éclair + saisons), qui sont tout en bas de l'onglet SUCCÈS
@@ -4313,8 +4358,9 @@ function etatMission(y, m) {
   else if (mi.id === 'j8') cur = J.filter(x => x[1] === true).length;
   else if (mi.id === 's5') cur = maxSerie(J.map(x => x[1]));
   else if (mi.id === 'baisse') { mi.dep = depMoisJeu(mi.cat, y, m); cur = st === 'passe' && moisSaisi(y, m) && mi.dep < mi.ref - 0.005 ? 1 : 0; }
-  const ok = cur >= mi.max;
-  return Object.assign(mi, { cur: Math.min(cur, mi.max), ok, rate: !ok && st === 'passe', y, m });
+  const ok = cur >= mi.max, att = mi.id === 'baisse' ? 0 : J.filter(x => x[1] === null).length; // (9.33) jours de fin de mois encore en attente d'une saisie
+  const rate = !ok && st === 'passe' && cur + att < mi.max;
+  return Object.assign(mi, { cur: Math.min(cur, mi.max), ok, rate, attente: !ok && !rate && st === 'passe', y, m });
 }
 // ---- Composants compacts de l'onglet Défis ----
 function dcard(o) {
@@ -4326,7 +4372,7 @@ function carteEvMini(x) {
   const pct = x.def.type === 'plafond' ? (x.max > 0 ? x.cur / x.max * 100 : (x.cur > 0 ? 100 : 0)) : x.def.type === 'unique' ? (lost ? 100 : 0) : x.cur / x.max * 100;
   const etat = win ? 'ok' : lost ? 'rate' : (x.def.type === 'plafond' && pct >= 85) ? 'warn' : '';
   return dcard({ med: ecusson(x.def.id, x.def.nom, R0.n, 30, !win), tag: 'ÉCLAIR · ' + R0.l, xp: R0.xp, titre: x.def.nom, pct, etat, msg: x.txt,
-    sous: `${esc(x.info)} · ${win ? '<b class="c-ok">badge gagné</b>' : lost ? '<b class="c-bad">raté</b>' : x.reste > 1 ? x.reste + ' j restants' : 'dernier jour'}` });
+    sous: `${esc(x.info)} · ${win ? '<b class="c-ok">badge gagné</b>' : lost ? '<b class="c-bad">raté</b>' : x.attente ? "<b>en attente d'une dépense saisie</b>" : x.reste > 1 ? x.reste + ' j restants' : 'dernier jour'}` });
 }
 function carteSemaineMini() {
   const st = etatSemaines(), fin = new Date(lundi(now)); fin.setDate(fin.getDate() + 6);
@@ -4339,10 +4385,10 @@ function carteSemaineMini() {
 function carteSurpriseMini(e) {
   const pct = e.id === 'baisse' ? (e.ref > 0 ? e.dep / e.ref * 100 : 0) : e.cur / e.max * 100;
   return dcard({ tag: 'SURPRISE DU MOIS', xp: MISSION_XP, titre: e.nom, pct, etat: e.ok ? 'ok' : e.rate ? 'rate' : '', msg: e.txt,
-    sous: e.id === 'baisse' ? `${e0(e.dep)} / ${e0(e.ref)} · ${esc(e.cat)}` : `${e.cur}/${e.max} · ${esc(e.txt)}` });
+    sous: (e.id === 'baisse' ? `${e0(e.dep)} / ${e0(e.ref)} · ${esc(e.cat)}` : `${e.cur}/${e.max} · ${esc(e.txt)}`) + (e.ok ? '' : e.rate ? ' · <b class="c-bad">ratée</b>' : e.attente ? ' · <b>en attente</b>' : '') });
 }
 function ligneDefiPerso(d, m) {
-  if (!d) return `<button class="drow" data-act="defi-go"><span class="dtag">TON DÉFI ${deMois(m)}</span><span class="muted">+ choisir un plafond ›</span></button>`;
+  if (!d) return `<button class="drow" data-act="defi-go"><span class="dtag">TON DÉFI ${deMois(m)}</span><span class="muted">${defiVerrouille(now.getFullYear(), m) ? esc(MSG_DEFI_FERME) : '+ choisir un plafond ›'}</span></button>`;
   const w = d.montant > 0 ? Math.min(100, d.dep / d.montant * 100) : 100;
   return `<button class="drow ${d.ok ? '' : 'rate'}" data-act="defi-go"><span class="dtag">TON DÉFI ${deMois(m)} · +25</span><span><b>${esc(d.cat)} ≤ ${e0(d.montant)}</b> · ${e0(d.dep)}</span><i class="bar"><i style="width:${w}%;background:${d.ok ? 'var(--ok)' : 'var(--bad)'}"></i></i></button>`;
 }

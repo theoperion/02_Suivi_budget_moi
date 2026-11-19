@@ -8,7 +8,7 @@ const API = (html.match(/const API_DEFAUT = '([^']+)'/) || [])[1];
 const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const srv = {
   journal: [{ row: 5, mois: 'Novembre 2026', lib: 'Café', cat: 'Courses', montant: 3, date: '2026-11-02', especes: true }],
-  soldes: { '2026': 1000 }, controle: { mois: '', solde: null, especes: null }, prefs: {}, calls: [], adds: []
+  soldes: { '2026': 1000 }, controle: { mois: '', solde: null, especes: null }, prefs: { jeu: { jd: [['2026-11-07', '2026-11-15']], jdMig: 1 } }, calls: [], adds: [] // jd fixé : même jeu sur toutes les copies (Clément n'a pas le voyage par défaut)
 };
 function donnees() {
   return { categories: [

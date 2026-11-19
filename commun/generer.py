@@ -29,6 +29,8 @@ def fabriquer(p):
     html = remplacer(html, 'const ACCES_ANTICIPE = true;', f'const ACCES_ANTICIPE = {"true" if p["acces_anticipe"] else "false"};')
     jd = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p['jd_defaut']) + ']'   # jours avec dépenses non saisies (voyage)
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
+    jr = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p.get('jd_retires', [])) + ']'   # périodes à retirer une seule fois de la préférence
+    html = remplacer(html, "const JD_RETIRES = [];", f'const JD_RETIRES = {jr};')
     sw = remplacer(lire('sw.js'), "const PREFIXE = 'jauge-v';", f"const PREFIXE = '{p['prefixe_cache']}';")
     man = remplacer(lire('manifest.json'), '"name": "Jauge · mon budget"', f'"name": "{p["nom_appli"]}"')
     man = remplacer(man, '"short_name": "Jauge",', f'"short_name": "{p["nom_court"]}",')
