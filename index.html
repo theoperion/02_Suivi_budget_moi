@@ -3442,7 +3442,7 @@ function annoncerJeu() {
     LS.set('regles933', true); journaliserXP(e, true); defisMoisChange(e); LS.set('nivVu', e.niv); LS.set('prestVu', e.prest); LS.set('xpVu', e.xp);
     const n = nouveautes(e); if (n.length) LS.set('jeuVus', [...new Set(LS.get('jeuVus', []).concat(n))]);
     if (dx) carteGains('NOUVELLES RÈGLES DU JEU', ['Ton XP a été recalculée (' + (dx < 0 ? '−' : '+') + Math.abs(dx) + ' XP) : niveau ' + e.niv,
-      'Un jour sans dépense compte si tu saisis tes dépenses ; les envies rapportent seulement une fois mûres ; 1 reste mis de côté par mois.'], [],
+      'Un jour sans dépense compte si tu saisis tes dépenses ; les envies rapportent seulement une fois mûres (7 jours d’attente, 20 € au moins) ; un défi du mois vise au moins 10 % sous le budget ; 1 reste mis de côté par mois.'], [],
       () => { S.tab = 'stats'; S.statsVue = 'progres'; S.progT = 'succes'; rendre(); scrollTo(0, 0); }, 12000);
     return; }
   const ch = journaliserXP(e), dm = defisMoisChange(e);
