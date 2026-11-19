@@ -163,7 +163,7 @@ body.accent .fab{background:var(--acc);color:#fff}body.accent .tab.on{color:var(
 .fsai .libin{margin:6px 0;height:40px}
 .fsai .pad{gap:6px;margin:2px 0 8px}.fsai .pad button{height:46px}
 .fsai .go{height:48px}
-.fsai.kb .pad,.fsai.kb>.seg,.fsai.kb .mmois,.fsai.kb .envlnk,.fsai.kb .grab{display:none}
+.fsai.kb .pad,.fsai.kb>.seg,.fsai.kb .mmois,.fsai.kb .envlnk,.fsai.kb .grab,.fsai.kb .fsp{display:none}
 .fsai.kb .amt{font-size:26px;margin:0}
 .amt.zero{color:var(--ink3)}
 .hint{text-align:center;font-size:13px;min-height:20px;margin:2px 0 10px;color:var(--ink2)}
@@ -1840,7 +1840,7 @@ const INFOS = {
   objectif: ['OBJECTIF D\'ÉPARGNE', "La jauge montre ton <b>épargne nette</b> de l'année : ce que tu as <b>versé</b> sur ton épargne (livret, PEA, assurance vie…, saisies du Journal et virements automatiques de l'Échéancier à leur date) <b>moins</b> ce que tu en as <b>retiré</b> (catégories de retrait d'épargne, par exemple « Retraits d'épargne (LEP/Livret A) »).<br><br>Exemple : 300 € versés sur le PEA et 2 661 € retirés du livret A → épargne nette <b>−2 361 €</b> : ton épargne a baissé cette année.<br><br><b>Transfert d'un compte d'épargne à un autre</b> (livret A → PEA) : saisis les <b>deux</b> mouvements, le retrait du livret et le versement sur le PEA. Ils s'annulent : ce n'est pas de l'épargne en plus, la jauge ne bouge pas.<br><br>Les <b>prêts à des proches</b> ne comptent pas : prêter n'est pas épargner. Pour prêter, utilise DÉPENSE › « 👥 Payé pour d'autres » avec ta part à 0 € : l'appli note qu'on te doit cette somme.<br><br><b>Comment saisir</b> : + › ÉPARGNE › « ↓ Mettre de côté » pour un versement, « ↑ Retirer de l'épargne » pour un retrait.<br><br>Touche la jauge pour voir chaque mouvement compté, mois par mois."],
   prelever: ['À PRÉLEVER', "Les charges et abonnements de l'échéancier qui ne sont pas encore passés ce mois-ci, plus tes achats prévus. C'est l'argent déjà « réservé »."],
   nd: ['NON DÉPENSÉ', "Depuis janvier : revenus − dépenses. Comprend l'argent resté sur ton compte et celui parti en épargne."],
-  courbe: ['SOLDE PRÉVU', "Ton argent (banque + espèces) jour par jour. Elle s'affiche pour tous les mois : un mois passé est reconstitué d'après tes saisies datées et tes prélèvements (les lignes sans date comptent le dernier jour), un mois à venir est entièrement prévu. Trait plein : calculé d'après tes saisies et tes prélèvements jusqu'à aujourd'hui (ce n'est pas ton relevé bancaire). Pointillés : la suite, si tu dépenses tes budgets au rythme prévu (seulement la part des jours qui restent : si tu dépenses moins, la fin de la courbe remonte jour après jour). Points verts : entrées de l'échéancier (salaire…). Points rouges : sorties (loyer, abonnements, virements…) et achats prévus. Une dépense dans le rythme de ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue) ; une dépense au-dessus du rythme ou un dépassement la fait descendre. Sous 0 € : découvert."] };
+  courbe: ['SOLDE PRÉVU', "<b>Ce que montre la courbe</b> : ton argent (banque + espèces) jour par jour. Trait plein : calculé d'après tes saisies et tes prélèvements jusqu'à aujourd'hui (ce n'est pas ton relevé bancaire). Pointillés : la suite, si tu dépenses tes budgets au rythme prévu (seulement la part des jours qui restent). Elle s'affiche pour tous les mois : un mois passé est reconstitué d'après tes saisies datées et tes prélèvements (les lignes sans date comptent le dernier jour), un mois à venir est entièrement prévu. Sous 0 € : découvert.<br><br><b>Les points</b> : <b>verts</b> = entrées de l'échéancier (salaire…) ; <b>rouges</b> = sorties (loyer, abonnements, virements…) et achats prévus.<br><br><b>Comment elle bouge</b> : une dépense dans le rythme de ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue). Une dépense au-dessus du rythme, ou un dépassement, la fait <b>descendre</b>. Si tu dépenses moins que prévu, la fin de la courbe <b>remonte</b> jour après jour."] };
 const qi = k => LS.get('aidesOff', false) ? '' : `<span class="qi" data-act="info" data-k="${k}" role="button" aria-label="Explication">?</span>`;
 // Détail des écritures pas encore envoyées au fichier, avec la dernière erreur
 function descOp(o) {
@@ -1909,7 +1909,7 @@ function vueAccueil() {
   const pills = [];
   if (b.st !== 'passe') pills.push(`<button class="pill ${b.fin < 0 ? 'p-bad' : 'p-ok'}" data-act="tab:prevu"><small>FIN PRÉVUE ${qi('fin')}</small><b>${sg0(b.fin)}</b>${b.st === 'cours' && b.resteBud > 0.5 ? `<i class="psub">jusqu'à ${sg0(b.fin + b.resteBud)}</i>` : ''}</button>`);
   const ap = aPrelever(S.y, S.m); if (ap != null) pills.push(`<button class="pill" data-act="tab:prevu"><small>À PRÉLEVER ${qi('prelever')}</small><b>${e0(ap)}</b></button>`);
-  const nd = nonDepense(S.y); if (nd != null) pills.push(`<button class="pill ${nd < 0 ? 'p-bad' : ''}" data-act="stats-an"><small>NON DÉPENSÉ ${S.y} ${qi('nd')}</small><b>${sg0(nd)}</b></button>`);
+  const nd = nonDepense(S.y); if (nd != null) pills.push(`<button class="pill ${nd < 0 ? 'p-bad' : ''}" data-act="stats-an"><small>NON DÉPENSÉ ${qi('nd')}</small><b>${sg0(nd)}</b><i class="psub">depuis janv. ${S.y}</i></button>`);
   if (pills.length) h += `<div class="pills" style="grid-template-columns:repeat(${pills.length},1fr)">${pills.join('')}</div>`;
   if (on('pointbas')) h += cartePointBas(S.y, S.m); // (9.18) tous les mois : passés reconstitués, à venir prévus
   h += `</div>`; // (9.6) plus de lien « Mode d'emploi » ici : il est dans ⚙ Réglages
@@ -1983,7 +1983,7 @@ function htmlListe() {
   const rows = l.map(({ e, c }) => {
     const t = c ? c.type : '';
     if (t === 'Revenu' || t === 'Retrait') rev += e.montant; else dep += e.montant;
-    return `<button class="jl ${e.pending ? 'pend' : ''} ${e.nw ? 'nw' : ''}" data-act="edit" data-id="${e.id}"><div class="l"><div>${esc(e.lib || e.cat)}</div><div class="c">${S.filtre.q ? esc(MC[e.m - 1]) + (S.filtre.anSeul ? '' : ' ' + e.y) + ' · ' : ''}${esc(e.cat)}${e.date ? ' · le ' + (+e.date.slice(8)) + '/' + esc(e.date.slice(5, 7)) : ''}${e.especes ? ' · <span class="espm">💶 espèces</span>' : ''}${c ? '' : ' · catégorie inconnue'}${e.pending ? ' · envoi…' : ''}</div></div>
+    return `<button class="jl ${e.pending ? 'pend' : ''} ${e.nw ? 'nw' : ''}" data-act="edit" data-id="${e.id}"><div class="l"><div>${esc(e.lib || e.cat)}</div><div class="c">${S.filtre.q ? esc(MC[e.m - 1]) + (S.filtre.anSeul ? '' : ' ' + e.y) + ' · ' : ''}${esc(e.cat)}${e.date ? ' · le\u00a0' + (+e.date.slice(8)) + '/' + esc(e.date.slice(5, 7)) : ''}${e.especes ? ' · <span class="espm">💶 espèces</span>' : ''}${c ? '' : ' · catégorie inconnue'}${e.pending ? ' · envoi…' : ''}</div></div>
       ${montantLigne(t, e.montant)}</button>`;
   }).join('');
   let tete = '';
@@ -2099,11 +2099,17 @@ function sectionsModeEmploi() {
       ['🛒', 'ACHATS ET REVENUS À VENIR', "Un achat prévu pour plus tard compte déjà dans ta fin de mois. Le jour venu, l'accueil te demande « C'est fait ? » : PAYÉ ✓ l'ajoute au Journal."]]],
     ['stats', '📊', 'STATS', 'Tes chiffres dans le temps.', [
       ['📊', 'ANNÉE ET MOIS', "En haut de l'onglet Stats : la vue de l'année (mois par mois, ton épargne, la comparaison des années) ou celle du mois (le détail par catégorie). Pratique pour voir où part l'argent."]]],
-    ['progres', '🏆', 'PROGRÈS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection.', [
+    ['progres', '🏆', 'PROGRÈS ET DÉFIS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection. Pour rendre le budget un peu plus amusant.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
-      ['🎯', 'DÉFIS', "Tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail plus bas, section Défis)."],
+      ['🎯', 'DÉFIS', "Stats › Progrès › Défis : tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail juste en dessous)."],
+      ['🎯', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude. Verdict le 1er du mois suivant."],
+      ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
+      ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
+      ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
+      ['🍂', 'SAISONS', FEAT_DETAIL.saison],
+      ['🧺', 'LES DÉPENSES ESSENTIELLES', "Les catégories « Sans alerte » (les courses par exemple) ne servent jamais de défi : on ne se prive pas de manger pour gagner des points."],
       ['🏅', 'SUCCÈS', "Ton niveau (jusqu'à 100), tes points d'expérience (XP) et leur journal, les succès débloqués. Chaque niveau rapporte une récompense."],
-      ['🛡️', 'MES ÉCUSSONS', "Les écussons des événements et des saisons : Stats › Progrès › Succès (ou Défis), bouton « MES ÉCUSSONS · ÉVÉNEMENTS ET SAISONS »."],
+      ['🛡️', 'MES ÉCUSSONS', "Les écussons des événements et des saisons : Stats › Progrès › Succès (ou Défis), bouton « 🛡️ MES ÉCUSSONS »."],
       ['🎨', 'STYLE ET COLLECTION', "Thèmes, jauges, tampons et autres cosmétiques gagnés avec les niveaux : choisis ceux que tu veux afficher."]]],
     ['saisir', '✍️', 'SAISIR', 'Le bouton + en bas, et c\'est parti.', [
       ['➕', 'LE BOUTON +', "Choisis Dépense, Revenu ou Épargne, une catégorie, tape le montant et ENREGISTRER. Le libellé est facultatif. « ? AIDE » en haut de la saisie rappelle tout ça."]].concat(TUTO.filter(t => !TUTO_SOLDE.includes(t[1])))],
@@ -2113,13 +2119,6 @@ function sectionsModeEmploi() {
       ['🟠', 'LE POINT SUR ⚙', "Tout ce que tu saisis est gardé sur le téléphone puis envoyé à ton fichier Google Sheets. Un point <b>orange</b> sur ⚙ : envoi en cours. <b>Rouge</b> : le fichier ne répond pas, l'appli réessaie toute seule. Pas de point : tout est à jour."],
       ['📮', 'RÉGLAGES › ENVOIS', "En bas des Réglages, ligne « Envois en attente » (ou le bandeau d'alerte de l'accueil) : le détail de ce qui attend, avec la dernière erreur. Tu peux réessayer ou abandonner un envoi. Une dépense refusée par le fichier n'est pas perdue : elle est gardée de côté pour la renvoyer ou la supprimer."],
       ['↓', 'ACTUALISER', "Tire l'écran vers le bas pour récupérer ce qui a changé dans le fichier (ou sur un autre téléphone). Tes saisies pas encore envoyées sont gardées."]]],
-    ['defis', '🎯', 'DÉFIS', 'Pour rendre le budget un peu plus amusant.', [
-      ['🎯', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude. Verdict le 1er du mois suivant."],
-      ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
-      ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
-      ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
-      ['🍂', 'SAISONS', FEAT_DETAIL.saison],
-      ['🧺', 'LES DÉPENSES ESSENTIELLES', "Les catégories « Sans alerte » (les courses par exemple) ne servent jamais de défi : on ne se prive pas de manger pour gagner des points."]]],
     ['reglages', '⚙', 'RÉGLAGES UTILES', 'Adapter l\'appli à ta façon de faire.', [
       ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », et l'aide de la saisie quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
       ['🧺', 'CATÉGORIES QUI NE CASSENT PAS LES SÉRIES', "Réglages › Mon budget (ou Stats › Progrès › Défis, tout en bas) : coche par exemple Courses si faire les courses ne doit pas casser un jour sans dépense. Les montants comptent toujours dans tes budgets.<br><br><b>Ce qui casse une journée</b> : une dépense courante (courses, sorties, divers…) ou une charge fixe <b>saisie à la main</b> (un abonnement pris en plus, par exemple). <b>Ce qui ne la casse jamais</b> : les prélèvements automatiques de l'Échéancier, les lignes « Écart … », les revenus, l'épargne, les catégories cochées ici. Une journée n'est comptée qu'une fois terminée (le lendemain)."],
@@ -2139,6 +2138,8 @@ function rendreModeEmploi() {
     <button class="go" data-act="${f.retour ? 'go:' + f.retour : 'close'}" style="margin-top:20px">COMPRIS</button>`;
 }
 function fermer() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); S.form = null; if (S.majEnAttente) { S.majEnAttente = false; setTimeout(() => rafraichir(true), 0); } }
+// (L4) Montant affiché avec espace des milliers (« 1 250,5 € ») : la valeur saisie (f.montant) ne change pas
+const montantAff = s => { const [a, d] = String(s || '0').split(','); return a.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + (d != null ? ',' + d : '') + '\u00a0€'; };
 function montantNum() { const n = parseFloat(String(S.form.montant).replace(',', '.')); return isFinite(n) ? n : 0; }
 function rendreForm() {
   const f = S.form; if (!f) return;
@@ -2163,7 +2164,7 @@ function rendreForm() {
     <div class="shead"><span>${f.mode === 'edit' ? 'MODIFIER LA LIGNE' : futur ? (f.type === 'Revenu' ? 'REVENU PRÉVU' : f.type === 'Épargne' ? 'ÉPARGNE PRÉVUE' : 'ACHAT PRÉVU') : 'NOUVELLE LIGNE'} ${LS.get('aidesOff', false) ? '' : `<button class="lnk" data-act="tuto" style="margin-left:6px">? AIDE</button>`}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
     <div class="seg">${Object.keys(TYPES).map(t => `<button class="${f.type === t ? 'on' : ''}" data-act="type" data-t="${t}">${t.toUpperCase()}</button>`).join('')}</div>
     ${f.type === 'Épargne' ? `<div class="seg" style="margin:6px 0 0"><button class="${f.sens !== 'retrait' ? 'on' : ''}" data-act="sens" data-s="verser">↓ METTRE DE CÔTÉ</button><button class="${f.sens === 'retrait' ? 'on' : ''}" data-act="sens" data-s="retrait">↑ RETIRER</button></div>` : ''}
-    <div class="amt ${montantNum() ? '' : 'zero'}" id="amt">${f.montant ? esc(f.montant) : '0'} €</div><div class="hhint" id="hhint"></div>
+    <div class="amt ${montantNum() ? '' : 'zero'}" id="amt">${esc(montantAff(f.montant))}</div><div class="hhint" id="hhint"></div>
     <div class="mrow mmois"><button class="mbtn" data-act="fm:-1" aria-label="Mois précédent">‹</button><span>${moisLabel(f.y, f.m).toUpperCase()}</span><button class="mbtn" data-act="fm:1" aria-label="Mois suivant">›</button></div>
     ${!moisFutur ? `<div class="mrow dsrow"><button class="mbtn" data-act="fd:-1" aria-label="Jour précédent">‹</button><span>${futur ? 'PRÉVU LE' : f.type === 'Dépense' ? 'DÉPENSÉ LE' : 'DATE'} · <b>${libDate(f.date)}</b>${futur ? ' · <b class="c-warn">À VENIR</b>' : ''}</span><button class="mbtn" data-act="fd:1" aria-label="Jour suivant" ${f.date && f.date >= f.y + '-' + pad2(f.m) + '-' + pad2(dim(f.y, f.m)) ? 'disabled style="opacity:.3"' : ''}>›</button></div>` : ''}
     ${/^Écart/.test(f.lib || '') ? `<div class="mrow" style="margin-top:2px"><button class="chip" data-act="sgn">± CHANGER LE SIGNE</button></div>` : ''}
@@ -2173,14 +2174,15 @@ function rendreForm() {
     ${f.type === 'Dépense' && f.mode === 'add' && !futur && on('avances') ? `<div class="mrow" style="margin:-4px 0 6px"><button class="chip ${f.partage ? 'on' : ''}" data-act="partage">👥 PAYÉ POUR D'AUTRES</button></div>${f.partage ? `<div class="part">
       ${(() => { const N = [...new Set([...(f.noms || []), ...nomsConnus()])], MAXN = 6, vis = f.tousNoms || f.gererNoms ? N : N.slice(0, MAXN);
         return `<div class="chips" style="margin:0">${vis.map(n => f.gererNoms ? `<button class="chip" data-act="pnom-x" data-n="${esc(n)}">✕ ${esc(n)}</button>` : `<button class="chip ${(f.noms || []).includes(n) ? 'on' : ''}" data-act="pnom" data-n="${esc(n)}">${esc(n)}</button>`).join('')}${!f.gererNoms && N.length > MAXN ? `<button class="chip" data-act="pnom-tous">${f.tousNoms ? 'Moins ▴' : '+' + (N.length - MAXN) + ' ▾'}</button>` : ''}${N.length ? `<button class="lnk" data-act="pnom-gerer" style="margin-left:4px">${f.gererNoms ? 'TERMINÉ' : 'GÉRER'}</button>` : ''}</div>${f.gererNoms ? '<div class="note" style="display:block;margin-top:4px">Touche ✕ pour retirer un prénom de ta liste (tes lignes déjà saisies ne changent pas).</div>' : ''}`; })()}
-      <div style="display:flex;gap:6px"><input class="libin" id="pnouv" placeholder="Ajouter un prénom" autocomplete="off" maxlength="30" style="margin:8px 0"><button class="chip" data-act="pajout" style="margin:8px 0">+</button></div>
+      <div style="display:flex;gap:6px"><input class="libin" id="pnouv" placeholder="Ajouter un prénom" autocomplete="off" maxlength="30" style="margin:8px 0"><button class="chip" data-act="pajout" style="margin:8px 0;white-space:nowrap">AJOUTER</button></div>
       <div class="grp" style="margin:6px 0 4px">MA PART</div>
       <div class="seg" style="margin:0 0 6px"><button class="${String(f.part || '') === '' ? 'on' : ''}" data-act="ppmode" data-v="">À PARTS ÉGALES</button><button class="${String(f.part) === '0' ? 'on' : ''}" data-act="ppmode" data-v="0">J'AVANCE TOUT (0 €)</button></div>
       <div style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px;white-space:nowrap">ou montant précis</span><input class="libin" id="ppart" inputmode="decimal" placeholder="ex. 12,50" value="${esc(String(f.part || '') === '0' ? '' : f.part || '')}" style="margin:0"></div>
       <div class="note" id="presume" style="display:block"></div></div>` : ''}` : ''}
     ${seule ? '' : `<div class="chips">${chips}</div>${tout}`}
     ${f.type === 'Épargne' ? `${!LS.get('aidesOff', false) ? `<div class="note" style="display:block;margin:-2px 0 8px">${f.sens === 'retrait' ? `Argent que tu <b>sors</b> d'un livret (livret A, LDDS, LEP…), d'un PEA ou d'une assurance vie. Il compte comme une <b>rentrée d'argent</b> ce mois-ci et fait <b>baisser ton épargne nette</b>. Si tu le remets plus tard, saisis-le dans « ↓ Mettre de côté » : les deux s'annulent. Précise le compte dans le libellé (ex. « LDDS »).` : `Argent que tu <b>mets de côté</b> (livrets, PEA, assurance vie, crypto…). Pour de l'argent que tu en sors, choisis « ↑ Retirer ». Pour <b>prêter</b> de l'argent à quelqu'un : DÉPENSE › « 👥 Payé pour d'autres », ma part 0 €.`}</div>` : ''}
-      ${f.sens === 'retrait' && !catsDuType('Épargne', 'retrait').length ? `<div class="note" style="display:block;margin:-2px 0 8px;color:var(--bad)">Aucune catégorie de retrait dans ton fichier : ajoute une catégorie « Retrait d'épargne » (groupe Épargne) dans ⚙ Réglages › Catégories.</div>` : ''}` : ''}
+      ${f.sens === 'retrait' && !catsDuType('Épargne', 'retrait').length ? `<div class="note" style="display:block;margin:-2px 0 8px;color:var(--bad)">Aucune catégorie de retrait dans ton fichier : ajoute une catégorie « Retrait d'épargne » (groupe Épargne) dans ⚙ Réglages › Catégories et favorites.</div>` : ''}` : ''}
+    <div class="fsp" id="fsp"></div>
     <input class="libin" id="lib" placeholder="Libellé (facultatif)" value="${esc(f.lib)}" autocomplete="off" maxlength="80" enterkeyhint="done">
     <div class="chips" id="libsug" style="margin:-4px 0 8px;${sugH ? '' : 'display:none'}">${sugH}</div>
     <div class="pad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-k="${k}">${k === '⌫' ? ico.back : k}</button>`).join('')}</div>
@@ -2195,7 +2197,16 @@ function rendreForm() {
   clavierSaisie();
   const pp = $('#ppart'); if (pp) pp.addEventListener('input', ev => { S.form.part = ev.target.value; majHint(); });
   const pn = $('#pnouv'); if (pn) pn.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ajoutNom(); } });
-  majHint();
+  majHint(); hauteurSaisie();
+}
+// (L4) Hauteur stable : passer de DÉPENSE à REVENU/ÉPARGNE ne doit pas faire rétrécir la fiche (ancrée en bas)
+// ni sauter le sélecteur. On retient la plus grande hauteur « normale » vue pendant cette saisie (sans « Payé pour
+// d'autres » ni « Toutes ▾ » ouverts) et un espace vide avant le libellé comble la différence. Clavier ouvert : espace masqué.
+function hauteurSaisie() {
+  const f = S.form, z = $('#sheetIn .fsai'), sp = $('#fsp'); if (!f || !z || !sp || z.classList.contains('kb')) return;
+  sp.style.height = '0px'; const h = z.offsetHeight; if (!h) return;
+  if (!f.partage && !f.all) f.hRef = Math.max(f.hRef || 0, h);
+  if (f.hRef > h) sp.style.height = (f.hRef - h) + 'px';
 }
 // Clavier du téléphone ouvert (libellé, prénom, part) : la fiche se resserre pour garder à l'écran montant, catégories,
 // libellé, date et ENREGISTRER (≈ 390 × 450 utiles) : on masque le pavé numérique, le type et le mois le temps de la frappe.
@@ -2227,7 +2238,7 @@ function majLibEtat() {
 }
 function majHint() {
   const f = S.form, h = $('#hint'), a = $('#amt'); if (!f || !h) return;
-  a.textContent = (f.montant || '0') + ' €'; a.classList.toggle('zero', !montantNum()); majLibEtat();
+  a.textContent = montantAff(f.montant); a.classList.toggle('zero', !montantNum()); majLibEtat();
   $('#ferr').textContent = '';
   majEspHint(); majHeures();
   if (estPrevu(f) && f.mode === 'add') { h.innerHTML = '<span class="muted">Rangé dans « À venir » : tu le valideras le jour venu, sur l\'accueil</span>'; return; }
@@ -2256,7 +2267,7 @@ function touche(k) {
   if (k === '⌫') s = s.slice(0, -1);
   else if (k === ',') { if (!s.includes(',')) s = (s || '0') + ','; }
   else { if (s.includes(',') && s.split(',')[1].length >= 2) return; if (s.replace(',', '').length >= 7) return; s = s === '0' ? k : s + k; }
-  f.montant = s; majHint();
+  f.montant = s; majHint(); hauteurSaisie();
 }
 function vibrer() {} // vibrations supprimées (jamais disponibles sur iPhone) : ne fait plus rien
 function enregistrer() {
@@ -4184,7 +4195,7 @@ function banniereEv() {
 function boutonEcussons(e) {
   if (!ouvert('saison')) return '';
   const n = new Set((e.f.evOk || []).map(o => o.def.id)).size + toutesSaisons().filter(d => editionsDe(d.id, e.f) > 0).length, N = EVENEMENTS.filter(d => !d.retire).length + toutesSaisons().length;
-  return `<button class="ghost ecubtn" data-act="ecussons-go" style="margin-top:10px">🛡️ MES ÉCUSSONS · ÉVÉNEMENTS ET SAISONS · ${n}/${N} ›</button>`;
+  return `<button class="ghost ecubtn" data-act="ecussons-go" style="margin-top:10px">🛡️ MES ÉCUSSONS · ${n}/${N} ›</button>`;
 }
 function blocBadgesEv(e) {
   if (!ouvert('saison')) return '';
@@ -4257,7 +4268,7 @@ function carteSemaineMini() {
   if (st.cur) { const ok = st.cur.dep <= st.cur.montant + 0.005;
     return dcard({ tag, xp: 30, titre: st.cur.cat + ' ≤ ' + e0(st.cur.montant), pct: st.cur.montant > 0 ? st.cur.dep / st.cur.montant * 100 : 100, etat: ok ? '' : 'rate', msg: 'Seules les dépenses saisies depuis l\'appli comptent.', sous: `${e0(st.cur.dep)} dépensés${ok ? '' : ' · <b class="c-bad">raté</b>'}` }); }
   const p = propositionSemaine(); if (!p) return '';
-  return dcard({ tag, xp: 30, titre: p.cat + ' < ' + e0(p.montant), etat: 'offre', act: 'sem-ok', attrs: `data-cat="${esc(p.cat)}" data-m="${p.montant}"`, sous: '20 % de moins que d\'habitude · <b>touche pour relever</b>' });
+  return dcard({ tag, xp: 30, titre: p.cat + ' < ' + e0(p.montant), etat: 'offre', act: 'sem-ok', attrs: `data-cat="${esc(p.cat)}" data-m="${p.montant}"`, sous: '<b>Touche pour relever</b> · 20 % de moins qu\'avant' });
 }
 function carteSurpriseMini(e) {
   const pct = e.id === 'baisse' ? (e.ref > 0 ? e.dep / e.ref * 100 : 0) : e.cur / e.max * 100;
@@ -4963,10 +4974,10 @@ function statsAnnee(y) {
     <div class="tl"><span>REVENUS${r.length < 12 ? ' (' + r.length + ' MOIS)' : ''}</span><span>${e2(rev)}</span></div>
     <div class="tl"><span>DÉPENSES</span><span>${neg2(dep)}</span></div>
     <hr class="dash"><div class="tl tot"><span>NON DÉPENSÉ</span><span class="${nd < 0 ? 'c-bad' : 'c-ok'}">${nd >= 0 ? '+' : ''}${e2(nd)}</span></div>
-    <div class="tl"><span>TAUX D'ÉPARGNE</span><span>${rev ? Math.round(nd / rev * 100) + ' %' : '—'}</span></div>
+    <div class="tl"><span>PART DES REVENUS NON DÉPENSÉE</span><span>${rev ? Math.round(nd / rev * 100) + ' %' : '—'}</span></div>
     ${r.length < 12 ? `<div class="tl"><span>PRÉVU FIN ${y}</span><span>${proj >= 0 ? '+' : ''}${e2(proj)}</span></div>` : ''}</div>`;
   h += `<div class="sec"><span>MOIS PAR MOIS</span><span>TOUCHE UN MOIS</span></div>` + graphMois(l);
-  h += `<div class="sec"><span>MON ÉPARGNE</span><span>${e0(placee)} PLACÉS${retiree ? ' · ' + e0(retiree) + ' RETIRÉS' : ''}</span></div>` + graphEpargne(l);
+  h += `<div class="sec"><span>CE QUI RESTE CHAQUE MOIS</span></div>` + graphEpargne(l) + `<div class="note" style="margin-top:4px">🐷 Dont <b>${e0(placee)} placés</b> en épargne${retiree ? ' · ' + e0(retiree) + ' retirés' : ''} en ${y}.</div>`;
   h += `<div class="note" style="margin-top:4px">« Non dépensé » = revenus − dépenses : ce qui est resté sur ton compte ou parti sur un livret.</div>`;
   // catégories de l'année vs même période de l'année précédente
   const dern = r.length ? r[r.length - 1].m : 0, tot = {}, prev = {};
@@ -4984,7 +4995,7 @@ function statsAnnee(y) {
   if (abos.length) {
     const ta = abos.reduce((s, a) => s + a.an, 0);
     h += `<div class="sec"><span>MES ABONNEMENTS ${y}</span><span>${e0(ta)}/AN · ${e0(ta / 12)}/MOIS</span></div>`;
-    abos.forEach(a => h += `<button class="up" data-act="ech" data-id="${a.e.id}"><span>${esc(a.e.freq === 'Mensuel' ? 'MOIS' : a.e.freq.slice(0, 4).toUpperCase() + '.')}</span><span>${esc(a.e.lib)}</span><span>${e0(a.an)}</span></button>`);
+    abos.forEach(a => h += `<button class="up" data-act="ech" data-id="${a.e.id}"><span>${esc(a.e.freq.toUpperCase())}</span><span>${esc(a.e.lib)}</span><span style="white-space:nowrap">${a.e.freq === 'Mensuel' ? e2(a.e.montant) + ' €/mois <small class="muted">(' + e0(a.an) + '/an)</small>' : e0(a.an) + '/an'}</span></button>`);
     h += `<div class="note">À passer en revue tous les 3 mois : touche un abonnement pour l'arrêter ou le modifier.</div>`;
   }
   // comparaison des années
