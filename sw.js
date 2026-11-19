@@ -14,7 +14,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit);
+    const net = fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit || caches.match('./index.html'));
     return hit || net;
   }));
 });

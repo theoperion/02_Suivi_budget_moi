@@ -1081,7 +1081,7 @@ function cats() {
 // catMap() mémorisée le temps d'un affichage : vidée avec memo, ou si les catégories / leur ordre changent
 let cacheCats = null;
 function catMap() {
-  let ro = null; try { ro = localStorage.getItem('jauge.ordre'); } catch (e) {}
+  const ro = JSON.stringify(LS.get('ordre', null)); // (L1) via LS : le préfixe de stockage des copies s'applique
   const C = S.data && S.data.categories, z = cacheCats;
   if (z && z.m === memo && z.d === S.data && z.c === C && z.n === (C ? C.length : -1) && z.ro === ro) return z.v;
   const o = {}; cats().forEach((c, i) => o[c.nom] = Object.assign({ ordre: i }, c));
@@ -1108,9 +1108,10 @@ function calc(y, m) {
   Object.keys(par).forEach(n => {
     const c = cm[n], t = par[n].j + par[n].e;
     if (estAv(n)) av += t;
+    else if (c.type === 'Revenu' && estRetraitEp(n)) { ep -= t; epR += t; } // (L1) « Retraits d'épargne (LEP…) » rangé en revenu : un retrait, pas un revenu
     else if (c.type === 'Revenu') rev += t;
     else if (c.type === 'Épargne') { ep += t; if (!/pr[êe]t/i.test(n)) epV += t; } // (9.16) un prêt sort du compte mais n'est pas de l'épargne
-    else if (c.type === 'Retrait') { ep -= t; epR += t; }
+    else if (c.type === 'Retrait') { ep -= t; if (!estPret(n)) epR += t; } // un remboursement de prêt n'est pas un retrait d'épargne (comme bilanEpargne)
     else if (FIX.includes(c.groupe)) fix += t;
     else if (VAR.includes(c.groupe)) { vr += t; jvar += par[n].j; budVar += par[n].e; }
   });
@@ -1119,7 +1120,9 @@ function calc(y, m) {
     if (a.fait || a.deleted || a.y !== y || a.m !== m) return; const c = cm[a.cat]; if (!c) return;
     if (c.type === 'Revenu' || c.type === 'Retrait') pr += a.montant; else if (VAR.includes(c.groupe) && c.type === 'Dépense') pv += a.montant; else pf += a.montant;
   });
-  const r = { par, epV, epR, rev, fix, vr, ep, av, jvar, budVar, pv, pf, pr, dep: fix + vr };
+  // ep = tout ce qui part vers l'épargne, prêts compris, moins les retraits (pour le solde) ;
+  // epN (L1) = épargne NETTE pour les bilans et stats : versements hors prêts − retraits d'épargne (comme bilanEpargne)
+  const r = { par, epV, epR, epN: epV - epR, rev, fix, vr, ep, av, jvar, budVar, pv, pf, pr, dep: fix + vr };
   r.restant = rev - r.dep - ep - av;
   r.dispo = rev - fix - ep;
   memo.set(k, r); return r;
@@ -1130,7 +1133,7 @@ function statut(y, m) { const a = y * 12 + m, b = now.getFullYear() * 12 + now.g
 // (avant, un seul total « budgets − dépenses » : un gros dépassement rendait la courbe du solde prévu toute plate).
 // Un budget annuel déjà entièrement consommé sur l'année ne prévoit plus rien. Un achat prévu compte s'il dépasse le reste de sa catégorie.
 function resteBudgets(y, m) {
-  const c = calc(y, m), cm = catMap(), pv = {}, noms = new Set();
+  const cm = catMap(), pv = {}, noms = new Set();
   if (y * 12 + m >= nowYM()) ((S.data && S.data.avenir) || []).forEach(a => { if (!a.fait && !a.deleted && a.y === y && a.m === m && estCourante(a.cat)) { pv[a.cat] = (pv[a.cat] || 0) + a.montant; noms.add(a.cat); } });
   cats().forEach(x => { if (estCourante(x.nom) && x.budget > 0 && !estAv(x.nom)) noms.add(x.nom); });
   // (9.10) Mois en cours : on ne prévoit plus que la part du budget des jours restants (aujourd'hui compris).
@@ -1243,7 +1246,6 @@ function joursAvecDep() {
   const p = getPref('jeu', null), L = p && Array.isArray(p.jd) ? p.jd : JD_DEFAUT;
   return L.filter(x => Array.isArray(x) && /^\d{4}-\d\d-\d\d$/.test(x[0]) && /^\d{4}-\d\d-\d\d$/.test(x[1]) && x[0] <= x[1]);
 }
-const estJourDep = k => joursAvecDep().some(([a, b]) => k >= a && k <= b);
 const chevaucheJD = (a, b) => joursAvecDep().some(([x, y]) => x <= b && y >= a); // une période [a, b] touche-t-elle un de ces jours ?
 const libJD = ([a, b]) => { const f = k => +k.slice(8) + ' ' + MC[+k.slice(5, 7) - 1] + ' ' + k.slice(0, 4); return a === b ? f(a) : f(a) + ' → ' + f(b); };
 function rendreJD() {
@@ -1410,7 +1412,6 @@ function blocMoyennes(cat) {
 const eCourt = v => { const a = Math.abs(v); return (v < 0 ? '−' : '') + (a >= 10000 ? Math.round(a / 1000) + 'k' : a >= 1000 ? (a / 1000).toFixed(1).replace('.', ',') + 'k' : Math.round(a)); };
 function graphBarres(C, titreBud, gauche) {
   const max = Math.max(1, ...C.map(o => Math.max(o.v, o.bud))) * 1.12, n = C.length;
-  const lb = C[C.length - 1].bud, yb = lb / max * 100;
   return `<div class="hleg"><span><i class="lg ok"></i>${gauche}</span><span><i class="lg bad"></i>au-dessus du budget</span><span><i class="lg tr"></i>${titreBud}</span></div>
     <div class="histo" style="grid-template-columns:repeat(${n},1fr);gap:${n > 8 ? 3 : 6}px">${C.map(o => { const h = Math.max(2, o.v / max * 100); return `<div class="hcol"><div class="hz"><i class="${o.bad ? 'bad' : 'ok'} ${o.cours ? 'cours' : ''}" style="height:${h}%"></i><b style="bottom:${o.bud / max * 100}%"></b><em class="hv ${o.bad ? 'c-bad' : ''}" style="bottom:calc(${h}% + 2px)">${eCourt(o.v)}</em></div><span>${o.lab}</span></div>`; }).join('')}</div>
     <div class="hunit"><span>montants en €${n > 8 ? ' · k = milliers' : ''}</span><span>${C.some(o => o.cours) ? 'barre claire = mois en cours' : ''}</span></div>`;
@@ -1419,7 +1420,7 @@ function histoAnnuel(c) {
   const x = budgets(S.y, S.m).find(o => o.c.nom === c.nom); if (!x) return '';
   const M = []; let cum = 0;
   for (let k = 1; k <= S.m; k++) { const p = calc(S.y, k).par[c.nom]; cum += p ? p.j + p.e : 0; M.push({ m: k, cum }); }
-  const max = Math.max(cum, x.annuel, 1), reste = x.annuel - cum;
+  const reste = x.annuel - cum;
   return `<div class="sec"><span>${esc(c.nom.toUpperCase())} · ANNÉE ${S.y}</span><span>CUMUL</span></div>
     ${graphBarres(M.map(o => ({ lab: MC[o.m - 1].slice(0, 3), v: o.cum, bud: x.annuel, bad: o.cum > x.annuel + 0.5, cours: o.m === S.m })), 'budget de l\'année : ' + e0(x.annuel), 'dépensé depuis janvier')}
     <div class="note" style="display:block;margin-top:6px">Chaque barre = le total dépensé depuis janvier, à la fin de ce mois. ${reste < -0.5 ? '<b>Dépassé de ' + e0(-reste) + '</b> : à rattraper sur tes autres budgets.' : 'Il te reste <b>' + e0(reste) + '</b> pour ' + S.y + (S.m < 12 ? ', soit ' + e0(reste / (12 - S.m + 1)) + ' par mois d\'ici décembre.' : '.')}</div>` + blocMoyennes(c.nom || c);
@@ -1431,11 +1432,9 @@ function histoBudget(cat) {
   const M = []; let y = S.y, m = S.m;
   for (let i = 0; i < 6; i++) { if (moisActif(y, m)) { const p = calc(y, m).par[cat], e = p ? p.e : 0; M.unshift({ y, m, dep: p ? p.j + e : 0, bud: c.budget + e }); } [y, m] = reculer(y, m); }
   if (M.length < 2) return '';
-  const max = Math.max(...M.map(o => Math.max(o.dep, o.bud)), 1), fini = M.filter(o => statut(o.y, o.m) === 'passe');
-  const moy = fini.length ? fini.reduce((t, o) => t + o.dep, 0) / fini.length : null, dep = fini.filter(o => o.dep > o.bud + 0.5).length;
-  const xa = c.suivi === 'Annuel' ? budgets(S.y, S.m).find(o => o.c.nom === cat) : null;
-  const verdict = xa ? `Budget annuel : ${e0(xa.dep)} dépensés sur ${e0(xa.annuel)} pour ${S.y}${xa.dep > xa.annuel + 0.5 ? ', dépassé de ' + e0(xa.dep - xa.annuel) : ', il reste ' + e0(xa.annuel - xa.dep)}.` : !fini.length ? '' : dep >= Math.ceil(fini.length / 2) ? `Dépassé ${dep} mois sur ${fini.length} : ce budget est peut-être trop serré, ou c'est là qu'une habitude dérape.` : dep ? `Dépassé ${dep} mois sur ${fini.length}.` : `Tenu tous les mois terminés 👏`;
-  return `<div class="sec"><span>${esc(cat.toUpperCase())} · 6 DERNIERS MOIS</span><span>${c.suivi === 'Annuel' ? 'PAR MOIS' : ''}</span></div>
+  const fini = M.filter(o => statut(o.y, o.m) === 'passe'), dep = fini.filter(o => o.dep > o.bud + 0.5).length;
+  const verdict = !fini.length ? '' : dep >= Math.ceil(fini.length / 2) ? `Dépassé ${dep} mois sur ${fini.length} : ce budget est peut-être trop serré, ou c'est là qu'une habitude dérape.` : dep ? `Dépassé ${dep} mois sur ${fini.length}.` : `Tenu tous les mois terminés 👏`;
+  return `<div class="sec"><span>${esc(cat.toUpperCase())} · 6 DERNIERS MOIS</span><span></span></div>
     ${graphBarres(M.map(o => ({ lab: MC[o.m - 1], v: o.dep, bud: o.bud, bad: o.dep > o.bud + 0.5, cours: statut(o.y, o.m) === 'cours' })), 'budget : ' + e0(c.budget) + '/mois', 'dépensé dans le mois')}
     <div class="note" style="display:block;margin-top:6px">Chaque barre = ce que tu as dépensé dans le mois. ${verdict}</div>` + blocMoyennes(c.nom || c);
 }
@@ -1562,8 +1561,6 @@ function anomaliesVisibles() {
 }
 function blocAnomalies() {
   const t = S.data.anomalies || ''; const lines = t.split('\n').map(s => s.trim()).filter(Boolean);
-  const head = lines.find(l => l.startsWith('⚠') && /ANOMALIE/.test(l));
-  const items = lines.filter(l => l.startsWith('•')).map(l => l.replace(/^•\s*/, ''));
   const rap = lines.filter(l => l.startsWith('📅')).map(l => l.replace(/^📅\s*/, ''));
   let h = '';
   // Anomalies : on peut dire « c'est voulu ».
@@ -1661,23 +1658,33 @@ function courbeSolde(yT, mT) { // (9.18) yT/mT : prolonge la prévision jusqu'à
   let s = soldeCalcule(y, m); if (s == null) return null;
   const cm = catMap(), oc0 = occurrences(y, m), iso = j => y + '-' + String(m).padStart(2, '0') + '-' + String(j).padStart(2, '0');
   // Passé du mois : on remonte depuis le solde d'aujourd'hui (échéancier + lignes datées), pour voir le chemin parcouru
+  // (L1) Une ligne du mois sans date (ou datée hors des jours passés) compte aujourd'hui, comme dans le solde calculé.
+  const jourL = e => { const k = e.date && e.date.slice(0, 8) === iso(1).slice(0, 8) ? +e.date.slice(8, 10) : 0; return k >= 1 && k < d ? k : d; };
+  const JM = S.journal.filter(e => !e.deleted && e.y === y && e.m === m && e.montant && cm[e.cat]);
   const pts = []; let t = s;
   for (let j = d; j >= 1; j--) {
     const ev = oc0.filter(o => o.jour === j).map(o => ({ lib: o.lib, v: signe(o.type) * o.v }));
     pts.unshift({ y, m, j, s: t, ev, passe: true });
-    t -= ev.reduce((a, e) => a + e.v, 0) + S.journal.filter(e => !e.deleted && e.date === iso(j) && e.montant && cm[e.cat]).reduce((a, e) => a + signe(cm[e.cat].type) * e.montant, 0);
+    t -= ev.reduce((a, e) => a + e.v, 0) + JM.filter(e => jourL(e) === j).reduce((a, e) => a + signe(cm[e.cat].type) * e.montant, 0);
   }
   s = pts[pts.length - 1].s;
   const MS = [[y, m]]; { let yy = y, mm = m; const fin = yT ? Math.max(yT * 12 + mT, y * 12 + m + 1) : y * 12 + m + 1; while (yy * 12 + mm < fin) { mm++; if (mm > 12) { mm = 1; yy++; } MS.push([yy, mm]); } }
   MS.forEach(([yy, mm], k) => {
     const b = bilan(yy, mm), nbj = dim(yy, mm), j0 = k === 0 ? d : 0, reste = nbj - j0;
-    const parJour = reste > 0 ? Math.max(0, k === 0 ? b.resteBud : b.prevVar) / reste : 0;
-    const oc = occurrences(yy, mm), av = avenirMois(yy, mm);
+    const oc = occurrences(yy, mm), av = avenirMois(yy, mm).filter(a => cm[a.cat]); // une catégorie inconnue n'est pas comptée (comme dans calc)
+    // (L1) Part étalée = reste des budgets courants MOINS leurs achats prévus, montrés à leur date (avant : comptés deux fois).
+    // Mois à venir : l'Échéancier (à sa date) et les lignes déjà saisies (à leur date) ne sont plus dans la part étalée.
+    // Ainsi le dernier point du mois = solde de départ + bilan().fin.
+    const pvC = av.filter(a => estCourante(a.cat)).reduce((t, a) => t + a.montant, 0);
+    const parJour = reste > 0 ? Math.max(0, b.resteBud - pvC) / reste : 0;
+    const JF = k === 0 ? [] : S.journal.filter(e => !e.deleted && e.y === yy && e.m === mm && e.montant && cm[e.cat]);
+    const jourF = e => { const q = e.date && e.date.slice(0, 7) === yy + '-' + String(mm).padStart(2, '0') ? +e.date.slice(8, 10) : 1; return Math.max(1, Math.min(q, nbj)); };
     for (let j = j0 + 1; j <= nbj; j++) {
       const ev = [];
       oc.forEach(o => { if (Math.min(o.jour, nbj) === j) { s += signe(o.type) * o.v; ev.push({ lib: o.lib, v: signe(o.type) * o.v }); } });
+      JF.forEach(e => { if (jourF(e) === j) { const v = signe(cm[e.cat].type) * e.montant; s += v; ev.push({ lib: e.lib || e.cat, v }); } });
       // Achat prévu sans jour (le 15) ou dont le jour est passé : compté demain, comme dans « à prélever » (C5).
-      av.forEach(a => { if (Math.max(Math.min(a.jour || 15, nbj), j0 + 1) === j) { const v = signe(cm[a.cat] ? cm[a.cat].type : 'Dépense') * a.montant; s += v; ev.push({ lib: a.lib, v }); } });
+      av.forEach(a => { if (Math.max(Math.min(a.jour || 15, nbj), j0 + 1) === j) { const v = signe(cm[a.cat].type) * a.montant; s += v; ev.push({ lib: a.lib, v }); } });
       s -= parJour;
       pts.push({ y: yy, m: mm, j, s, ev });
     }
@@ -1845,7 +1852,8 @@ function vueAccueil() {
   h += `<div class="sec"><span>TICKET DU MOIS</span></div><div class="ticket">
     <button class="tl" data-act="grp:rev"><span>REVENUS</span><span>${e2(b.rev)}</span></button>
     <button class="tl" data-act="grp:fix"><span>CHARGES ET ABONNEMENTS</span><span>${neg2(b.fix)}</span></button>
-    ${Math.abs(b.ep) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>ÉPARGNE ${b.ep < 0 ? 'RETIRÉE' : 'VERSÉE'}</span><span>${b.ep < 0 ? '+' + e2(-b.ep) : '−' + e2(b.ep)}</span></button>` : ''}
+    ${Math.abs(b.epN) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>ÉPARGNE ${b.epN < 0 ? 'RETIRÉE' : 'VERSÉE'}</span><span>${b.epN < 0 ? '+' + e2(-b.epN) : '−' + e2(b.epN)}</span></button>` : ''}
+    ${Math.abs(b.ep - b.epN) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>PRÊTS À DES PROCHES</span><span>${b.ep - b.epN < 0 ? '+' + e2(b.epN - b.ep) : '−' + e2(b.ep - b.epN)}</span></button>` : ''}
     <button class="tl" data-act="grp:var"><span>DÉPENSES COURANTES</span><span>${neg2(b.vr)}</span></button>
     ${Math.abs(b.av) > 0.005 ? `<div class="tl"><span>AVANCES ${b.av > 0 ? 'POUR LES AUTRES' : 'REMBOURSÉES'}</span><span>${b.av > 0 ? '−' + e2(b.av) : '+' + e2(-b.av)}</span></div>` : ''}
     <hr class="dash"><div class="tl tot"><span>RESTE</span><span class="${b.restant < 0 ? 'c-bad' : ''}">${e2(b.restant)}</span></div></div>`;
@@ -1882,7 +1890,7 @@ function vueAccueil() {
   return h;
 }
 
-const GRPS = { rev: ['REVENUS', c => c.type === 'Revenu'], fix: ['CHARGES ET ABONNEMENTS', c => FIX.includes(c.groupe) && c.type === 'Dépense'], var: ['DÉPENSES COURANTES', c => VAR.includes(c.groupe) && c.type === 'Dépense'], ep: ['ÉPARGNE', c => c.type === 'Épargne' || c.type === 'Retrait'] };
+const GRPS = { rev: ['REVENUS', c => c.type === 'Revenu' && !estRetraitEp(c.nom)], fix: ['CHARGES ET ABONNEMENTS', c => FIX.includes(c.groupe) && c.type === 'Dépense'], var: ['DÉPENSES COURANTES', c => VAR.includes(c.groupe) && c.type === 'Dépense'], ep: ['ÉPARGNE', c => c.type === 'Épargne' || c.type === 'Retrait' || estRetraitEp(c.nom)] }; // (L1) comme le ticket : un retrait d'épargne rangé en revenu va avec l'épargne
 function okFiltre(cat) {
   const c = catMap()[cat];
   if (S.filtre.cat && cat !== S.filtre.cat) return false;
@@ -2529,7 +2537,7 @@ const jjmm = iso => iso ? (+iso.slice(8)) + '/' + iso.slice(5, 7) : '';
 // Salaire de l'Échéancier daté du 1er du mois prochain (souvent versé quelques jours avant)
 function salaireDejaLa() {
   const y = now.getFullYear(), m = now.getMonth() + 1, ny = m === 12 ? y + 1 : y, nm = m === 12 ? 1 : m + 1;
-  return occurrences(ny, nm).filter(o => o.type === 'Revenu' && o.jour === 1).reduce((t, o) => t + o.v, 0);
+  return occurrences(ny, nm).filter(o => o.type === 'Revenu' && o.jour === 1 && !estRetraitEp(o.cat)).reduce((t, o) => t + o.v, 0);
 }
 function totalSaisi() {
   const f = S.form, b = numTxt(f.banque); if (isNaN(b)) return null;
@@ -3509,7 +3517,7 @@ function bilanAnnee(y) {
   const L = []; for (let m = 1; m <= 12; m++) { if (ymNum(y, m) >= nowYM()) break; if (moisActif(y, m)) L.push(m); }
   if (!L.length) return null;
   const R = L.map(m => { const c = calc(y, m); return { m, c, res: c.restant + c.av, bu: budgets(y, m).filter(x => !x.sa) }; });
-  const rev = R.reduce((t, x) => t + x.c.rev, 0), dep = R.reduce((t, x) => t + x.c.dep, 0), ep = R.reduce((t, x) => t + x.c.ep, 0);
+  const rev = R.reduce((t, x) => t + x.c.rev, 0), dep = R.reduce((t, x) => t + x.c.dep, 0), ep = R.reduce((t, x) => t + x.c.epN, 0); // (L1) épargne nette, sans les prêts
   const nd = rev - dep, best = R.slice().sort((a, b) => b.res - a.res)[0], worst = R.slice().sort((a, b) => a.res - b.res)[0];
   const cats0 = {}, cm = catMap(); R.forEach(x => Object.keys(x.c.par).forEach(n => { if (estCourante(n)) cats0[n] = (cats0[n] || 0) + x.c.par[n].j + x.c.par[n].e; }));
   const top = Object.entries(cats0).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -3528,7 +3536,7 @@ function blocBilans() {
     if (!L.length) return h + `<div class="note">Le premier bilan apparaîtra le 1er du mois prochain.</div>`;
     (all ? L : L.slice(0, 2)).forEach(([a, b]) => {
       const c = calc(a, b), bu = budgets(a, b).filter(x => !x.sa), ok = bu.filter(x => x.reste >= -0.5).length, df = etatDefi(a, b), r = c.restant;
-      h += `<button class="bil" data-act="bilmois" data-y="${a}" data-m="${b}"><div><b>${esc(MOIS[b - 1].toUpperCase())} ${a}</b><small>${ok}/${bu.length} budgets tenus${c.ep > 0.5 ? ' · ' + e0(c.ep) + ' épargnés' : ''}${df ? ' · défi ' + (df.ok ? '✓' : '✗') : ''}</small></div>
+      h += `<button class="bil" data-act="bilmois" data-y="${a}" data-m="${b}"><div><b>${esc(MOIS[b - 1].toUpperCase())} ${a}</b><small>${ok}/${bu.length} budgets tenus${c.epN > 0.5 ? ' · ' + e0(c.epN) + ' épargnés' : ''}${df ? ' · défi ' + (df.ok ? '✓' : '✗') : ''}</small></div>
         <span class="${r <= -0.5 ? 'c-bad' : r >= 0.5 ? 'c-ok' : ''}">${Math.abs(r) < 0.5 ? '0 €' : (r > 0 ? '+' : '') + e0(r)}</span></button>`;
     });
     if (L.length > 2) h += `<button class="chip" style="margin-top:8px" data-act="bilall">${all ? 'Moins ▴' : 'Voir plus (' + L.length + ' mois) ▾'}</button>`;
@@ -4332,7 +4340,7 @@ function epNetMois(y, m) { return versementsEpargne(y).filter(x => x.m === m && 
 function majObjMois() { const z = $('#objmois'); if (!z) return; const n = numTxt(S.form.montant || ''); z.innerHTML = n > 0 ? `soit <b>≈ ${e0(n / 12)} par mois</b> pendant 12 mois` : "Montant pour <b>toute l'année</b> (pas par mois)."; }
 function rendreObjEdit() {
   const f = S.form;
-  let t = 0, rv = 0, n = 0; for (let k = 1; k <= 6; k++) { let yy = now.getFullYear(), mm = now.getMonth() + 1 - k; while (mm < 1) { mm += 12; yy--; } if (moisActif(yy, mm)) { t += epNetMois(yy, mm); const P = calc(yy, mm).par; rv += calc(yy, mm).rev - Object.keys(P).filter(estRetraitEp).reduce((z, k) => z + P[k].j + P[k].e, 0); n++; } }
+  let t = 0, rv = 0, n = 0; for (let k = 1; k <= 6; k++) { let yy = now.getFullYear(), mm = now.getMonth() + 1 - k; while (mm < 1) { mm += 12; yy--; } if (moisActif(yy, mm)) { t += epNetMois(yy, mm); rv += calc(yy, mm).rev; /* (L1) calc().rev ne compte plus les retraits d'épargne */ n++; } }
   const r100 = v => Math.round(v / 100) * 100, ryt = n ? r100(t / n * 12) : 0, dix = n ? r100(rv / n * 12 * 0.1) : 0;
   const sug = (v, txt) => `<button class="chip sug" data-act="obj-sug" data-v="${v}" style="display:block;width:100%;text-align:left;margin-top:6px;white-space:normal;height:auto;line-height:1.35;padding:8px 12px"><b>${e0(v)} par an</b> · ≈ ${e0(v / 12)}/mois · ${txt}</button>`;
   $('#sheetIn').innerHTML = enteteSheet("OBJECTIF D'ÉPARGNE " + f.y, null) + `
@@ -4754,7 +4762,7 @@ function rendreBilMois() {
       <div class="wgrid">
         ${tuile('BUDGETS TENUS', b.ok.length + '/' + b.bu.length, b.ko[0] ? 'le plus dépassé : ' + esc(b.ko[0].c.nom) : 'aucun dépassement 👏')}
         ${tuile('VS TA MOYENNE', b.vsMoy == null ? '—' : (b.vsMoy > 0 ? '+' : '') + b.vsMoy + ' %', 'dépenses courantes', b.vsMoy > 0 ? 'c-bad' : 'c-ok')}
-        ${tuile('ÉPARGNE', e0(b.c.ep), Math.round(b.taux * 100) + ' % non dépensé')}
+        ${tuile('ÉPARGNE', e0(b.c.epN), Math.round(b.taux * 100) + ' % non dépensé')}
         ${tuile(b.jours != null ? 'JOURS SANS DÉPENSE' : 'DÉFI', b.jours != null ? b.jours : (b.defi ? (b.defi.ok ? 'RÉUSSI' : 'RATÉ') : '—'), b.jours != null && b.defi ? 'défi ' + (b.defi.ok ? 'réussi ✓' : 'raté') : '')}
       </div>
       ${b.top.length ? `<div class="wline">💸 ${b.top.map((t, i) => `<b>${i + 1}. ${esc(t[0])}</b> ${e0(t[1])}`).join(' · ')}</div>` : ''}
@@ -4825,10 +4833,15 @@ function vueStats() {
   return h + (v === 'annee' ? statsAnnee(S.y) : v === 'progres' ? vueProgres() : statsMois(S.y, S.m));
 }
 function moisAnnee(y) {
+  const cm = catMap();
   return Array.from({ length: 12 }, (_, i) => {
     const m = i + 1, b = bilan(y, m), reel = b.st !== 'futur';
-    const dep = reel ? b.dep : b.fix + b.prevVar + b.pf, rev = reel ? b.rev : b.rev + b.pr;
-    return { m, b, reel, rev, dep, ep: b.ep, nd: rev - dep };
+    // (L1) Mois à venir : les achats prévus d'épargne et d'avances ne sont pas des dépenses, un retrait d'épargne prévu n'est pas un revenu
+    const AV = reel ? [] : avenirMois(y, m).filter(a => cm[a.cat]), som = f => AV.filter(f).reduce((t, a) => t + a.montant, 0);
+    const pfHors = som(a => !estCourante(a.cat) && cm[a.cat].type !== 'Revenu' && cm[a.cat].type !== 'Retrait' && (cm[a.cat].type === 'Épargne' || estAv(a.cat)));
+    const prRet = som(a => (cm[a.cat].type === 'Revenu' || cm[a.cat].type === 'Retrait') && (cm[a.cat].type === 'Retrait' || estRetraitEp(a.cat)));
+    const dep = reel ? b.dep : b.fix + b.prevVar + b.pf - pfHors, rev = reel ? b.rev : b.rev + b.pr - prRet;
+    return { m, b, reel, rev, dep, ep: b.epN, nd: rev - dep };
   });
 }
 const pct = (a, b) => b ? Math.round((a - b) / Math.abs(b) * 100) : null;
@@ -5018,13 +5031,13 @@ function sauverEnvies(p) { setPref('envies', compacterEnvies(p)); }
 // divisée par les heures du mois = heures par semaine × 52 ÷ 12 (35 h → 151,67 h). Un taux saisi à la main (envies.r.taux) prime.
 function tauxHoraire() {
   const r = prefEnvies().r, hs = +r.hs > 0 ? +r.hs : HEURES_SEMAINE_DEFAUT, heures = hs * 52 / 12, manuel = +r.taux > 0 ? +r.taux : 0;
-  const noms = cats().filter(c => c.type === 'Revenu' && /salaire|paie|paye/.test(norm(c.nom))).map(c => c.nom);
+  const noms = cats().filter(c => c.type === 'Revenu' && !estRetraitEp(c.nom) && /salaire|paie|paye/.test(norm(c.nom))).map(c => c.nom);
   const L = []; let [y, m] = reculer(now.getFullYear(), now.getMonth() + 1);
   for (let k = 0; k < 3; k++) { const v = noms.reduce((t, n) => t + depenseMois(n, y, m), 0); if (v > 0) L.push(v); [y, m] = reculer(y, m); }
   let salaire = L.length ? L.reduce((t, v) => t + v, 0) / L.length : 0, base = L.length ? 'salaire' : null;
   if (!salaire && S.data) { // pas de catégorie salaire renseignée : revenus mensuels réguliers de l'Échéancier
     const cm = catMap();
-    salaire = (S.data.echeancier || []).filter(e => !e.deleted && !e.pause && e.freq === 'Mensuel' && cm[e.cat] && cm[e.cat].type === 'Revenu' && !estAv(e.cat)).reduce((t, e) => t + (+e.montant || 0), 0);
+    salaire = (S.data.echeancier || []).filter(e => !e.deleted && !e.pause && e.freq === 'Mensuel' && cm[e.cat] && cm[e.cat].type === 'Revenu' && !estAv(e.cat) && !estRetraitEp(e.cat)).reduce((t, e) => t + (+e.montant || 0), 0);
     if (salaire > 0) base = 'echeancier';
   }
   salaire = r2(salaire);
