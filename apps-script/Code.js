@@ -14,7 +14,8 @@
  * v5.14 : envois rejoués sans risque après une coupure : chaque ajout, suppression, ligne d'Échéancier ou d'« À venir »
  *         porte un identifiant (uid) gardé 30 jours (propriété UIDS, plus seulement 6 h) ; une suppression déjà faite
  *         n'efface plus une 2e ligne identique ; une modification déjà faite répond « ok » ; libellé écrit en texte
- *         (« =… », « 1,20 », « 12/11 » ne sont plus transformés par Sheets).
+ *         (cellule au format « Texte brut » : « =… », « 1,20 », « 12/11 » ne sont plus transformés par Sheets) ;
+ *         la mémoire UIDS n'est écrite qu'une fois par demande (un lot de 20 envois = 1 écriture).
  * v5.13 : une fois, les catégories « Courses » passent en suivi « Sans alerte ».
  * v5.12 : préférence « envies » (liste d'envies) ; colonne « Payé en » accepte aussi « En ligne ».
  * v5.11 : action « lot » : plusieurs envois en une demande (un seul verrou) ; un envoi refusé n'empêche pas les suivants.
@@ -385,9 +386,9 @@ function defi_(mois, cat, montant) {
 // v5.14 · Mémoire durable des envois déjà faits (uid → ligne), pour qu'un envoi rejoué après une coupure
 // (le fichier a écrit, la réponse s'est perdue) ne soit pas appliqué deux fois, même le lendemain.
 // Propriété « UIDS » : { "type:uid": [ligne, decale(0/1), jour] }, 30 jours et ~8 000 caractères au plus (les plus anciens partent).
-// Toujours lue et écrite sous le verrou (avecVerrou_).
+// Toujours lue et écrite sous le verrou (avecVerrou_) : retenue en mémoire pendant la demande, écrite une fois à la fin.
 const UIDS_JOURS = 30, UIDS_MAX = 8000;
-let UIDS_ = null;
+let UIDS_ = null, UIDS_SALE_ = false;
 function uidsLire_() {
   if (UIDS_) return UIDS_;
   try { UIDS_ = JSON.parse(PropertiesService.getScriptProperties().getProperty('UIDS') || '{}') || {}; } catch (e) { UIDS_ = {}; }
@@ -399,6 +400,12 @@ function uidRetenir_(cle, row, decale) {
   if (!cle) return;
   const m = uidsLire_(), j = Math.floor(Date.now() / 86400000);
   m[cle] = [row || 0, decale ? 1 : 0, j];
+  UIDS_SALE_ = true; // écrit une seule fois, à la fin de la demande (uidsEcrire_, sous le verrou), même pour un lot de 20 envois
+}
+function uidsEcrire_() {
+  if (!UIDS_SALE_ || !UIDS_) return;
+  UIDS_SALE_ = false;
+  const m = UIDS_, j = Math.floor(Date.now() / 86400000);
   let cles = Object.keys(m).filter(k => !(Array.isArray(m[k]) && j - m[k][2] <= UIDS_JOURS));
   cles.forEach(k => delete m[k]);
   let t = JSON.stringify(m);
@@ -409,22 +416,20 @@ function uidRetenir_(cle, row, decale) {
   PropertiesService.getScriptProperties().setProperty('UIDS', t);
 }
 
-// v5.14 · Libellé écrit en texte : sans l'apostrophe, Sheets transforme « =x », « +3 », « 1,20 », « 12/11 », « VRAI »…
+// v5.14 · Libellé écrit en texte : sinon Sheets transforme « =x », « +3 », « 1,20 », « 12/11 », « VRAI »…
 // en formule, nombre ou date, et la ligne ne se reconnaît plus ensuite (« La ligne a changé »).
-// L'apostrophe n'est pas gardée dans la cellule : la valeur relue est exactement le texte envoyé.
-function texte_(v) {
-  const s = String(v == null ? '' : v);
-  if (!s) return s;
-  const risque = !/^\p{L}/u.test(s) || /^(vrai|faux|true|false)$/i.test(s) ||
-    (/\d/.test(s) && s.length <= 24 && /^\p{L}{3,10}\.?[\s\/.-]*\d{1,4}([\s\/.,:-]+\d{1,4})*$/u.test(s));
-  return risque ? "'" + s : s;
-}
+// La cellule du libellé passe au format « Texte brut » AVANT d'écrire, puis le texte est écrit tel quel
+// (pas d'apostrophe devant : dans une cellule déjà en texte brut, elle resterait collée au libellé).
+function libEnTexte_(sh, row, col) { sh.getRange(row, col).setNumberFormat('@'); }
 
 function avecVerrou_(fn) {
   const lock = LockService.getScriptLock();
   // Fichier occupé par un autre envoi : on le dit à l'appli, qui réessaiera toute seule (rien n'est perdu).
   if (!lock.tryLock(20000)) return { ok: false, error: 'OCCUPE', message: 'Fichier occupé, nouvel essai automatique.' };
-  try { return fn(); } finally { lock.releaseLock(); }
+  try { return fn(); } finally {
+    try { uidsEcrire_(); } catch (err) { console.error('UIDS non enregistrés : ' + (err && err.message || err)); }
+    lock.releaseLock();
+  }
 }
 
 function valider_(l, futurOk) {
@@ -466,7 +471,8 @@ function ajouter_(l) {
   }
   const row = 5 + dernier + 1;
   if (row > jou.getMaxRows()) jou.insertRowsAfter(jou.getMaxRows(), 100);
-  jou.getRange(row, 1, 1, 4).setValues([[l.mois, texte_(l.lib || l.cat), l.cat, Math.round(Number(l.montant) * 100) / 100]]);
+  libEnTexte_(jou, row, 2);
+  jou.getRange(row, 1, 1, 4).setValues([[l.mois, String(l.lib || l.cat), l.cat, Math.round(Number(l.montant) * 100) / 100]]);
   ecrireDate_(jou, row, l.date);
   ecrirePaye_(jou, row, l.especes === true, l.enLigne === true);
   uidRetenir_(cleUid, row, false);
@@ -492,7 +498,8 @@ function modifier_(row, attendu, l) {
   const r = jou.getRange(row, 1, 1, 4), v = r.getValues()[0];
   // v5.14 : une modification déjà faite (renvoyée après une coupure) n'est plus refusée : on la réécrit à l'identique.
   if (!identique_(v, attendu) && !identique_(v, Object.assign({}, l, { lib: l.lib || l.cat }))) return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans le fichier.', detail: { row, fichier: v.map(String), attendu } };
-  r.setValues([[l.mois, texte_(l.lib || l.cat), l.cat, Math.round(Number(l.montant) * 100) / 100]]);
+  libEnTexte_(jou, row, 2);
+  r.setValues([[l.mois, String(l.lib || l.cat), l.cat, Math.round(Number(l.montant) * 100) / 100]]);
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(l.date || ''))) ecrireDate_(jou, row, l.date); // date de la dépense corrigée dans l'appli
   majPaye_(jou, row, l); // une ancienne appli qui n'envoie rien ne touche pas à la colonne
   return { ok: true, row };
@@ -533,7 +540,7 @@ function echEnregistrer_(row, attendu, e, uid) {
   if (FREQS_.indexOf(e.freq) < 0) return { ok: false, error: 'INVALIDE', message: 'Fréquence inconnue.' };
   const mois = v => (v === null || v === '' || v === undefined) ? '' : Math.min(12, Math.max(1, Math.round(Number(v))));
   const an = v => (v === null || v === '' || v === undefined) ? '' : Math.round(Number(v));
-  const ligne = [texte_(String(e.lib).trim()), e.cat, Math.round(Number(e.montant) * 100) / 100, e.freq,
+  const ligne = [String(e.lib).trim(), e.cat, Math.round(Number(e.montant) * 100) / 100, e.freq,
     e.jour ? Math.min(31, Math.max(1, Math.round(Number(e.jour)))) : '',
     mois(e.f) || 1, mois(e.g) || 12, an(e.h), an(e.i), e.pause ? true : ''];
   // v5.14 : nouvelle ligne renvoyée après une coupure (déjà écrite) : on renvoie sa ligne au lieu d'en créer une 2e.
@@ -549,6 +556,7 @@ function echEnregistrer_(row, attendu, e, uid) {
     const v = ech.getRange(row, 1, 1, 3).getValues()[0];
     if (!echIdentique_(v, attendu) && !echIdentique_(v, { lib: String(e.lib).trim(), cat: e.cat, montant: e.montant })) return { ok: false, error: 'CHANGE', message: "La ligne a changé dans l'Échéancier." };
   }
+  libEnTexte_(ech, row, 1);
   ech.getRange(row, 1, 1, 10).setValues([ligne]);
   uidRetenir_(cleUid, row, false);
   return { ok: true, row };
@@ -691,9 +699,10 @@ function avEnregistrer_(row, attendu, a, uid) {
     return { ok: false, error: 'CHANGE', message: 'La ligne a changé dans « À venir ».' };
   }
   // Écrit cellule par cellule : en cas de souci (validation, format…), le message dit laquelle.
-  const vals = [a.mois, texte_(String(a.lib).trim()), a.cat, Math.round(Number(a.montant) * 100) / 100];
+  const vals = [a.mois, String(a.lib).trim(), a.cat, Math.round(Number(a.montant) * 100) / 100];
   // Le mois est forcé en texte : sinon Sheets transforme « Novembre 2026 » en date et le menu le refuse.
   sh.getRange(row, 1).setNumberFormat('@');
+  libEnTexte_(sh, row, 2);
   ['Mois', 'Libellé', 'Catégorie', 'Montant'].forEach((nom, k) => {
     try { sh.getRange(row, k + 1).setValue(vals[k]); } catch (err) { throw new Error('« À venir », colonne ' + nom + ' : ' + err.message); }
   });

@@ -179,9 +179,11 @@ body.accent .fab{background:var(--acc);color:#fff}body.accent .tab.on{color:var(
 .danger.armed{background:var(--bad);color:#fff}
 .mrow{display:flex;justify-content:center;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;letter-spacing:1px;color:var(--ink2)}
 .grp{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ink3);margin:10px 0 5px}
-.toast{position:fixed;left:50%;bottom:calc(92px + var(--safeB));transform:translate(-50%,20px);opacity:0;z-index:30;background:var(--ink);color:var(--paper);border-radius:10px;padding:10px 14px;font-size:13px;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px);transition:opacity .18s,transform .18s;pointer-events:none}
-.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-.toast button{font-family:var(--mono);font-weight:600;letter-spacing:1px;color:var(--paper);text-decoration:underline}
+.toast{position:fixed;left:16px;right:16px;margin:0 auto;width:fit-content;max-width:440px;box-sizing:border-box;bottom:calc(92px + var(--safeB));transform:translateY(20px);opacity:0;z-index:30;background:var(--ink);color:var(--paper);border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.35;display:flex;gap:14px;align-items:center;transition:opacity .18s,transform .18s;pointer-events:none}
+.toast.on{opacity:1;transform:translateY(0);pointer-events:auto}
+.toast span{flex:1 1 auto;min-width:0}
+.toast button{flex:none;font-family:var(--mono);font-weight:600;letter-spacing:1px;color:var(--paper);text-decoration:underline}
+.toast.garde button{text-decoration:none;border:1.5px solid var(--paper);border-radius:8px;padding:6px 12px}
 .lock{position:fixed;inset:0;z-index:40;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px}
 .lock[hidden]{display:none}
 .lock .in{width:100%;max-width:340px;text-align:center}
@@ -795,7 +797,7 @@ const LS = {
 };
 function stockagePlein() {
   if (Date.now() - S_plein < 60000) return; S_plein = Date.now(); // au plus un message par minute
-  setTimeout(() => { try { toast("Mémoire du téléphone pleine : tes saisies sont envoyées au fichier mais peuvent se perdre si l'appli se ferme sans réseau. Libère de la place sur le téléphone.", 'OK', () => {}); } catch (e) {} }, 300);
+  setTimeout(() => { try { toastOK('Mémoire du téléphone pleine. Tes saisies partent bien au fichier, mais garde le réseau jusqu\'à l\'envoi et libère de la place.'); } catch (e) {} }, 300);
 }
 let S_plein = 0;
 const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -824,7 +826,9 @@ const S = {
   filtre: { cat: null, q: '' }, busy: false, lastFetch: 0, lastFrac: 0, anomOpen: false, form: null
 };
 (function chargerCache() {
-  S.queue.forEach(o => { if (!o.u) o.u = uid(); }); // identifiant d'envoi (anti-doublon du script 5.14)
+  // identifiant d'envoi (anti-doublon du script 5.14). Créé ici (envoi mis en file par une version d'avant) : le script ne le connaît
+  // peut-être pas (envoi déjà parti sans lui) → « sansUid » : une suppression incertaine sera vérifiée dans le fichier avant d'être renvoyée.
+  S.queue.forEach(o => { if (!o.u) { o.u = uid(); o.sansUid = true; } });
   const c = LS.get('cache', null);
   if (c && c.data) { S.data = c.data; S.journal = c.journal || []; }
 })();
@@ -953,6 +957,7 @@ function enfiler(op) {
 const ligneOp = o => { if (o.op !== 'update' && o.op !== 'delete') return null; const e = trouver(o.id); return e && e.row != null ? e.row : null; };
 function seuilSuppr() { let m = Infinity; S.queue.forEach(o => { if (o.op === 'delete' && o.incertain) { const r = ligneOp(o); if (r != null && r < m) m = r; } }); return m; }
 const apiUid = () => !!(S.data && versionAuMoins(S.data.apiVersion, API_UID));
+const creeLigneJ = o => o.op === 'add' || o.op === 'av-paye' || (o.op === 'update' && (() => { const e = trouver(o.id); return !!e && e.row == null; })());
 // Envois prêts à partir : le 1er envoi en attente de chaque élément (hors délai de nouvel essai), au plus « max ».
 // Une seule suppression du Journal par lot, placée en dernier : elle décale les lignes du dessous.
 function choisirLot(max) {
@@ -963,6 +968,9 @@ function choisirLot(max) {
     const libre = !k.some(c => vus.has(c)); k.forEach(c => vus.add(c));
     if (!libre || o.prochain > t) continue;
     { const r = ligneOp(o); if (r != null && r > seuil) continue; } // sous une suppression incertaine : attend
+    // Nouvelle ligne du Journal (ajout, achat prévu payé) pendant une suppression incertaine : elle attend aussi.
+    // Sinon, si le fichier avait déjà supprimé, la réponse « déjà faite » (decale) redescendrait aussi cette ligne neuve.
+    if (seuil < Infinity && creeLigneJ(o)) continue;
     if (o.op === 'delete') { if (!suppr) suppr = o; continue; }
     if (pris.length + (suppr ? 1 : 0) >= max) break;
     pris.push(o);
@@ -994,14 +1002,14 @@ function preparer(op) {
     const a = trouverAv(op.id);
     if (a && op.op === 'av-save') { const env = { lib: a.lib, cat: a.cat, montant: a.montant }; return Object.assign(P, { local: null, action: 'av-save', payload: { row: a.row || null, attendu: a.srv, a: { mois: a.mois, lib: a.lib, cat: a.cat, montant: a.montant, jour: a.jour }, uid: op.u }, apres: res => { if (res.ok) { a.row = res.row; a.srv = env; a.pending = false; } } }); }
     if (a && op.op === 'av-del') { const fin = res => { if (res.ok) S.data.avenir = S.data.avenir.filter(z => z !== a); }; return a.row ? Object.assign(P, { local: null, action: 'av-del', payload: { row: a.row, attendu: a.srv }, apres: fin }) : Object.assign(P, { apres: fin }); }
-    if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { const env = pick(j); return Object.assign(P, { local: null, action: 'av-paye', payload: { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }, apres: res => { if (res.ok) { j.row = res.row; j.srv = env; j.pending = false; } } }); } }
+    if (a && op.op === 'av-paye') { const j = trouver(op.jid); if (j) { const env = pick(j); return Object.assign(P, { local: null, action: 'av-paye', payload: { row: a.row, attendu: a.srv, ligne: Object.assign(pick(j), { date: j.date || null, uid: j.id }) }, apres: res => { if (res.ok) { j.row = res.row; j.srv = env; j.pending = false; if (res.row == null) relireVite(); } } }); } }
     return P;
   }
   if (!e) return P;
   if (op.op === 'add') {
     // On mémorise ce qui part réellement : si la ligne est modifiée pendant l'envoi, la modification suivra (P2).
     const env = pick(e);
-    return Object.assign(P, { local: null, action: 'add', payload: { ligne: Object.assign(pick(e), { date: e.date || null, uid: e.id }) }, apres: res => { if (res.ok) { e.row = res.row; e.srv = env; } } });
+    return Object.assign(P, { local: null, action: 'add', payload: { ligne: Object.assign(pick(e), { date: e.date || null, uid: e.id }) }, apres: res => { if (res.ok) { e.row = res.row; e.srv = env; if (res.row == null) relireVite(); } } });
   }
   if (op.op === 'update') {
     if (e.row == null) return P;
@@ -1016,6 +1024,8 @@ function preparer(op) {
   }
   return P;
 }
+// Ajout déjà fait mais sa ligne est introuvable (supprimée ou changée entre-temps dans le fichier) : on relit le fichier tout de suite.
+function relireVite() { S.lastFetch = 0; setTimeout(() => rafraichir(true), 0); }
 // Essai raté (réseau, fichier occupé, panne Google) : l'envoi reste en file avec son propre délai ; les autres continuent.
 function essaiRate(op, msg, incertain) {
   op.essais = (op.essais || 0) + 1;
@@ -1052,9 +1062,11 @@ async function pomper() {
   const ops = choisirLot(S.sansLot ? 1 : LOT_MAX);
   if (!ops.length) { planifierPompe(); return; }
   // Avant de renvoyer : on relit le fichier pour une suppression incertaine (script d'avant 5.14) ou une modification refusée « La ligne a changé ».
-  const aVerifier = ops.filter(o => o.arelire || (o.op === 'delete' && o.incertain && !apiUid() && ligneOp(o) != null));
+  const aVerifier = ops.filter(o => o.arelire || (o.op === 'delete' && o.incertain && (!apiUid() || o.sansUid) && ligneOp(o) != null));
   if (aVerifier.length) return verifierAvantEnvoi(aVerifier);
   S.busy = true; S.enVol = new Set(ops); setSync('sync');
+  // Parti vers un script d'avant la 5.14 : il ne retient pas l'identifiant, un renvoi plus tard (même au 5.14) doit être vérifié.
+  if (!apiUid()) ops.forEach(o => { o.sansUid = true; });
   const preps = ops.map(preparer), aEnvoyer = preps.filter(p => !p.local);
   let reps = null, erreurGlobale = null, lotRefuse = null, repondu = false;
   try {
@@ -1122,7 +1134,7 @@ function trancherSuppr(o, F) {
   if (apres) { o.err = null; return terminer(o, Object.assign(p, { apres: () => { S.journal = S.journal.filter(z => z !== e); if (d) S.journal.forEach(z => { if (z.row != null && z.row > r0) z.row--; }); } }), { ok: true }); }
   // Doute : on retire l'envoi sans rien supprimer de plus.
   S.queue = S.queue.filter(q => q !== o); S.journal = S.journal.filter(z => z !== e); S.gen = (S.gen || 0) + 1; S.envoye = true;
-  toast('Suppression de « ' + e.lib + ' » à vérifier : le fichier a changé entre-temps. Supprime-la à nouveau si elle réapparaît.');
+  toastOK('« ' + (e.lib || e.cat) + ' » n\'est peut-être pas supprimée : le fichier a changé entre-temps. Si elle réapparaît, supprime-la à nouveau.');
 }
 // Modification refusée « La ligne a changé » : déjà faite (le fichier a déjà le nouveau contenu) → réussie ;
 // la ligne a remonté (même contenu un peu plus haut) → relancée à sa nouvelle place ; sinon abandon comme avant.
@@ -1312,8 +1324,8 @@ function joursSansDepense() {
 function rendreExclus() {
   // (lot L2) Seules les dépenses essentielles sont proposées (+ celles déjà cochées avant, pour pouvoir les décocher)
   const f = S.form, L = cats().filter(c => (estCourante(c.nom) || estFixeManuelle(c.nom)) && (estEssentielle(c.nom) || f.ex.includes(c.nom)));
-  $('#sheetIn').innerHTML = enteteSheet('JOURS SANS DÉPENSE', f.retour || null) + `
-    <div class="note" style="display:block;margin-top:10px">Coche les dépenses <b>essentielles</b> qui <b>ne cassent pas</b> un jour sans dépense (séries, Novembre sobre, mission du mois, calendrier de l'avent) : courses, cantine, santé, budgets « Sans alerte ». Les montants restent bien sûr comptés dans tes budgets. Les prélèvements automatiques de l'Échéancier ne cassent jamais une journée ; une charge fixe (abonnement, assurance…) saisie à la main, oui.<br><br>Un changement compte <b>à partir d'aujourd'hui</b> : les jours déjà passés ne bougent pas.</div>
+  $('#sheetIn').innerHTML = enteteSheet('NE CASSENT PAS LES SÉRIES', f.retour || null) + `
+    <div class="note" style="display:block;margin-top:10px">Coche les dépenses <b>essentielles</b> qui <b>ne cassent pas</b> un jour sans dépense (séries, Novembre sobre, mission du mois, calendrier de l'avent) : courses, cantine, santé, budgets « Sans alerte ». Les montants restent bien sûr comptés dans tes budgets. Les prélèvements automatiques de l'Échéancier ne cassent jamais une journée ; une charge fixe (abonnement, assurance…) saisie à la main, oui.<br><br>Un changement compte <b>à partir d'aujourd'hui</b> : les jours déjà passés ne bougent pas.<br><br>Seules les dépenses essentielles sont proposées (si tu décoches une autre catégorie, tu ne pourras plus la recocher).</div>
     <div class="chips" style="margin-top:10px">${L.map(c => `<button class="chip ${f.ex.includes(c.nom) ? 'on' : ''}" data-act="exclus-tog" data-cat="${esc(c.nom)}">${f.ex.includes(c.nom) ? '✓ ' : ''}${esc(c.nom)}</button>`).join('')}</div>
     <button class="go" data-act="exclus-ok">ENREGISTRER</button>`;
 }
@@ -1766,6 +1778,13 @@ function courbeSolde(yT, mT) { // (9.18) yT/mT : prolonge la prévision jusqu'à
       s -= parJour;
       pts.push({ y: yy, m: mm, j, s, ev });
     }
+    // Dernier jour du mois en cours : plus de jour à venir dans le mois. Les achats prévus et la part de budget du jour
+    // vont sur ce dernier point (aujourd'hui), pour que la courbe finisse bien à bilan().fin.
+    if (k === 0 && reste === 0) {
+      const P = pts[pts.length - 1]; P.ev = P.ev.slice();
+      av.forEach(a => { const v = signe(cm[a.cat].type) * a.montant; s += v; P.ev.push({ lib: a.lib, v }); });
+      s -= Math.max(0, b.resteBud - pvC); P.s = s;
+    }
   });
   pts.auj = d - 1; return pts;
 }
@@ -1853,7 +1872,7 @@ const INFOS = {
   objectif: ['OBJECTIF D\'ÉPARGNE', "La jauge montre ton <b>épargne nette</b> de l'année : ce que tu as <b>versé</b> sur ton épargne (livret, PEA, assurance vie…, saisies du Journal et virements automatiques de l'Échéancier à leur date) <b>moins</b> ce que tu en as <b>retiré</b> (catégories de retrait d'épargne, par exemple « Retraits d'épargne (LEP/Livret A) »).<br><br>Exemple : 300 € versés sur le PEA et 2 661 € retirés du livret A → épargne nette <b>−2 361 €</b> : ton épargne a baissé cette année.<br><br><b>Transfert d'un compte d'épargne à un autre</b> (livret A → PEA) : saisis les <b>deux</b> mouvements, le retrait du livret et le versement sur le PEA. Ils s'annulent : ce n'est pas de l'épargne en plus, la jauge ne bouge pas.<br><br>Les <b>prêts à des proches</b> ne comptent pas : prêter n'est pas épargner. Pour prêter, utilise DÉPENSE › « 👥 Payé pour d'autres » avec ta part à 0 € : l'appli note qu'on te doit cette somme.<br><br><b>Comment saisir</b> : + › ÉPARGNE › « ↓ Mettre de côté » pour un versement, « ↑ Retirer de l'épargne » pour un retrait.<br><br>Touche la jauge pour voir chaque mouvement compté, mois par mois."],
   prelever: ['À PRÉLEVER', "Les charges et abonnements de l'échéancier qui ne sont pas encore passés ce mois-ci, plus tes achats prévus. C'est l'argent déjà « réservé »."],
   nd: ['NON DÉPENSÉ', "Depuis janvier : revenus − dépenses. Comprend l'argent resté sur ton compte et celui parti en épargne."],
-  courbe: ['SOLDE PRÉVU', "<b>Ce que montre la courbe</b> : ton argent (banque + espèces) jour par jour. Trait plein : calculé d'après tes saisies et tes prélèvements jusqu'à aujourd'hui (ce n'est pas ton relevé bancaire). Pointillés : la suite, si tu dépenses tes budgets au rythme prévu (seulement la part des jours qui restent). Elle s'affiche pour tous les mois : un mois passé est reconstitué d'après tes saisies datées et tes prélèvements (les lignes sans date comptent le dernier jour), un mois à venir est entièrement prévu. Sous 0 € : découvert.<br><br><b>Les points</b> : <b>verts</b> = entrées de l'échéancier (salaire…) ; <b>rouges</b> = sorties (loyer, abonnements, virements…) et achats prévus.<br><br><b>Comment elle bouge</b> : une dépense dans le rythme de ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue). Une dépense au-dessus du rythme, ou un dépassement, la fait <b>descendre</b>. Si tu dépenses moins que prévu, la fin de la courbe <b>remonte</b> jour après jour."] };
+  courbe: ['SOLDE PRÉVU', "<b>Ce que montre la courbe</b> : ton argent (banque + espèces) jour par jour. Trait plein : calculé d'après tes saisies et tes prélèvements jusqu'à aujourd'hui (ce n'est pas ton relevé bancaire). Pointillés : la suite, si tu dépenses tes budgets au rythme prévu (seulement la part des jours qui restent). Sous 0 € : découvert.<br><br><b>Mois passés et à venir</b> : la courbe s'affiche aussi pour eux. Un mois passé est reconstitué d'après tes saisies datées et tes prélèvements (les lignes sans date comptent le dernier jour ; mois en cours : aujourd'hui). Un mois à venir est entièrement prévu.<br><br><b>Les points</b> : <b>verts</b> = entrées de l'échéancier (salaire…) ; <b>rouges</b> = sorties (loyer, abonnements, virements…) et achats prévus.<br><br><b>Comment elle bouge</b> : une dépense dans le rythme de ton budget ne fait pas bouger la fin de la courbe (elle était déjà prévue). Une dépense au-dessus du rythme, ou un dépassement, la fait <b>descendre</b>. Si tu dépenses moins que prévu, la fin de la courbe <b>remonte</b> jour après jour."] };
 const qi = k => LS.get('aidesOff', false) ? '' : `<span class="qi" data-act="info" data-k="${k}" role="button" aria-label="Explication">?</span>`;
 // Détail des écritures pas encore envoyées au fichier, avec la dernière erreur
 function descOp(o) {
@@ -1930,7 +1949,7 @@ function vueAccueil() {
   h += `<div class="sec"><span>TICKET DU MOIS</span></div><div class="ticket">
     <button class="tl" data-act="grp:rev"><span>REVENUS</span><span>${e2(b.rev)}</span></button>
     <button class="tl" data-act="grp:fix"><span>CHARGES ET ABONNEMENTS</span><span>${neg2(b.fix)}</span></button>
-    ${Math.abs(b.epN) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>ÉPARGNE ${b.epN < 0 ? 'RETIRÉE' : 'VERSÉE'}</span><span>${b.epN < 0 ? '+' + e2(-b.epN) : '−' + e2(b.epN)}</span></button>` : ''}
+    ${Math.abs(b.epN) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>ÉPARGNE ${b.epN < 0 ? 'RETIRÉE' : 'NETTE'}</span><span>${b.epN < 0 ? '+' + e2(-b.epN) : '−' + e2(b.epN)}</span></button>` : ''}
     ${Math.abs(b.ep - b.epN) > 0.005 ? `<button class="tl" data-act="grp:ep"><span>PRÊTS À DES PROCHES</span><span>${b.ep - b.epN < 0 ? '+' + e2(b.epN - b.ep) : '−' + e2(b.ep - b.epN)}</span></button>` : ''}
     <button class="tl" data-act="grp:var"><span>DÉPENSES COURANTES</span><span>${neg2(b.vr)}</span></button>
     ${Math.abs(b.av) > 0.005 ? `<div class="tl"><span>AVANCES ${b.av > 0 ? 'POUR LES AUTRES' : 'REMBOURSÉES'}</span><span>${b.av > 0 ? '−' + e2(b.av) : '+' + e2(-b.av)}</span></div>` : ''}
@@ -2115,12 +2134,12 @@ function sectionsModeEmploi() {
     ['progres', '🏆', 'PROGRÈS ET DÉFIS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection. Pour rendre le budget un peu plus amusant.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
       ['🎯', 'DÉFIS', "Stats › Progrès › Défis : tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail juste en dessous)."],
-      ['🎯', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>jamais au-dessus du budget</b>. Jusqu'au 5 du mois tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner). Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
+      ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>jamais au-dessus du budget</b>. Jusqu'au 5 du mois tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner). Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
       ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
       ['🕵️', 'MISSION DU MOIS', "Tirée au sort chaque mois (la même sur tous tes appareils) : un week-end à zéro, quelques jours sans dépense… Réussie = +" + MISSION_XP + " XP."],
       ['⚡', 'ÉVÉNEMENTS', "Ils apparaissent certaines semaines et durent de 2 à 10 jours. Réussis, ils rapportent un badge à collectionner et de l'XP."],
       ['🍂', 'SAISONS', FEAT_DETAIL.saison],
-      ['🧺', 'LES DÉPENSES ESSENTIELLES', "Les catégories « Sans alerte » (les courses par exemple) ne servent jamais de défi : on ne se prive pas de manger pour gagner des points."],
+      ['🧺', 'LES DÉPENSES ESSENTIELLES', "Les catégories « Sans alerte » et celles cochées dans « ne cassent pas les séries » (courses, cantine, santé…) ne servent jamais de défi : on ne se prive pas de manger pour gagner des points."],
       ['🏅', 'SUCCÈS', "Ton niveau (jusqu'à 100), tes points d'expérience (XP) et leur journal, les succès débloqués. Chaque niveau rapporte une récompense."],
       ['🛡️', 'MES ÉCUSSONS', "Les écussons des événements et des saisons : Stats › Progrès › Succès (ou Défis), bouton « 🛡️ MES ÉCUSSONS »."],
       ['🎨', 'STYLE ET COLLECTION', "Thèmes, jauges, tampons et autres cosmétiques gagnés avec les niveaux : choisis ceux que tu veux afficher."]]],
@@ -2193,7 +2212,7 @@ function rendreForm() {
       <div style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px;white-space:nowrap">ou montant précis</span><input class="libin" id="ppart" inputmode="decimal" placeholder="ex. 12,50" value="${esc(String(f.part || '') === '0' ? '' : f.part || '')}" style="margin:0"></div>
       <div class="note" id="presume" style="display:block"></div></div>` : ''}` : ''}
     ${seule ? '' : `<div class="chips">${chips}</div>${tout}`}
-    ${f.type === 'Épargne' ? `${!LS.get('aidesOff', false) ? `<div class="note" style="display:block;margin:-2px 0 8px">${f.sens === 'retrait' ? `Argent que tu <b>sors</b> d'un livret (livret A, LDDS, LEP…), d'un PEA ou d'une assurance vie. Il compte comme une <b>rentrée d'argent</b> ce mois-ci et fait <b>baisser ton épargne nette</b>. Si tu le remets plus tard, saisis-le dans « ↓ Mettre de côté » : les deux s'annulent. Précise le compte dans le libellé (ex. « LDDS »).` : `Argent que tu <b>mets de côté</b> (livrets, PEA, assurance vie, crypto…). Pour de l'argent que tu en sors, choisis « ↑ Retirer ». Pour <b>prêter</b> de l'argent à quelqu'un : DÉPENSE › « 👥 Payé pour d'autres », ma part 0 €.`}</div>` : ''}
+    ${f.type === 'Épargne' ? `${!LS.get('aidesOff', false) ? `<div class="note" style="display:block;margin:-2px 0 8px">${f.sens === 'retrait' ? `Argent que tu <b>sors</b> d'un livret (livret A, LDDS, LEP…), d'un PEA ou d'une assurance vie. Il remet de l'argent sur ton compte (ce n'est pas un revenu) et fait <b>baisser ton épargne nette</b>. Si tu le remets plus tard, saisis-le dans « ↓ Mettre de côté » : les deux s'annulent. Précise le compte dans le libellé (ex. « LDDS »).` : `Argent que tu <b>mets de côté</b> (livrets, PEA, assurance vie, crypto…). Pour de l'argent que tu en sors, choisis « ↑ Retirer ». Pour <b>prêter</b> de l'argent à quelqu'un : DÉPENSE › « 👥 Payé pour d'autres », ma part 0 €.`}</div>` : ''}
       ${f.sens === 'retrait' && !catsDuType('Épargne', 'retrait').length ? `<div class="note" style="display:block;margin:-2px 0 8px;color:var(--bad)">Aucune catégorie de retrait dans ton fichier : ajoute une catégorie « Retrait d'épargne » (groupe Épargne) dans ⚙ Réglages › Catégories et favorites.</div>` : ''}` : ''}
     <div class="fsp" id="fsp"></div>
     <input class="libin" id="lib" placeholder="Libellé (facultatif)" value="${esc(f.lib)}" autocomplete="off" maxlength="80" enterkeyhint="done">
@@ -3004,13 +3023,13 @@ function rendreDefi() {
   const moy = f.cat ? (() => { let t = 0, n = 0; for (let k = 1; k <= 6; k++) { const z = f.y * 12 + f.m - 1 - k, yy = Math.floor(z / 12), mm = (z % 12) + 1; if (moisActif(yy, mm)) { t += depenseMois(f.cat, yy, mm); n++; } } return n ? t / n : null; })() : null;
   $('#sheetIn').innerHTML = `<div class="grab"></div>
     <div class="shead"><span>DÉFI ${deMois(f.m)}</span><button class="ibtn" data-act="close" aria-label="Fermer">${ico.x}</button></div>
-    <div class="note" style="margin-top:4px">Choisis un budget et un plafond plus serré que d'habitude pour ce mois-ci. Verdict le 1er.</div>
-    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Depuis le ${DEFI_JOUR_LIBRE + 1} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au plus égal à ton budget. Jusqu'au ${DEFI_JOUR_LIBRE} du mois tu peux tout changer ; ensuite, seulement le baisser.</div>`}
+    ${verrou ? '' : `<div class="note" style="margin-top:4px">Choisis un budget et un plafond plus serré que d'habitude pour ce mois-ci. Verdict le 1er.</div>`}
+    ${verrou ? `<div class="note" style="display:block;margin-top:8px">Après le ${DEFI_JOUR_LIBRE} du mois, ton défi est verrouillé : tu peux seulement <b>baisser</b> le plafond (au plus ${e0(d0.montant)}), pas le relever, ni changer de budget, ni l'abandonner.</div>` : `<div class="note" style="display:block;margin-top:8px">Plafond au plus égal à ton budget. Jusqu'au ${DEFI_JOUR_LIBRE} du mois tu peux tout changer ; ensuite, seulement le baisser.</div>`}
     <div class="chips" style="margin-top:12px">${budgetsDefiables().filter(b => !verrou || b.nom === d0.cat).map(b => `<button class="chip ${f.cat === b.nom ? 'on' : ''}" data-act="defi-cat" data-cat="${esc(b.nom)}">${esc(b.nom)}</button>`).join('')}</div>
     ${c ? `<div class="note">Budget ${e0(c.budget)}/mois${moy != null ? ` · tu dépenses en moyenne ${e0(moy)}/mois (6 derniers mois)` : ''} · déjà ${e0(depenseMois(f.cat, f.y, f.m))} ce mois-ci</div>
-    <input class="libin" data-f="montant" inputmode="decimal" placeholder="Plafond du défi en €" value="${esc(f.montant)}" style="margin-top:10px">` : ''}
+    <input class="libin" data-f="montant" inputmode="decimal" placeholder="${verrou ? 'Plafond en €' : 'Plafond du défi en €'}" value="${esc(f.montant)}" style="margin-top:10px">` : ''}
     <div class="err" id="ferr"></div>
-    <button class="go" data-act="defi-ok">${f.existe ? 'MODIFIER LE DÉFI' : 'LANCER LE DÉFI'}</button>
+    <button class="go" data-act="defi-ok">${verrou ? 'BAISSER LE PLAFOND' : f.existe ? 'MODIFIER LE DÉFI' : 'LANCER LE DÉFI'}</button>
     ${f.existe && !verrou ? `<button class="danger ${f.arm ? 'armed' : ''}" data-act="defi-del">${f.arm ? 'TOUCHE ENCORE POUR ABANDONNER' : 'ABANDONNER LE DÉFI'}</button>` : ''}`;
   lierChamps();
   const i = $('[data-f="montant"]'); if (i) i.addEventListener('input', () => { S.form.touche = true; });
@@ -3062,7 +3081,7 @@ function vueProgres() {
   // Budgets tenus (mois d'affilée depuis novembre 2026)
   if (on('series')) { const sb = budgetsSuivis().map(c => ({ n: c.nom, s: serieBudget(c.nom) })).sort((a, b) => b.s - a.s);
     if (sb.length) h += `<div class="sec"><span>BUDGETS TENUS</span><span>DEPUIS NOV. 2026</span></div><div class="ticket">${sb.slice(0, S.allSeries ? 99 : 4).map(x => `<div class="tl"><span>${esc(x.n.toUpperCase())}</span><span class="${x.s ? 'c-ok' : 'muted'}">${x.s ? x.s + ' MOIS TENU' + (x.s > 1 ? 'S' : '') : '—'}</span></div>`).join('')}</div>${sb.length > 4 ? `<button class="chip" style="margin-top:8px" data-act="allseries">${S.allSeries ? 'Moins ▴' : 'Tous les budgets (' + sb.length + ') ▾'}</button>` : ''}`; }
-  if (on('series')) h += `<button class="note" data-act="exclus" style="display:block;width:100%;text-align:left;margin-top:12px;font-size:12px">Ne cassent pas un jour sans dépense : <b>${exclusSerie().length ? esc(exclusSerie().join(', ')) : 'aucune catégorie'}</b> · modifier ›</button>`;
+  if (on('series')) h += `<button class="note" data-act="exclus" style="display:block;width:100%;text-align:left;margin-top:12px;font-size:12px">Ne cassent pas les séries : <b>${exclusSerie().length ? esc(exclusSerie().join(', ')) : 'aucune catégorie'}</b> · modifier ›</button>`;
   if (on('series') || on('jeu')) { const L = joursAvecDep(); h += `<button class="note" data-act="jd" style="display:block;width:100%;text-align:left;margin-top:8px;font-size:12px">Jours avec dépenses non saisies (voyage, dépenses partagées) : <b>${L.length ? esc(L.map(libJD).join(' · ')) : 'aucun'}</b> · modifier ›</button>`; }
   T.defis = [h, ['saison', 'semaine', 'objectif']]; }
   // SUCCÈS et STYLE
@@ -3483,8 +3502,8 @@ function journaliserXP(e) {
 function rendreXpInfo() {
   const G = [
     ['📅 CHAQUE JOUR', [['🌙', 'Jour sans dépense courante', 5]]],
-    ['🗓️ CHAQUE SEMAINE', [['📅', 'Défi de la semaine réussi', 30], ['🛋️', 'Week-end sans dépense', 15], ['⚡', 'Événement éclair (selon rareté)', '30 à 250'], ['💭', 'Envie abandonnée une fois mûre (2 par semaine au plus)', 10]]],
-    ['📆 CHAQUE MOIS', [['✅', 'Mois bouclé', 10], ['🌿', 'Mois dans le vert', 25], ['🎯', 'Défi du mois réussi', 25], ['🕵️', 'Mission du mois réussie', 60], ['💰', 'Reste du mois mis de côté (une fois par mois)', 25], ['🛡️', 'Aucun budget dépassé', 60], ['🌱', '10 % des revenus non dépensés', 60], ['🐜', '25 % des revenus non dépensés', 150]]],
+    ['🗓️ CHAQUE SEMAINE', [['📅', 'Défi de la semaine réussi', 30], ['🛋️', 'Week-end sans dépense', 15], ['⚡', 'Événement éclair', '30 à 250'], ['💭', 'Envie mûre abandonnée (2/sem. max)', 10]]],
+    ['📆 CHAQUE MOIS', [['✅', 'Mois bouclé', 10], ['🌿', 'Mois dans le vert', 25], ['🎯', 'Défi du mois réussi', 25], ['🕵️', 'Mission du mois réussie', 60], ['💰', 'Reste du mois mis de côté', 25], ['🛡️', 'Aucun budget dépassé', 60], ['🌱', '10 % des revenus non dépensés', 60], ['🐜', '25 % des revenus non dépensés', 150]]],
     ['🍂 SAISONS (UNE FOIS PAR AN CHACUNE)', [['🍂', 'Novembre sobre', 150], ['🎄', "Calendrier de l'avent", 250], ...SAISONS_EV.map(d => ['🎟️', d.nom, d.xp]), ['🏁', "Objectif d'épargne annuel", 200]]],
     ['🏆 SUCCÈS (UNE FOIS CHACUN)', [['🥉', 'Facile', 20], ['🥈', 'Moyen', 50], ['🥇', 'Difficile', 120], ['💎', 'Extrême', 300]]]];
   $('#sheetIn').innerHTML = enteteSheet("COMMENT GAGNER DE L'XP", null) + G.map(([t, L]) => `<div class="grp" style="margin-top:14px">${t}</div><div class="ticket">${L.map(r => `<div class="tl"><span>${r[0]} ${esc(r[1])}</span><span class="c-ok">+${r[2]}</span></div>`).join('')}</div>`).join('')
@@ -3633,6 +3652,8 @@ function skinClassiqueMini(f) {
   return `<svg viewBox="0 0 300 178"><path d="M32 150 A118 118 0 0 1 268 150" fill="none" stroke="var(--track)" stroke-width="20"/><path d="M32 150 A118 118 0 0 1 268 150" fill="none" stroke="var(--ok)" stroke-width="20" stroke-dasharray="${L}" stroke-dashoffset="${L * (1 - f)}"/><g style="transform-origin:150px 150px;transform:rotate(${f * 180}deg)"><path d="M150 146 L44 150 L150 154 Z" fill="var(--bad)"/></g><circle cx="150" cy="150" r="10" fill="var(--ink)"/></svg>`;
 }
 // --- Bilans : mois et années (« Wrapped ») ---
+// Mois « vert » : sans compter les retraits d'épargne (un mois sauvé par un retrait du livret n'est pas vert) ; le résultat affiché reste le vrai.
+const vertSansRetraits = c => bilanSansRetraits(c).reste >= -0.5;
 function bilanAnnee(y) {
   const L = []; for (let m = 1; m <= 12; m++) { if (ymNum(y, m) >= nowYM()) break; if (moisActif(y, m)) L.push(m); }
   if (!L.length) return null;
@@ -3645,7 +3666,7 @@ function bilanAnnee(y) {
   const tenus = {}; R.forEach(x => x.bu.forEach(b => { tenus[b.c.nom] = (tenus[b.c.nom] || 0) + (b.reste >= -0.5 ? 1 : 0); }));
   const champion = Object.entries(tenus).sort((a, b) => b[1] - a[1])[0];
   const defis = R.filter(x => { const d = etatDefi(y, x.m); return d && d.ok; }).length;
-  return { y, n: L.length, enCours: y === now.getFullYear(), rev, dep, ep, nd, taux: rev ? nd / rev : 0, best, worst, top, abos, champion, defis, verts: R.filter(x => x.res >= -0.5).length, serie: maxSerie(R.map(x => x.res >= -0.5)) };
+  return { y, n: L.length, enCours: y === now.getFullYear(), rev, dep, ep, nd, taux: rev ? nd / rev : 0, best, worst, top, abos, champion, defis, verts: R.filter(x => vertSansRetraits(x.c)).length, serie: maxSerie(R.map(x => vertSansRetraits(x.c))) };
 }
 function blocBilans() {
   const v = S.bilVue || 'mois', all = !!S.bilAll, y0 = now.getFullYear(), m0 = now.getMonth() + 1;
@@ -3681,7 +3702,7 @@ function rendreWrapped() {
         ${tile('MOIS DANS LE VERT', b.verts + '/' + b.n, b.serie > 1 ? 'meilleure série : ' + b.serie : '')}
         ${tile('MEILLEUR MOIS', esc(MOIS[b.best.m - 1]), (b.best.res >= 0 ? '+' : '') + e0(b.best.res))}
         ${tile('MOIS LE PLUS DUR', esc(MOIS[b.worst.m - 1]), (b.worst.res >= 0 ? '+' : '') + e0(b.worst.res))}
-        ${tile('ÉPARGNE VERSÉE', e0(b.ep))}
+        ${tile(b.ep < -0.5 ? 'ÉPARGNE RETIRÉE' : 'ÉPARGNE NETTE', e0(Math.abs(b.ep)))}
         ${tile('ABONNEMENTS', e0(b.abos), e0(b.abos / b.n) + '/mois')}
         ${tile('DÉFIS RÉUSSIS', b.defis)}
       </div>
@@ -3702,7 +3723,7 @@ function setPref(k, v) {
   if (k === 'jeu') v = compacterJeu(v);
   const n = JSON.stringify(v == null ? null : v).length;
   LS.set('pref_' + k, v); if (S.data) { S.data.prefs = S.data.prefs || {}; S.data.prefs[k] = v; }
-  if (S.data && n > PREF_MAX) { sauver(); toast('Trop de données pour ton fichier Google (' + n + ' caractères sur 8 000) : ce réglage reste seulement sur ce téléphone.', 'OK', () => {}); return; }
+  if (S.data && n > PREF_MAX) { sauver(); toastOK('Ce réglage est trop gros pour ton fichier Google : il n\'a pas pu être enregistré.'); return; }
   if (S.data) appel('pref-set', { cle: k, valeur: v }); else sauver(); // appel() enregistre déjà
 }
 // « jeu » trop gros : les périodes « jours avec dépenses non saisies » (jd) qui se touchent sont fusionnées, 60 au plus (les plus récentes).
@@ -4313,7 +4334,7 @@ function carteSemaineMini() {
   if (st.cur) { const ok = st.cur.dep <= st.cur.montant + 0.005;
     return dcard({ tag, xp: 30, titre: st.cur.cat + ' ≤ ' + e0(st.cur.montant), pct: st.cur.montant > 0 ? st.cur.dep / st.cur.montant * 100 : 100, etat: ok ? '' : 'rate', msg: 'Seules les dépenses saisies depuis l\'appli comptent.', sous: `${e0(st.cur.dep)} dépensés${ok ? '' : ' · <b class="c-bad">raté</b>'}` }); }
   const p = propositionSemaine(); if (!p) return '';
-  return dcard({ tag, xp: 30, titre: p.cat + ' < ' + e0(p.montant), etat: 'offre', act: 'sem-ok', attrs: `data-cat="${esc(p.cat)}" data-m="${p.montant}"`, sous: '<b>Touche pour relever</b> · 20 % de moins qu\'avant' });
+  return dcard({ tag, xp: 30, titre: p.cat + ' < ' + e0(p.montant), etat: 'offre', act: 'sem-ok', attrs: `data-cat="${esc(p.cat)}" data-m="${p.montant}"`, sous: '<b>Touche pour accepter</b> · 20 % de moins qu\'avant' });
 }
 function carteSurpriseMini(e) {
   const pct = e.id === 'baisse' ? (e.ref > 0 ? e.dep / e.ref * 100 : 0) : e.cur / e.max * 100;
@@ -4418,7 +4439,7 @@ const estPret = n => /pr[êe]t/i.test(n || '');
 function estRetraitEp(n) {
   const c = catMap()[n]; if (!c || estPret(n)) return false;
   if (c.type === 'Retrait') return true;
-  return c.type === 'Revenu' && /retrait/i.test(n) && /([ée]pargne|livret|\bLEP\b|LDDS|PEA|assurance|PEL|CEL)/i.test(n);
+  return c.type === 'Revenu' && /\bretraits?\b/i.test(n) && /([ée]pargne|livret|\bLEP\b|LDDS|PEA|assurance|PEL|CEL)/i.test(n);
 }
 function bilanEpargne(y) { const L = versementsEpargne(y), v = L.filter(x => !x.pret && !x.retrait).reduce((t, x) => t + x.v, 0), r = L.filter(x => x.retrait).reduce((t, x) => t + x.v, 0); return { verse: v, retire: r, net: v - r }; }
 function versementsEpargne(y) {
@@ -4897,7 +4918,7 @@ function rendreBilMois() {
       <div class="wgrid">
         ${tuile('BUDGETS TENUS', b.ok.length + '/' + b.bu.length, b.ko[0] ? 'le plus dépassé : ' + esc(b.ko[0].c.nom) : 'aucun dépassement 👏')}
         ${tuile('VS TA MOYENNE', b.vsMoy == null ? '—' : (b.vsMoy > 0 ? '+' : '') + b.vsMoy + ' %', 'dépenses courantes', b.vsMoy > 0 ? 'c-bad' : 'c-ok')}
-        ${tuile('ÉPARGNE', e0(b.c.epN), Math.round(b.taux * 100) + ' % non dépensé')}
+        ${tuile(b.c.epN < -0.5 ? 'ÉPARGNE RETIRÉE' : 'ÉPARGNE NETTE', e0(Math.abs(b.c.epN)), Math.round(b.taux * 100) + ' % non dépensé')}
         ${tuile(b.jours != null ? 'JOURS SANS DÉPENSE' : 'DÉFI', b.jours != null ? b.jours : (b.defi ? (b.defi.ok ? 'RÉUSSI' : 'RATÉ') : '—'), b.jours != null && b.defi ? 'défi ' + (b.defi.ok ? 'réussi ✓' : 'raté') : '')}
       </div>
       ${b.top.length ? `<div class="wline">💸 ${b.top.map((t, i) => `<b>${i + 1}. ${esc(t[0])}</b> ${e0(t[1])}`).join(' · ')}</div>` : ''}
@@ -4908,9 +4929,10 @@ function rendreBilMois() {
 }
 // --- Lecteur de story plein écran ---
 function slidesMois(y, m) {
-  const b = bilanMois(y, m), nom = MOIS[m - 1], vert = b.res >= -0.5;
+  // Vert seulement sans l'aide d'un retrait d'épargne (comme les sceaux du jeu) ; le résultat montré reste le vrai.
+  const b = bilanMois(y, m), nom = MOIS[m - 1], vert = b.res >= -0.5 && vertSansRetraits(b.c), sauve = b.res >= -0.5 && !vert;
   const S0 = [{ bg: '#2C2C2A', k: 'TON MOIS', big: nom.toUpperCase(), sub: y + ' · touche pour avancer' },
-    { bg: vert ? '#0F6E56' : '#993C1D', k: vert ? 'TU FINIS DANS LE VERT' : 'TU FINIS DANS LE ROUGE', num: b.res, sub: e0(b.c.rev) + ' gagnés · ' + e0(b.c.dep) + ' dépensés' },
+    { bg: vert ? '#0F6E56' : sauve ? '#854F0B' : '#993C1D', k: vert ? 'TU FINIS DANS LE VERT' : sauve ? 'À FLOT GRÂCE À TON ÉPARGNE' : 'TU FINIS DANS LE ROUGE', num: b.res, sub: sauve ? 'Sans l\'argent retiré de ton épargne : ' + e0(bilanSansRetraits(b.c).reste) : e0(b.c.rev) + ' gagnés · ' + e0(b.c.dep) + ' dépensés' },
     { bg: '#1D3557', k: 'BUDGETS TENUS', big: b.ok.length + ' / ' + b.bu.length, sub: b.ko.length ? 'Le plus dépassé : ' + b.ko[0].c.nom + ' (' + e0(-b.ko[0].reste) + ')' : 'Aucun budget dépassé. Propre.' }];
   if (b.top.length) S0.push({ bg: '#4A3A2A', k: "LÀ OÙ L'ARGENT EST PARTI", bars: b.top.map(t => [t[0], t[1]]) });
   if (b.gros) S0.push({ bg: '#5A3FB0', k: 'TA PLUS GROSSE DÉPENSE', big: e0(b.gros.montant), sub: b.gros.lib + ' · ' + b.gros.cat });
@@ -4929,7 +4951,7 @@ function slidesAnnee(y) {
   if (b.top.length) S0.push({ bg: '#5A3FB0', k: "LÀ OÙ L'ARGENT EST PARTI", bars: b.top.map(t => [t[0], t[1]]) });
   S0.push({ bg: '#854F0B', k: 'TES ABONNEMENTS', big: e0(b.abos), sub: 'soit ' + e0(b.abos / b.n) + ' par mois' });
   if (b.champion) S0.push({ bg: '#0F6E56', k: 'TON BUDGET CHAMPION', big: b.champion[0].toUpperCase(), sub: 'tenu ' + b.champion[1] + ' mois sur ' + b.n });
-  S0.push({ bg: '#1B1B1A', k: 'ÉPARGNE VERSÉE', big: e0(b.ep), sub: b.defis ? b.defis + ' défi' + (b.defis > 1 ? 's' : '') + ' réussi' + (b.defis > 1 ? 's' : '') : '' });
+  S0.push({ bg: '#1B1B1A', k: b.ep < -0.5 ? 'ÉPARGNE RETIRÉE' : 'ÉPARGNE NETTE', big: e0(Math.abs(b.ep)), sub: b.defis ? b.defis + ' défi' + (b.defis > 1 ? 's' : '') + ' réussi' + (b.defis > 1 ? 's' : '') : '' });
   S0.push({ bg: b.nd >= 0 ? '#1D9E75' : '#D85A30', k: 'VERDICT ' + y, stamp: b.nd >= 0 ? 'ANNÉE TENUE' : 'À RATTRAPER', sub: 'Revenus ' + e0(b.rev) + ' · dépenses ' + e0(b.dep) });
   return S0;
 }
@@ -5010,7 +5032,6 @@ function graphEpargne(l) {
 function statsAnnee(y) {
   const l = moisAnnee(y), r = l.filter(x => x.reel), cm = catMap();
   const rev = r.reduce((s, x) => s + x.rev, 0), dep = r.reduce((s, x) => s + x.dep, 0), nd = rev - dep;
-  const placee = r.reduce((s, x) => s + Math.max(0, x.ep), 0), retiree = r.reduce((s, x) => s + Math.max(0, -x.ep), 0);
   const proj = l.reduce((s, x) => s + x.nd, 0);
   let h = '';
   if (!r.length) h += `<div class="note" style="margin-top:12px">${y} n'a pas encore commencé : tout ce qui suit est prévu.</div>`;
@@ -5021,7 +5042,8 @@ function statsAnnee(y) {
     <div class="tl"><span>PART DES REVENUS NON DÉPENSÉE</span><span>${rev ? Math.round(nd / rev * 100) + ' %' : '—'}</span></div>
     ${r.length < 12 ? `<div class="tl"><span>PRÉVU FIN ${y}</span><span>${proj >= 0 ? '+' : ''}${e2(proj)}</span></div>` : ''}</div>`;
   h += `<div class="sec"><span>MOIS PAR MOIS</span><span>TOUCHE UN MOIS</span></div>` + graphMois(l);
-  h += `<div class="sec"><span>CE QUI RESTE CHAQUE MOIS</span></div>` + graphEpargne(l) + `<div class="note" style="margin-top:4px">🐷 Dont <b>${e0(placee)} placés</b> en épargne${retiree ? ' · ' + e0(retiree) + ' retirés' : ''} en ${y}.</div>`;
+  h += `<div class="sec"><span>CE QUI RESTE CHAQUE MOIS</span></div>` + graphEpargne(l) + (() => { const B = bilanEpargne(y), det = B.retire > 0.5 ? ` (versé ${e0(B.verse)} · retiré ${e0(B.retire)})` : '';
+    return `<div class="note" style="margin-top:4px">🐷 ${B.net < -0.5 ? `Épargne nette : <b>−${e0(-B.net)}</b> en ${y}${det} : tu as plus retiré que versé.` : `Dont <b>${e0(B.net)} d'épargne nette</b> en ${y}${det}.`}</div>`; })();
   h += `<div class="note" style="margin-top:4px">« Non dépensé » = revenus − dépenses : ce qui est resté sur ton compte ou parti sur un livret.</div>`;
   // catégories de l'année vs même période de l'année précédente
   const dern = r.length ? r[r.length - 1].m : 0, tot = {}, prev = {};
@@ -5128,12 +5150,19 @@ async function okLien() {
 }
 
 /* ================= TOAST ================= */
-let tt;
-function toast(txt, btn, fn) {
+let tt, toastGarde = null;
+// garde : le message reste affiché jusqu'à l'appui sur OK (message important, long à lire). Un message éclair
+// affiché entre-temps passe par-dessus, puis le message gardé revient.
+function toast(txt, btn, fn, garde) {
   const t = $('#toast'); $('#toastT').textContent = txt; const b = $('#toastB');
-  b.hidden = !btn; b.textContent = btn || ''; b.onclick = () => { t.classList.remove('on'); fn && fn(); };
-  t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), btn ? 5000 : 2200);
+  if (garde) toastGarde = { txt, btn, fn };
+  const gardeIci = toastGarde && toastGarde.txt === txt;
+  t.classList.toggle('garde', !!gardeIci);
+  b.hidden = !btn; b.textContent = btn || ''; b.onclick = () => { if (gardeIci) toastGarde = null; t.classList.remove('on'); fn && fn(); if (!gardeIci && toastGarde) setTimeout(() => { const g = toastGarde; if (g) toast(g.txt, g.btn, g.fn); }, 250); };
+  t.classList.add('on'); clearTimeout(tt);
+  if (!gardeIci) tt = setTimeout(() => { t.classList.remove('on'); if (toastGarde) setTimeout(() => { const g = toastGarde; if (g) toast(g.txt, g.btn, g.fn); }, 250); }, btn ? 5000 : 2200);
 }
+const toastOK = txt => toast(txt, 'OK', null, true);
 
 /* ================= ACHATS PLAISIR (9.5 · lot G2) : liste d'envies, petits achats, heures de travail, enveloppe ================= */
 // Une seule préférence synchronisée « envies » (ajoutée à PREFS_OK_ dans le script) :

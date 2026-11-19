@@ -97,7 +97,7 @@ const FAITS = () => { const e = etatJeu(), f = e.f, g = id => e.succes.find(s =>
     ok(/\+10 XP/.test(R.toastMur) && R.env2 === 3, `renoncer à une envie mûre (autre semaine) → +10 XP (${R.env2})`);
     await p.evaluate(() => { S.form = { mode: 'xpinfo' }; rendreForm(); ouvrirSheet(); }); await p.waitForTimeout(300);
     R.xpinfo = await p.evaluate(() => document.querySelector('#sheetIn').innerText);
-    ok(/Envie abandonnée une fois mûre/.test(R.xpinfo) && /semaine avant ou la semaine après/.test(R.xpinfo), "« Comment gagner de l'XP » : envies et règle des jours expliquées");
+    ok(/Envie mûre abandonnée/.test(R.xpinfo) && /semaine avant ou la semaine après/.test(R.xpinfo), "« Comment gagner de l'XP » : envies et règle des jours expliquées");
     await p.screenshot({ path: path.join(SHOTS, 'x2-xpinfo.png') }); await ctx.close(); }
   // 6. Défi du mois : plafond ≤ budget ; après le 5 : seulement baisser, ni relever, ni abandonner
   { const defis = { '2027-1': { cat: 'Loisirs', montant: 80 } };

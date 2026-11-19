@@ -9,12 +9,13 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 // Ouvre instantanément depuis le cache, puis met à jour en arrière-plan.
+// Hors ligne, la page d'accueil ne sert de repli qu'à l'ouverture d'une page (pas à une icône ou au manifeste).
 self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit || caches.match('./index.html'));
+    const net = fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit || (e.request.mode === 'navigate' ? caches.match('./index.html') : Response.error()));
     return hit || net;
   }));
 });

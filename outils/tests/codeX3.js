@@ -6,9 +6,11 @@ const DIR = process.argv[2] || path.join(__dirname, '..', '..');
 const src = fs.readFileSync(path.join(DIR, 'apps-script', 'Code.js'), 'utf8');
 
 // Feuille simulée : comme Sheets, un texte « =… » devient une formule, « 1,20 » un nombre, « 12/11 » une date,
-// sauf s'il commence par une apostrophe (qui n'est pas gardée).
-function convertir(v) {
+// sauf s'il commence par une apostrophe (qui n'est pas gardée), ou si la cellule est au format « Texte brut » (@) :
+// alors le texte est gardé tel quel, apostrophe comprise.
+function convertir(v, texteBrut) {
   if (typeof v !== 'string') return v;
+  if (texteBrut) return v;
   if (v[0] === "'") return v.slice(1);
   if (v[0] === '=') return '#ERROR!';
   if (/^[+-]?\d+([.,]\d+)?$/.test(v)) return Number(v.replace(',', '.'));
@@ -17,23 +19,24 @@ function convertir(v) {
   return v;
 }
 function feuille(nom, lignes, cols) {
-  const g = Array.from({ length: lignes }, () => Array(cols).fill(''));
+  const g = Array.from({ length: lignes }, () => Array(cols).fill('')), fmt = {};
+  const brut = (i, j) => fmt[i + ':' + j] === '@';
   const sh = {
     nom, g,
     getMaxRows: () => g.length, getMaxColumns: () => g[0].length,
     insertRowsAfter: (a, n) => { for (let i = 0; i < n; i++) g.push(Array(g[0].length).fill('')); },
     insertColumnsAfter: (a, n) => g.forEach(r => { for (let i = 0; i < n; i++) r.push(''); }),
-    deleteRow: r => { g.splice(r - 1, 1); },
+    deleteRow: r => { g.splice(r - 1, 1); const f2 = {}; Object.keys(fmt).forEach(k => { const [a, b] = k.split(':').map(Number); if (a !== r) f2[(a > r ? a - 1 : a) + ':' + b] = fmt[k]; }); Object.keys(fmt).forEach(k => delete fmt[k]); Object.assign(fmt, f2); },
     getRange: (r, c, nr, nc) => {
       if (typeof r === 'string') { const m = /^([A-Z])(\d+)(?::([A-Z])(\d+))?$/.exec(r); const C = x => x.charCodeAt(0) - 64; c = C(m[1]); nc = m[3] ? C(m[3]) - c + 1 : 1; nr = m[4] ? +m[4] - +m[2] + 1 : 1; r = +m[2]; }
       nr = nr || 1; nc = nc || 1;
       const R = {
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => (g[r - 1 + i] || [])[c - 1 + j] ?? '')),
         getDisplayValues: () => R.getValues().map(x => x.map(String)),
-        setValues: v => { v.forEach((row, i) => row.forEach((x, j) => { g[r - 1 + i][c - 1 + j] = convertir(x); })); return R; },
-        setValue: x => { g[r - 1][c - 1] = convertir(x); return R; },
+        setValues: v => { v.forEach((row, i) => row.forEach((x, j) => { g[r - 1 + i][c - 1 + j] = convertir(x, brut(r + i, c + j)); })); return R; },
+        setValue: x => { g[r - 1][c - 1] = convertir(x, brut(r, c)); return R; },
         getValue: () => R.getValues()[0][0],
-        setNumberFormat: () => R, clearContent: () => { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) g[r - 1 + i][c - 1 + j] = ''; return R; },
+        setNumberFormat: f => { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) fmt[(r + i) + ':' + (c + j)] = f; return R; }, clearContent: () => { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) g[r - 1 + i][c - 1 + j] = ''; return R; },
         getFormula: () => '', setFormula: () => R
       };
       return R;
@@ -46,11 +49,12 @@ function monde() {
   par.getRange(10, 1, 3, 1).setValues([['Salaire'], ['Courses'], ['Loyer']]);
   ['Octobre 2026', 'Novembre 2026', 'Décembre 2026'].forEach((m, i) => { par.g[3 + i][13] = m; });
   const feuilles = { 'Paramètres': par, 'Journal': jou, 'Échéancier': ech, 'À venir': av };
-  const props = {}, cache = {};
+  const classeur = { getSheetByName: n => feuilles[n] || null, getSpreadsheetTimeZone: () => 'Europe/Paris', getRangeByName: () => null, getUrl: () => 'x', getName: () => 'test', insertSheet: n => (feuilles[n] = feuille(n, 5, 6)) };
+  const props = {}, cache = {}, ecrit = { UIDS: 0 };
   const ctx = {
     console: { log() {}, error() {} }, JSON, Math, Date, Number, String, Array, Object, RegExp, Error,
-    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: n => feuilles[n] || null, getSpreadsheetTimeZone: () => 'Europe/Paris', getRangeByName: () => null, getUrl: () => 'x', getName: () => 'test', insertSheet: n => (feuilles[n] = feuille(n, 5, 6)) }) },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in props ? props[k] : null), setProperty: (k, v) => { if (String(v).length > 9000) throw new Error('trop long'); props[k] = String(v); }, deleteProperty: k => { delete props[k]; } }) },
+    SpreadsheetApp: { getActiveSpreadsheet: () => classeur, openById: () => classeur }, // openById : copies générées (ID_FICHIER renseigné)
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in props ? props[k] : null), setProperty: (k, v) => { if (String(v).length > 9000) throw new Error('trop long'); if (k in ecrit) ecrit[k]++; props[k] = String(v); }, deleteProperty: k => { delete props[k]; } }) },
     CacheService: { getScriptCache: () => ({ get: k => cache[k] || null, put: (k, v) => { cache[k] = v; } }) },
     LockService: { getScriptLock: () => ({ tryLock: () => true, waitLock: () => {}, releaseLock: () => {} }) },
     Utilities: { formatDate: d => d.toISOString().slice(0, 10) },
@@ -60,8 +64,8 @@ function monde() {
   vm.runInContext(src, ctx);
   props.APP_KEY = 'k';
   // Chaque appel = une nouvelle exécution Apps Script (variables globales remises à zéro).
-  const appel = req => { vm.runInContext('SS_ = null; UIDS_ = null;', ctx); return JSON.parse(ctx.api(JSON.stringify(Object.assign({ key: 'k' }, req)))); };
-  return { appel, jou, ech, av, props, cache };
+  const appel = req => { vm.runInContext('SS_ = null; UIDS_ = null; UIDS_SALE_ = false;', ctx); return JSON.parse(ctx.api(JSON.stringify(Object.assign({ key: 'k' }, req)))); };
+  return { appel, jou, ech, av, props, cache, ecrit };
 }
 const lignes = sh => sh.g.slice(4).filter(r => r.slice(0, 4).some(v => v !== '')).map(r => r[1] + ':' + r[3]).join(' | ');
 const ligne = (lib, montant, uid) => ({ mois: 'Novembre 2026', lib, cat: 'Courses', montant, uid });
@@ -112,6 +116,20 @@ const OK = {}, R = {};
   const lus = w.jou.g.slice(4, 4 + libs.length).map(r => r[1]);
   const maj = libs.map((l, i) => w.appel({ action: 'update', row: 5 + i, attendu: ligne(l, 2), ligne: ligne(l, 3) }).ok);
   R.P7 = { lus, maj }; OK.P7 = JSON.stringify(lus) === JSON.stringify(libs) && maj.every(Boolean); }
+// Libellés à risque dans l'Échéancier et « À venir » : gardés tels quels ; une cellule déjà en texte brut ne garde pas d'apostrophe en trop.
+{ const w = monde();
+  const e = w.appel({ action: 'ech-save', row: null, e: { lib: '1,20', cat: 'Loyer', montant: 13, freq: 'Mensuel', jour: 10, f: 1, g: 12 }, uid: 'e7' });
+  const a = w.appel({ action: 'av-save', row: null, a: { mois: 'Décembre 2026', lib: '12/11', cat: 'Courses', montant: 20, jour: 3 }, uid: 'a7' });
+  w.appel({ action: 'add', ligne: ligne('=2+2', 1, 't1') });
+  const u = w.appel({ action: 'update', row: 5, attendu: ligne('=2+2', 1), ligne: ligne('+33 6', 1) });
+  R.texte = { ech: w.ech.g[e.row - 1][0], av: w.av.g[a.row - 1][1], jou: w.jou.g[4][1], u };
+  OK.texte = R.texte.ech === '1,20' && R.texte.av === '12/11' && R.texte.jou === '+33 6' && u.ok; }
+// Un lot de 10 ajouts : la propriété UIDS n'est écrite qu'une fois (et contient les 10).
+{ const w = monde();
+  const r = w.appel({ action: 'lot', ops: Array.from({ length: 10 }, (_, i) => Object.assign({ action: 'add' }, { ligne: ligne('L' + i, 1, 'lot' + i) })) });
+  const m = JSON.parse(w.props.UIDS || '{}');
+  R.uidsUneFois = { ecritures: w.ecrit.UIDS, n: Object.keys(m).length };
+  OK.uidsUneFois = r.ok && r.res.every(x => x.ok) && w.ecrit.UIDS === 1 && Object.keys(m).length === 10; }
 // Mémoire bornée : 2 000 envois → la propriété reste sous 9 000 caractères, les plus récents sont gardés.
 { const w = monde();
   for (let i = 0; i < 2000; i++) w.appel({ action: 'delete', row: 5, attendu: ligne('Z', 1), uid: 'z' + i }); // refusés (CHANGE) : rien de retenu

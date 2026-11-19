@@ -86,9 +86,9 @@ function donnees() {
       courbeNov: r2(nov[nov.length - 1].s), attenduNov: r2(finNov), courbeDec: r2(dec[dec.length - 1].s), attenduDec: r2(finDec),
       courbeMoisDec: Q ? r2(Q[Q.length - 1].s) : null, p15: r2(p15), p16: r2(p16), soldeAuj: r2(soldeCalcule(2026, 11)),
       rev10: c10.rev, restant10: c10.restant, ep10: c10.ep, epN10: c10.epN, epR10: c10.epR, nd10: r2(c10.restant + c10.ep + c10.av), rev11: c11.rev,
-      ticket: (acc.match(/REVENUS [^A-Z]*|ÉPARGNE (VERSÉE|RETIRÉE) [^A-Z]*|PRÊTS À DES PROCHES [^A-Z]*|RESTE [^A-Z]*/g) || []).map(s => s.trim()),
+      ticket: (acc.match(/REVENUS [^A-Z]*|ÉPARGNE (NETTE|RETIRÉE) [^A-Z]*|PRÊTS À DES PROCHES [^A-Z]*|RESTE [^A-Z]*/g) || []).map(s => s.trim()),
       bilanMoisEp: bm.c.epN, bilanAnneeEp: ba.ep, bilanAnneeRev: ba.rev, listeBilans: (lb.match(/OCTOBRE 2026[^€]*€[^€]*épargnés/) || [''])[0],
-      statsEp: (st.match(/Dont [^.]*? placés en épargne( · [^.]*? retirés)?/) || [''])[0],
+      statsEp: (st.match(/Dont [^.]*? d'épargne nette en 2026( \([^)]*\))?/) || [''])[0],
       decDep: r2(lA[11].dep), decAttendu: r2(lA[11].b.fix + lA[11].b.prevVar), taux: tauxHoraire().salaire
     };
   });
@@ -100,13 +100,24 @@ function donnees() {
     solde: Math.abs(R.restant10 - (2000 - 250 - 500 - 40 - 300 - 200 + 100)) < 0.01,
     epNette: R.epN10 === 200 && R.epR10 === 100 && R.ep10 === 400,
     nonDepense: Math.abs(R.nd10 - (2000 - 250 - 500 - 40)) < 0.01, // le retrait n'est plus « non dépensé »
-    ticket: R.ticket.some(s => /^REVENUS 2 000,00/.test(s)) && R.ticket.some(s => /^ÉPARGNE VERSÉE −200,00/.test(s)) && R.ticket.some(s => /^PRÊTS À DES PROCHES −200,00/.test(s)),
+    ticket: R.ticket.some(s => /^REVENUS 2 000,00/.test(s)) && R.ticket.some(s => /^ÉPARGNE NETTE −200,00/.test(s)) && R.ticket.some(s => /^PRÊTS À DES PROCHES −200,00/.test(s)),
     bilans: R.bilanMoisEp === 200 && R.bilanAnneeEp === 200 && R.bilanAnneeRev === 2000 && /200 € épargnés/.test(R.listeBilans),
-    stats: /^Dont 200 € placés en épargne/.test(R.statsEp),
+    stats: /^Dont 200 € d'épargne nette en 2026 \(versé 300 € · retiré 100 €\)/.test(R.statsEp.replace(/[\u202f\u00a0]/g, ' ')),
     decSansEpargne: Math.abs(R.decDep - R.decAttendu) < 0.01, // le Livret prévu en décembre n'est pas une dépense
     taux: R.taux === 2000
   };
   await p.screenshot({ path: path.join(SHOTS, 'x1-accueil.png'), fullPage: false });
+  // K : dernier jour du mois (30/11) : plus de jour à venir, l'achat prévu (Concert) et la part de budget du jour
+  // doivent quand même être placés : la courbe finit à la fin prévue.
+  await p.clock.setFixedTime(new Date('2026-11-30T10:00:00+01:00')); await p.reload(); await p.waitForTimeout(2500);
+  const K = await p.evaluate(() => {
+    const r2 = v => Math.round(v * 100) / 100;
+    const dep0 = soldeDepart(2026) + Array.from({ length: 10 }, (_, i) => calc(2026, i + 1).restant).reduce((a, v) => a + v, 0);
+    const P = courbeSolde(), nov = P.filter(x => x.m === 11), dec = P.filter(x => x.m === 12);
+    return { jour: now.getDate(), courbe30: r2(nov[nov.length - 1].s), attendu30: r2(dep0 + bilan(2026, 11).fin), courbeDec: r2(dec[dec.length - 1].s), attenduDec: r2(dep0 + bilan(2026, 11).fin + bilan(2026, 12).fin) };
+  });
+  R.dernierJour = K;
+  ok.dernierJour = K.jour === 30 && Math.abs(K.courbe30 - K.attendu30) < 0.01 && Math.abs(K.courbeDec - K.attenduDec) < 0.01;
   console.log(JSON.stringify(R, null, 1)); console.log(JSON.stringify(ok));
   console.log('VERDICT:', Object.values(ok).every(Boolean) ? 'OK' : 'ÉCHEC');
   console.log('ERREURS JS:', errs.length ? errs : 'aucune'); await b.close();

@@ -78,7 +78,7 @@ let echecs = 0; const ok = (c, m, v) => { if (!c) echecs++; console.log((c ? 'OK
   await clic('.regm[data-act="go:budgets"]'); t = await txt(); ok(/Courses/.test(t), 'Budgets par catégorie s\'ouvre', t.slice(0, 80));
   await p.evaluate(() => { S.form = { mode: 'reglages' }; rendreForm(); });
   await clic('[data-act="go:cats"]'); ok(/NOUVELLE CATÉGORIE/.test(await txt()), 'Catégories et favorites'); await clic('[data-act="go:reglages"]');
-  await clic('#sheetIn [data-act=exclus]'); t = await txt(); ok(/JOURS SANS DÉPENSE/.test(t), 'Catégories qui ne cassent pas les séries');
+  await clic('#sheetIn [data-act=exclus]'); t = await txt(); ok(/NE CASSENT PAS LES SÉRIES/.test(t), 'Catégories qui ne cassent pas les séries');
   await clic('[data-act=exclus-tog][data-cat=Courses]'); await clic('[data-act=exclus-ok]'); t = await txt(); ok(/CHAQUE MOIS/.test(t) && /aucune pour l'instant/.test(t), 'enregistrer revient aux Réglages, liste à jour (Courses retirée)', t.slice(0, 400));
   await clic('#sheetIn [data-act=achats-reglages]'); ok(/ACHATS PLAISIR|TAUX HORAIRE/i.test(await txt()), 'Achats plaisir (Réglages) s\'ouvre');
   await p.evaluate(() => { S.form = { mode: 'reglages' }; rendreForm(); ouvrirSheet(); });
