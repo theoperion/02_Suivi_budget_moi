@@ -2159,7 +2159,7 @@ function sectionsModeEmploi() {
     ['envois', '🔄', 'ENVOIS', 'Comment tes saisies arrivent dans le fichier.', [
       ['🟠', 'LE POINT SUR ⚙', "Tout ce que tu saisis est gardé sur le téléphone puis envoyé à ton fichier Google Sheets. Un point <b>orange</b> sur ⚙ : envoi en cours. <b>Rouge</b> : le fichier ne répond pas, l'appli réessaie toute seule. Pas de point : tout est à jour."],
       ['📮', 'RÉGLAGES › ENVOIS', "En bas des Réglages, ligne « Envois en attente » (ou le bandeau d'alerte de l'accueil) : le détail de ce qui attend, avec la dernière erreur. Tu peux réessayer ou abandonner un envoi. Une dépense refusée par le fichier n'est pas perdue : elle est gardée de côté pour la renvoyer ou la supprimer."],
-      ['📱', 'CHANGER DE TÉLÉPHONE', "Attends qu'il n'y ait plus de point sur ⚙ (tout est envoyé). Sur le nouveau téléphone, ouvre le lien de l'appli, ajoute-la à l'écran d'accueil et tape ta clé : tous tes chiffres reviennent, ils sont dans ton fichier Google. Seuls le style choisi et l'historique des contrôles du solde restent sur l'ancien."],
+      ['📱', 'CHANGER DE TÉLÉPHONE', "Attends qu'il n'y ait plus de point sur ⚙ (tout est envoyé). Sur le nouveau téléphone, ouvre le même lien que la première fois (garde-le dans tes favoris), ajoute l'appli à l'écran d'accueil et tape ta clé (la même qu'avant). Tous tes chiffres reviennent : ils sont dans ton fichier Google. Restent seulement sur l'ancien : le style, le mode clair ou sombre, l'ordre de tes catégories et l'historique des contrôles du solde. Ancien téléphone perdu ? Seules les saisies pas encore envoyées sont perdues."],
       ['↓', 'ACTUALISER', "Tire l'écran vers le bas pour récupérer ce qui a changé dans le fichier (ou sur un autre téléphone). Tes saisies pas encore envoyées sont gardées."]]],
     ['reglages', '⚙', 'RÉGLAGES UTILES', 'Adapter l\'appli à ta façon de faire.', [
       ['?', 'AIDES ET EXPLICATIONS', "Masque les « ? », et l'aide de la saisie quand tu n'en as plus besoin. Ce mode d'emploi reste toujours dans Réglages."],
@@ -4460,7 +4460,7 @@ function alertes() {
   // 9.34 : rappel discret quand rien n'est noté depuis 4 jours (jamais lié au jeu ; une fois par trou de saisie ; pas les 7 premiers jours)
   const A = auj(), dd = S.journal.filter(e => !e.deleted && e.date && e.date <= A).map(e => e.date).sort();
   if (dd.length && ecartJ(dd[0], A) >= 7 && ecartJ(dd[dd.length - 1], A) >= RAPPEL_SAISIE_J)
-    out.unshift({ id: 'rien' + dd[dd.length - 1], ico: '📝', txt: `Rien noté depuis <b>${ecartJ(dd[dd.length - 1], A)} jours</b>. Un oubli ? Si tu n'as rien dépensé, bravo : touche ✕.` });
+    out.push({ id: 'rien' + dd[dd.length - 1], ico: '📝', txt: `Rien noté depuis <b>${ecartJ(dd[dd.length - 1], A)} jours</b>. Un oubli ? Ajoute-le avec ＋. Rien dépensé ? Bravo, touche ✕.` });
   const vues = LS.get('alertesVues', []); return out.filter(a => !vues.includes(a.id));
 }
 function blocAlertes() {
@@ -4474,7 +4474,7 @@ const FEAT_DETAIL = {
   objectif: "Fixe un montant à mettre de côté sur l'année. Une jauge dédiée te montre si tu es en avance ou en retard, et combien mettre chaque mois pour y arriver.",
   semaine: "Chaque lundi, un petit défi calculé sur tes habitudes : par exemple, Courses sous 35 € cette semaine. Réussi = de l'XP.",
   resume: "Le dimanche soir, un bandeau sur l'accueil résume ta semaine : ce que tu as dépensé par rapport à d'habitude, tes jours sans dépense, et les prélèvements de la semaine qui arrive.",
-  alertes: "Un encadré « À surveiller » sur l'accueil : abonnements qui augmentent, abonnements qui coûtent cher à l'année, catégorie qui dérape par rapport à ta moyenne, gros prélèvement dans les 3 jours.",
+  alertes: "Un encadré « À surveiller » sur l'accueil : abonnements qui augmentent, abonnements qui coûtent cher à l'année, catégorie qui dérape par rapport à ta moyenne, gros prélèvement dans les 3 jours, rien noté depuis 4 jours.",
   cosmetiques: "Plus de choses à débloquer avec les niveaux : thèmes complets, tirelire mascotte, tampons, styles de chiffres, aiguilles, fêtes, tickets, son « cha-ching »."
 };
 function rendreSoon() {

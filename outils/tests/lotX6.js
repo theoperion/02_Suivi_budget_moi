@@ -54,7 +54,7 @@ const VU = { nivVu: 1, xpVu: 0, echelle100: true, regles933: true }; // joueur d
   const al = p => p.evaluate(() => alertes().filter(a => a.id.startsWith('rien')).map(a => a.txt.replace(/<[^>]+>/g, '')));
   { const { p, ctx } = await page('2026-11-20T10:00:00+01:00', SAL.concat([L(100, '2026-11-05', 'Courses', 40), L(101, '2026-11-15', 'Courses', 40)]), null, VU);
     R.a1 = await al(p); await p.evaluate(() => rendre(true)); await p.screenshot({ path: path.join(SHOTS, 'x6-rappel.png') }); await ctx.close();
-    ok(R.a1.length === 1 && /5 jours/.test(R.a1[0]), `rien depuis le 15/11 → rappel (${R.a1})`); }
+    ok(R.a1.length === 1 && /5 jours/.test(R.a1[0]) && /Ajoute-le/.test(R.a1[0]), `rien depuis le 15/11 → rappel (${R.a1})`); }
   { const { p, ctx } = await page('2026-11-20T10:00:00+01:00', SAL.concat([L(100, '2026-11-05', 'Courses', 40), L(101, '2026-11-18', 'Courses', 40)]), null, VU);
     R.a2 = await al(p); await ctx.close(); ok(R.a2.length === 0, `saisie le 18/11 → pas de rappel (${R.a2})`); }
   { const { p, ctx } = await page('2026-11-20T10:00:00+01:00', [L(100, '2026-11-15', 'Courses', 40)], null, VU);
