@@ -137,7 +137,7 @@ const VU = { nivVu: 1, xpVu: 0, echelle100: true, regles933: true }; // joueur d
       return (LS.get('xpLog', []) || []).slice(0, 3).map(libXPLog); });
     await p.evaluate(() => { document.querySelectorAll('#gains').forEach(x => x.remove()); S.form = { mode: 'xplog' }; rendreForm(); ouvrirSheet(); }); await p.waitForTimeout(300);
     await p.screenshot({ path: path.join(SHOTS, 'x4-xplog.png') }); await ctx.close();
-    ok(R.log.some(t => /^7 jours sans dépense validés grâce à ta saisie$/.test(t)) && !R.log.some(t => /^Journée du/.test(t)), `journal : « ${R.log.join(' | ')} »`); }
+    ok(R.log.some(t => /^7 jours sans dépense validés \(saisie\)$/.test(t)) && !R.log.some(t => /^Journée du/.test(t)), `journal : « ${R.log.join(' | ')} »`); }
   console.log(JSON.stringify(R).slice(0, 2500));
   console.log('VERDICT:', KO.length ? 'ÉCHEC (' + KO.length + ')' : 'OK');
   console.log('ERREURS JS:', errs.length ? errs : 'aucune'); await b.close();

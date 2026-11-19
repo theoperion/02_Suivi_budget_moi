@@ -3511,7 +3511,7 @@ function detailXP(e) {
 // (9.30) Journal d'XP : pour un jour sans dépense gagné, préciser la journée concernée (la veille de l'inscription)
 function libXPLog(x) {
   if (x.r) return (x.k.slice(2) === 'Jours sans dépense courante' ? 'Jours sans dépense' : libXP(x.k)) + ' · recalcul (nouvelles règles du jeu)'; // 9.33
-  if (x.p && x.k.slice(2) === 'Jours sans dépense courante') { const n = Math.max(1, Math.round(x.v / 5)); return n + ' jour' + (n > 1 ? 's' : '') + ' sans dépense validé' + (n > 1 ? 's' : '') + ' grâce à ta saisie'; }
+  if (x.p && x.k.slice(2) === 'Jours sans dépense courante') { const n = Math.max(1, Math.round(x.v / 5)); return n + ' jour' + (n > 1 ? 's' : '') + ' sans dépense validé' + (n > 1 ? 's' : '') + ' (saisie)'; }
   if (x.k.slice(2) === 'Jours sans dépense courante' && x.v > 0 && x.v <= 5) { const d = addJ(x.j, -1); return 'Journée du ' + (+d.slice(8)) + ' ' + MC[+d.slice(5, 7) - 1] + ' sans dépense courante'; }
   if (x.k.slice(2) === 'Jours sans dépense courante') return x.v > 0 ? 'Jours terminés sans dépense courante' : 'Jour sans dépense annulé (dépense ajoutée ou corrigée)';
   return libXP(x.k);
