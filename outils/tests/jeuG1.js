@@ -37,7 +37,8 @@ function journal(debut, fin, casse, extra) {
   const J = []; let row = 5;
   for (let d = new Date(debut + 'T00:00:00'); iso(d) < fin; d.setDate(d.getDate() + 1)) { const k = iso(d), y = d.getFullYear(), m = d.getMonth() + 1, mois = MOIS[m - 1] + ' ' + y;
     if (d.getDate() === 1) J.push({ row: row++, mois, lib: 'Salaire', cat: 'Salaire', montant: 2000, date: k });
-    if (casse(k)) J.push({ row: row++, mois, lib: 'Bus', cat: 'Transport', montant: 2, date: k }); }
+    if (casse(k)) J.push({ row: row++, mois, lib: 'Bus', cat: 'Transport', montant: 2, date: k });
+    if (d.getDate() % 4 === 2) J.push({ row: row++, mois, lib: 'Pain', cat: 'Courses', montant: 1, date: k }); } // (lot L2) preuve d'utilisation : une petite course (ne casse rien) tous les 4 jours
   (extra || []).forEach(([k, cat, montant, o]) => { const [y, m] = k.split('-').map(Number); J.push(Object.assign({ row: row++, mois: MOIS[m - 1] + ' ' + y, lib: cat, cat, montant, date: k }, o || {})); });
   return J;
 }
@@ -78,7 +79,7 @@ async function cas(b, nom, date, J, id, y, prefs, ech, apres) {
   await run('bf-gagne', '2026-12-01T12:00:00', journal('2026-11-01', '2026-12-01', tous, [['2026-11-25', 'Sorties', 30], ['2026-12-01', 'Bricoles', 20], ['2026-11-27', 'Courses', 40]]), 'blackfriday', 2026);
   await run('bf-divers-rate', '2026-12-01T12:00:00', journal('2026-11-01', '2026-12-01', tous, [['2026-11-28', 'Bricoles', 9]]), 'blackfriday', 2026);
   await run('bf-en-ligne-rate', '2026-12-01T12:00:00', journal('2026-11-01', '2026-12-01', tous, [['2026-11-30', 'Courses', 25, { enLigne: true }]]), 'blackfriday', 2026, {}, null,
-    `(() => { const e = S.journal.find(x => x.date === '2026-11-30' && x.cat === 'Courses'); const avant = e.enLigne; e.enLigne = true; memo = new Map(); S._jeu = null; const r = etatSaisonEv(SAISONS_EV.find(x => x.id === 'blackfriday'), 2026, new Map(joursJeu())); return { champServeurConserve: avant === true, ok: r.ok, rate: r.rate, info: r.info }; })()`);
+    `(() => { const e = S.journal.find(x => x.date === '2026-11-30' && x.cat === 'Courses' && x.lib !== 'Pain'); const avant = e.enLigne; e.enLigne = true; memo = new Map(); S._jeu = null; const r = etatSaisonEv(SAISONS_EV.find(x => x.id === 'blackfriday'), 2026, new Map(joursJeu())); return { champServeurConserve: avant === true, ok: r.ok, rate: r.rate, info: r.info }; })()`);
   await run('bf-2027-dates', '2027-11-20T12:00:00', journal('2026-11-01', '2027-11-20', tous), 'blackfriday', 2027);
   // Éditions : Janvier léger réussi 2027, 2028, 2029 (puis 2030) → bronze, argent, or (+ ambiance dorée), puis une étoile
   for (const [y, att] of [[2027, 1], [2028, 2], [2029, 3], [2030, 4]]) {
