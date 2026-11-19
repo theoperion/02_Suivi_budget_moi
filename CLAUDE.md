@@ -79,6 +79,13 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 - **Transfert de l'appli de Clément le mercredi 25 novembre 2026** (fiche de transfert déjà remise à Théo). Ensuite : retirer Clément de `commun/personnes.json` (et adapter `generer.py`). Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
 
+## Conseil de relecture (agents)
+
+Cinq agents relecteurs dans `.claude/agents/` : `conseil-comptable` (chiffres), `conseil-ergonomie` (clarté au téléphone), `conseil-code` (bugs, tests, générateur), `conseil-jeu` (XP, défis, séries), `conseil-fiabilite` (données, envois, mises à jour). Ils lisent et testent, ne modifient rien, et rendent ✅ ou ⚠ avec des exemples.
+- Avant de publier : petit changement de texte ou d'affichage → `conseil-code` + `conseil-ergonomie` ; calcul, jeu ou données → les membres concernés, ou les 5 pour un gros changement. Les lancer en parallèle.
+- Corriger ce qu'ils signalent, puis donner à Théo leurs avis et leurs idées d'amélioration (à faire seulement avec son accord).
+- Le texte à coller pour démarrer une nouvelle conversation est dans `outils/PROMPT_CONSEIL.md`.
+
 ## Façon de travailler avec Théo
 
 - Il valide les propositions avant le travail (« vas-y », « go »), puis veut tout en ligne directement (pas de version bêta).
