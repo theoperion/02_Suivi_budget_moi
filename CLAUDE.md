@@ -15,12 +15,12 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.32'` |
+| `index.html` | toute l'appli (HTML + CSS + JS, ~5 400 lignes). `const VERSION = '9.33'` |
 | `sw.js` | service worker cache-first. `const CACHE = PREFIXE + 'NN'` : **à incrémenter à chaque version** |
 | `manifest.json`, `icon-*.png` | PWA |
-| `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.13), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
+| `apps-script/Code.js` | API Apps Script (`VERSION_API`, actuellement 5.14 : identifiant `uid` par envoi, mémoire `UIDS` 30 jours, libellé écrit en texte brut), actions `data`, `add`, `update`, `delete`, `lot` (envois groupés), `pref-set`, `budget`, échéancier, à venir… |
 | `apps-script/.clasp.json` | scriptId du script de Théo |
-| `commun/personnes.json` | réglages propres à Clément et Devlin (titre, lien du script, préfixes de stockage et de cache, id du fichier, scriptId, id de déploiement) |
+| `commun/personnes.json` | réglages propres à Clément et Devlin (titre, lien du script, préfixes de stockage et de cache, id du fichier, scriptId, id de déploiement, `nom_court`, `jd_defaut` / `jd_retires` : périodes de jours avec dépenses non saisies ajoutées / retirées une fois) |
 | `commun/generer.py` | fabrique les copies 05/06 : remplacements **exacts** (le script s'arrête si un motif n'est pas trouvé le bon nombre de fois) |
 | `outils/tests/*.js` | tests Playwright avec faux serveur (voir plus bas) |
 
@@ -46,7 +46,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 ## Tests
 
 - `npm` n'est pas nécessaire : Playwright est installé globalement dans l'environnement cloud.
-- Lancer : `node outils/tests/lotH2.js <dossier de l'appli> [dossier captures]` (idem lotA, lotB, lotF1, lotF6, lotG, lotG2-h2, lotI, lotJ, lotK, lotL, lotM). Les `jeu*.js` prennent le chemin de `index.html`.
+- Lancer : `node outils/tests/lotH2.js <dossier de l'appli> [dossier captures]` (idem pour tous les `lot*.js`, dont lotX1 chiffres, lotX2/lotX4/lotX5 jeu, lotX3 envois ; `codeX3.js` teste Code.js dans Node). Les `jeu*.js` prennent le chemin de `index.html`.
 - Ils simulent le serveur Apps Script (`page.route`) et figent l'horloge. Résultat attendu : « VERDICT: OK » quand il existe, et **« ERREURS JS: aucune »** partout.
 - Pour Clément/Devlin, certains tests codent en dur le préfixe de stockage `jauge.` : remplacer par `jauge-clem.` / `jauge-devlin.` dans une copie.
 - `g3ui.js` : contrôle large de l'interface (« TOUT VERT » attendu).
@@ -71,6 +71,8 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 - Les 5 boutons du haut restent tels quels. « Budgets tenus » = 3 mois verts. Ancien succès « Régulier » renommé « Semainier ».
 - Idée « mettre de côté chaque mois pour les budgets annuels » : écartée (trop lourd).
 - Mode d'emploi : seulement dans Réglages (pas sur l'accueil).
+- Jeu (9.33) : un jour sans dépense, un événement, une saison ou un défi de la semaine ne compte que s'il y a une dépense saisie dans les 7 jours autour (sinon « en attente ») ; succès d'épargne = plus haut niveau atteint de l'épargne nette ; envie abandonnée : +10 XP seulement si mûre, après 7 jours d'attente et dès 20 €, 2 par semaine ; défi du mois : lancé du 1er au 5, plafond au moins 10 % sous le budget, après le 5 seulement baisser ; « ne cassent pas les séries » : seulement les dépenses essentielles, et depuis le 19/11/2026 les anciennes non essentielles ne comptent plus ; restes mis de côté : 25 XP par mois.
+- Un retrait d'épargne (même rangé en Revenu) n'est jamais un revenu ; ticket et bilans affichent l'épargne **nette** (« ÉPARGNE NETTE » / « ÉPARGNE RETIRÉE ») et une ligne « PRÊTS À DES PROCHES ».
 - Jours sans dépense : une charge fixe saisie à la main (hors « Écart … », reconnu sans tenir compte des majuscules ni de l'accent) casse la journée ; l'Échéancier jamais. Un jour ne compte qu'une fois terminé (annonce « hier »).
 - Saisie : montant d'abord (libellé bloqué tant qu'il est à 0), puis libellé au clavier du téléphone ; « Entrée » enregistre.
 - Prêts à des proches : se saisissent dans DÉPENSE › « Payé pour d'autres » (« J'avance tout (0 €) »), plus dans ÉPARGNE. « Autres revenus » = vrais revenus en plus (cadeau, vente…), jamais un retrait d'épargne.
