@@ -92,5 +92,6 @@ Deux membres pour les idées : `conseil-creativite` (propose des améliorations,
 ## Façon de travailler avec Théo
 
 - Il valide les propositions avant le travail (« vas-y », « go »), puis veut tout en ligne directement (pas de version bêta).
+- Économiser les crédits (demande de Théo, 20/11/2026) : pour un petit changement de texte ou d'affichage, lancer seulement les tests de l'écran concerné (pas toute la suite) et une seule relecture rapide si besoin ; la suite complète et le conseil pour les changements de calcul, de jeu, de données ou d'envoi.
 - Toujours finir par : version publiée, tests passés, explication courte et concrète, avec un exemple chiffré.
 - Un document de suivi (« mode d'emploi ») existe sur son ancien compte Claude ; s'il n'est plus accessible, ce fichier le remplace.
