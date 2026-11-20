@@ -86,7 +86,7 @@ function donnees() {
   await p.fill('#sheetIn [data-f=banque]', '1760'); await p.click('#sheetIn [data-act=s-ok]'); await attendreFile();
   R.controle2 = Object.assign(await etat(), { prefServeur: JSON.parse(JSON.stringify(srv.prefs.especes)) });
   console.log(JSON.stringify(R, null, 1));
-  const ok = R.controle1.banque === 1800 && R.controle1.especes === 50 && /banque 1 800 € · espèces 50 €/.test(R.controle1.jauge)
+  const ok = R.controle1.banque === 1800 && R.controle1.especes === 50 && /SUR TES COMPTES AUJOURD.HUI estimé \(\+ espèces 50.€\)/.test(R.controle1.jauge)
     && R.depense.especes === 38 && R.depense.banque === 1800 && R.depense.total === R.controle1.total - 12
     && R.retrait.especes === 78 && R.champEspecesApresRetrait === '78' && R.retrait.banque === 1760 && R.retrait.total === R.depense.total
     && R.controle2.prefServeur.r.length === 0 && R.envoiAdd.some(a => a.especes === true) && R.relu.length === 1 && R.relu[0].especes === true

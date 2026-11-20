@@ -772,7 +772,7 @@ body.discret .ticket .tl span.achn{filter:none}
 
 <script>
 /* ================= CONFIG ================= */
-const VERSION = '9.36';
+const VERSION = '9.37';
 const HEURES_SEMAINE_DEFAUT = 38.67; // heures de contrat par semaine (réglable dans Achats plaisir)
 // Toutes les fonctionnalités (jeu, défis, séries, bilans, alertes, saisons, semaine, résumé, objectif, collection…) sont actives pour tout le monde :
 // plus d'interrupteurs dans Réglages. on() reste pour ne pas toucher aux appels ; l'ancienne préférence locale « off » est ignorée.
@@ -1940,12 +1940,14 @@ function alerteEnvois() {
 function vueAccueil() {
   const b = bilan(S.y, S.m), solde = S.jmode === 'solde';
   const sc = solde ? soldeCalcule(S.y, S.m) : null;
-  const val = solde ? sc : b.restant;
+  // 9.37 (Théo) : mois en cours → le grand chiffre = ce qu'il y a sur les comptes ; les espèces sont rappelées en dessous
+  const ps = solde && sc != null && b.st === 'cours' ? partageSolde(sc) : null;
+  const val = ps ? ps.banque : solde ? sc : b.restant;
   let h = carteBilanMois() + (b.st === 'cours' ? banniereResume() : '') + alerteVersion() + alerteEnvois() + blocAnomalies() + (ouvert('alertes') && b.st === 'cours' ? blocAlertes() : '');
   if (b.st === 'cours') h += banniereEv();
   h += `<div class="gauge">${b.st === 'cours' ? blocMascotte() + blocVitrine() : ''}<button data-act="jmode" style="display:block;width:100%" aria-label="Basculer argent restant / solde">${jaugeSVG(b)}
     <div class="big ${val != null && val < 0 ? 'c-bad' : ''}" id="big" data-v="${val == null ? 0 : val}">${val == null ? '—' : e0(val)}</div>
-    <div class="lbl">${solde ? (sc == null ? 'SOLDE PAS ENCORE NOTÉ · ⚙ › MON SOLDE' : 'ARGENT DISPONIBLE ESTIMÉ' + (b.st === 'cours' ? " AUJOURD'HUI" + sousTitreEspeces(sc) : '<small class="lblsub">banque + espèces</small>')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span>${solde ? '' : ' ' + qi('restant')}${solde ? '' : '<small class="lblsub">après les charges et dépenses du mois</small>'}</div></button>
+    <div class="lbl">${solde ? (sc == null ? 'SOLDE PAS ENCORE NOTÉ · ⚙ › MON SOLDE' : (ps ? "SUR TES COMPTES AUJOURD'HUI" + sousTitreBanque(ps) : 'ARGENT DISPONIBLE ESTIMÉ<small class="lblsub">banque + espèces</small>')) : 'ARGENT RESTANT'} <span style="opacity:.6">⇄</span>${solde ? '' : ' ' + qi('restant')}${solde ? '' : '<small class="lblsub">après les charges et dépenses du mois</small>'}</div></button>
     ${b.st === 'cours' && !solde && on('pj') ? lignePJ() : ''}
     <p class="phrase">${phraseRythme(b)}</p>`;
   const pills = [];
@@ -2156,7 +2158,7 @@ function sectionsModeEmploi() {
     ['saisir', '✍️', 'SAISIR', 'Le bouton + en bas, et c\'est parti.', [
       ['➕', 'LE BOUTON +', "Choisis Dépense, Revenu ou Épargne, une catégorie, tape le montant et ENREGISTRER. Le libellé est facultatif. « ? AIDE » en haut de la saisie rappelle tout ça."]].concat(TUTO.filter(t => !TUTO_SOLDE.includes(t[1])))],
     ['solde', '🏦', 'SOLDE ET ESPÈCES', 'Recaler l\'appli sur ton compte, gérer le liquide.', TUTO.filter(t => TUTO_SOLDE.includes(t[1])).concat([
-      ['⇄', 'ARGENT DISPONIBLE', "Touche le grand chiffre de l'accueil pour passer de l'argent restant du mois à ton argent disponible estimé (banque + espèces), et inversement."]])],
+      ['⇄', 'ARGENT DISPONIBLE', "Touche le grand chiffre de l'accueil pour passer de l'argent restant du mois à ce qu'il y a sur tes comptes aujourd'hui (estimé ; tes espèces sont indiquées juste en dessous), et inversement."]])],
     ['envois', '🔄', 'ENVOIS', 'Comment tes saisies arrivent dans le fichier.', [
       ['🟠', 'LE POINT SUR ⚙', "Tout ce que tu saisis est gardé sur le téléphone puis envoyé à ton fichier Google Sheets. Un point <b>orange</b> sur ⚙ : envoi en cours. <b>Rouge</b> : le fichier ne répond pas, l'appli réessaie toute seule. Pas de point : tout est à jour."],
       ['📮', 'RÉGLAGES › ENVOIS', "En bas des Réglages, ligne « Envois en attente » (ou le bandeau d'alerte de l'accueil) : le détail de ce qui attend, avec la dernière erreur. Tu peux réessayer ou abandonner un envoi. Une dépense refusée par le fichier n'est pas perdue : elle est gardée de côté pour la renvoyer ou la supprimer."],
@@ -2619,10 +2621,8 @@ function etatEspeces() {
 // Banque estimée aujourd'hui = total calculé − espèces en poche
 function partageSolde(total) { const es = etatEspeces(); return Object.assign(es, { banque: Math.round((total - es.esp) * 100) / 100 }); }
 const AVERT_ESP = "tu as dépensé plus d'espèces que déclaré : refais un contrôle";
-function sousTitreEspeces(total) {
-  if (total == null) return '<small class="lblsub">banque + espèces</small>';
-  const s = partageSolde(total);
-  return `<small class="lblsub">banque <span class="espv">${e0(s.banque)}</span> · espèces <span class="espv">${e0(s.esp)}</span></small>${s.neg ? `<small class="espw">⚠ ${AVERT_ESP}</small>` : ''}`;
+function sousTitreBanque(s) { // 9.37 : sous le montant en banque, les espèces entre parenthèses
+  return `<small class="lblsub">estimé${Math.abs(s.esp) >= 0.5 ? ` (+ espèces <span class="espv">${e0(s.esp)}</span>)` : ''}</small>${s.neg ? `<small class="espw">⚠ ${AVERT_ESP}</small>` : ''}`;
 }
 // Saisie : effet de « Payé en espèces » sur ce qui reste en poche
 function majEspHint() {
