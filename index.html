@@ -2622,7 +2622,7 @@ function etatEspeces() {
 function partageSolde(total) { const es = etatEspeces(); return Object.assign(es, { banque: Math.round((total - es.esp) * 100) / 100 }); }
 const AVERT_ESP = "tu as dépensé plus d'espèces que déclaré : refais un contrôle";
 function sousTitreBanque(s) { // 9.37 : sous le montant en banque, les espèces entre parenthèses
-  return `<small class="lblsub">estimé${Math.abs(s.esp) >= 0.5 ? ` (+ espèces <span class="espv">${e0(s.esp)}</span>)` : ''}</small>${s.neg ? `<small class="espw">⚠ ${AVERT_ESP}</small>` : ''}`;
+  return `<small class="lblsub">${Math.abs(s.esp) >= 0.5 ? `(espèces <span class="espv">${e0(s.esp)}</span>)` : ''}</small>${s.neg ? `<small class="espw">⚠ ${AVERT_ESP}</small>` : ''}`;
 }
 // Saisie : effet de « Payé en espèces » sur ce qui reste en poche
 function majEspHint() {
