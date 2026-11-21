@@ -79,6 +79,8 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 ## À faire / en attente
 
+- **Semaine du 23 novembre 2026 : vidéo tuto complète de l'appli** (demande de Théo du 21/11). Elle peut être longue et doit tout expliquer en détail (accueil, saisie, journal, prévu, stats, épargne, espèces, jeu, réglages), sur une musique calme (« chill »). La faire valider par les agents compétents ; ajouter si besoin des agents spécialisés (ex. scénario/pédagogie, montage/rythme, son/musique libre de droits) dans `.claude/agents/`. Pistes techniques : enregistrer l'appli avec Playwright (faux serveur, données d'exemple, 390 px), textes à l'écran ou voix, montage avec ffmpeg.
+
 - **Transfert de l'appli de Clément le mercredi 25 novembre 2026** (fiche de transfert déjà remise à Théo). Ensuite : retirer Clément de `commun/personnes.json` (et adapter `generer.py`). Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
 
 ## Conseil de relecture (agents)
