@@ -81,6 +81,8 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 
 - **Nuit du 23 au 24 novembre 2026 (départ 0 h 10, tâche programmée) : vidéo tuto complète de l'appli** (demande de Théo du 21/11 : la faire **seul, sans attendre son accord**, et la finir dans la nuit ; qualité avant tout). Elle peut être longue et doit tout expliquer en détail (accueil, saisie, journal, prévu, stats, épargne, espèces, jeu, réglages), sur une musique calme (« chill »). La faire valider par les agents compétents ; ajouter si besoin des agents spécialisés (ex. scénario/pédagogie, montage/rythme, son/musique libre de droits) dans `.claude/agents/`. Pistes techniques : enregistrer l'appli avec Playwright (faux serveur, données d'exemple, 390 px), textes à l'écran ou voix, montage avec ffmpeg.
 
+- **Idée pour plus tard (Théo, 21/11/2026, ne pas faire sans son go)** : réunir toutes ses applis GitHub Pages sur un même site et les faire communiquer. Exemple : un retrait de 5 000 € saisi dans l'appli Budget se répercute tout seul dans l'onglet « moi » de son fichier « versus », et ainsi pour tous ses fichiers (tout centralisé au même endroit). Piste : un seul site avec plusieurs pages, et des échanges entre fichiers Google par leurs scripts Apps Script.
+
 - **Transfert de l'appli de Clément le mercredi 25 novembre 2026** (fiche de transfert déjà remise à Théo). Ensuite : retirer Clément de `commun/personnes.json` (et adapter `generer.py`). Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
 
 ## Conseil de relecture (agents)
