@@ -84,7 +84,7 @@ function donnees() {
     const lA = moisAnnee(2026);
     return {
       courbeNov: r2(nov[nov.length - 1].s), attenduNov: r2(finNov), courbeDec: r2(dec[dec.length - 1].s), attenduDec: r2(finDec),
-      courbeMoisDec: Q ? r2(Q[Q.length - 1].s) : null, p15: r2(p15), p16: r2(p16), soldeAuj: r2(soldeCalcule(2026, 11)),
+      courbeMoisDec: Q && Q.texte ? r2(Q.fin) : null, p15: r2(p15), p16: r2(p16), soldeAuj: r2(soldeCalcule(2026, 11)),
       rev10: c10.rev, restant10: c10.restant, ep10: c10.ep, epN10: c10.epN, epR10: c10.epR, nd10: r2(c10.restant + c10.ep + c10.av), rev11: c11.rev,
       ticket: (acc.match(/REVENUS [^A-Z]*|ÉPARGNE (NETTE|RETIRÉE) [^A-Z]*|PRÊTS À DES PROCHES [^A-Z]*|RESTE [^A-Z]*/g) || []).map(s => s.trim()),
       bilanMoisEp: bm.c.epN, bilanAnneeEp: ba.ep, bilanAnneeRev: ba.rev, listeBilans: (lb.match(/OCTOBRE 2026[^€]*€[^€]*épargnés/) || [''])[0],
