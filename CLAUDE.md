@@ -92,6 +92,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume tout ce qu'il faut
 ## Conseil de relecture (agents)
 
 Sept agents dans `.claude/agents/` : `conseil-comptable` (chiffres), `conseil-ergonomie` (clarté au téléphone), `conseil-code` (bugs, tests, générateur), `conseil-jeu` (XP, défis, séries), `conseil-fiabilite` (données, envois, mises à jour). Ils lisent et testent, ne modifient rien, et rendent ✅ ou ⚠ avec des exemples.
+Deux membres pour le projet de vente (22/11) : `conseil-entrepreneur` (micro-entreprise, démarches, cotisations, cumul, rentabilité nette) et `conseil-business` (stratégie, prix, concurrence, marketing, scénarios de revenus).
 Deux membres pour les idées : `conseil-creativite` (propose des améliorations, avec bénéfice et effort) et `conseil-avocat-du-diable` (conteste idées et gros changements : ✅ / ✂ simplifier / ❌). Quand Théo demande des idées : lancer la créativité, puis passer ses idées à l'avocat du diable, et ne présenter à Théo que ce qui survit, avec les deux avis.
 - Avant de publier : petit changement de texte ou d'affichage → `conseil-code` + `conseil-ergonomie` ; calcul, jeu ou données → les membres concernés, ou les 5 pour un gros changement. Les lancer en parallèle.
 - Corriger ce qu'ils signalent, puis donner à Théo leurs avis et leurs idées d'amélioration (à faire seulement avec son accord).
