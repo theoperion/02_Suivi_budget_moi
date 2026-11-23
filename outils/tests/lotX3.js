@@ -33,6 +33,7 @@ function donnees(srv) {
       const u = r.request().url();
       if (u.startsWith('https://script.google.com')) {
         const q = JSON.parse(r.request().postData());
+        if (srv.horsLigne) { srv.coupes = (srv.coupes || 0) + 1; return r.abort('internetdisconnected'); } // vraie coupure : rien n'arrive au fichier
         const neuf = srv.v === '5.14';
         const renum = () => srv.journal.forEach((l, i) => { l.row = 5 + i; });
         const pareil = (l, a) => l && a && l.mois === a.mois && l.lib === a.lib && l.cat === a.cat && Math.abs(l.montant - a.montant) < 0.005;
@@ -178,6 +179,18 @@ function donnees(srv) {
     return { toast: await toasts(p), fileGardee: await p.evaluate(pre => (JSON.parse(localStorage.getItem(pre + 'queue')) || []).length, pre) };
   });
   OK.plein = /Mémoire du téléphone pleine/.test(R.plein.toast) && R.plein.fileGardee === 1;
+  // H : longue coupure (métro). Saisie « Pain 4,50 » hors connexion, au moins 3 essais ratés : elle doit rester en file
+  // (jamais abandonnée en silence), puis partir une seule fois quand le réseau revient.
+  R.H = await run('H', srv => { srv.journal = [L(5, 'Café', 3)]; }, async (p, srv) => {
+    await p.waitForTimeout(1500); srv.horsLigne = true;
+    await p.evaluate(() => { const e = { id: uid(), row: null, date: '2026-11-19', mois: 'Novembre 2026', lib: 'Pain', cat: 'Courses', montant: 4.5, y: 2026, m: 11, srv: null, pending: true, nw: true }; S.journal.push(e); enfiler({ op: 'add', id: e.id }); });
+    await p.waitForTimeout(16000);
+    const pendant = await p.evaluate(pre => ({ file: S.queue.length, essais: S.queue.length ? S.queue[0].essais || 0 : 0, stockee: (JSON.parse(localStorage.getItem(pre + 'queue')) || []).length }), PRE);
+    srv.horsLigne = false;
+    await p.waitForTimeout(18000);
+    return Object.assign({ pendant, coupes: srv.coupes || 0, serveur: srvTxt(srv), ops: srv.ops.filter(o => o !== 'data' && o !== 'pref-set') }, await etat(p));
+  });
+  OK.H = R.H.pendant.file === 1 && R.H.pendant.essais >= 3 && R.H.pendant.stockee === 1 && R.H.serveur === '5:Café:3 | 6:Pain:4.5' && R.H.file === 0 && R.H.ops.filter(o => o === 'add:Pain').length === 1;
   console.log(JSON.stringify(R, null, 1));
   console.log('CONTRÔLES:', JSON.stringify(OK));
   console.log('ERREURS JS:', errs.length ? errs : 'aucune');

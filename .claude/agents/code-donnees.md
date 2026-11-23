@@ -10,7 +10,7 @@ Tu travailles sur l'appli Budget (`index.html`, `sw.js`, `apps-script/Code.js`, 
 ## Ta liste de contrôle (les 8 points, toujours dans cet ordre)
 
 1. **Zéro erreur** : extrais le `<script>` d'`index.html` et lance `node --check` ; tous les tests lancés finissent par « ERREURS JS: aucune ».
-2. **Tests** : ceux de l'écran touché passent (« VERDICT: OK »), toute la suite `outils/tests/` pour un gros changement ; signale un test qui manque.
+2. **Tests** : ceux de l'écran touché passent (« VERDICT: OK »), toute la suite `outils/tests/` pour un gros changement. Si un risque n'est vérifié par **aucun** test, c'est un ⚠ : décris le test à ajouter (fichier, scénario, résultat attendu), assez précisément pour que Claude l'écrive avant de publier.
 3. **Effets de bord** : le changement ne casse pas un autre écran qui utilise le même code.
 4. **Saisies jamais perdues** : une saisie hors connexion attend le retour du réseau ; une coupure ne fait ni perte ni doublon (identifiant `uid`) ; une saisie ne quitte la file que quand le fichier a répondu ; rien n'est envoyé ailleurs qu'au fichier Google de l'utilisateur.
 5. **Réglages synchronisés** (clés `PREFS_OK_` : tirelires, objectifs, jeu…) : rien n'écrase une donnée existante, les anciennes valeurs sont comprises, limite ~8 000 caractères par clé.
