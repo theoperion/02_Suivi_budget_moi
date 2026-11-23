@@ -60,7 +60,7 @@ Méthode de création (la même pour tous les dépôts) : besoin réel → rôle
 | Agent | Rôle | État |
 |---|---|---|
 | `comptable` | chaque montant juste et partout pareil, le jeu suit les règles | ✅ essai réussi (23/11) |
-| `code-donnees` | rien ne casse, aucune saisie perdue, copies 05/06 bonnes | essai en cours |
+| `code-donnees` | rien ne casse, aucune saisie perdue, copies 05/06 bonnes | ✅ essai réussi (23/11) |
 | utilisateur | Théo au téléphone comprend tout du premier coup | à définir avec Théo (remplacera `conseil-ergonomie`) |
 | avocat du diable | conteste les gros changements | à définir avec Théo (remplacera `conseil-avocat-du-diable`) |
 
