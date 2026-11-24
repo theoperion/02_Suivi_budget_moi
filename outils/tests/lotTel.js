@@ -21,8 +21,8 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   const ech = [{ ligne: 5, lib: 'Assurance', cat: 'Transport', montant: 45, freq: 'Mensuel', jour: 10, f: 1, g: 12, h: null, i: null, pause: false },
                { ligne: 7, lib: 'Taxe', cat: 'Bricoles', montant: 300, freq: 'Annuel', jour: 15, f: 10, g: 12, h: 2026, i: null, pause: false }];
   const src = Object.assign({}, {
-    categories: B.CATS, mois: [2026, 2027].flatMap(y => B.MOIS.map(m => m + ' ' + y)), soldes: { '2026': 1000 }, debut: '2026-01-01',
-    echeancier: ech, journal, libres: 31 - B.CATS.length, controle: { mois: 'Octobre', solde: 1234.5, especes: 20 },
+    categories: B.CATS.concat([{ ligne: 21, nom: 'Remboursements prêts', groupe: 'Épargne', type: 'Retrait', budget: null, suivi: '' }]), mois: [2026, 2027].flatMap(y => B.MOIS.map(m => m + ' ' + y)), soldes: { '2026': 1000 }, debut: '2026-01-01',
+    echeancier: ech, journal, libres: 31 - B.CATS.length - 1, controle: { mois: 'Octobre', solde: 1234.5, especes: 20 },
     avenir: [{ row: 4, mois: 'Décembre 2026', lib: 'Cadeaux', cat: 'Bricoles', montant: 80, fait: false, jour: null }],
     defis: { '2026-11': { cat: 'Restaurants', montant: 100 } }, prefs: { jeu: { a: 1 }, envies: { l: [] } }, apiVersion: '5.14' });
 
@@ -53,6 +53,7 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
     out.avPaye = await A('av-paye', { row: 4, attendu: { lib: 'Cadeaux', cat: 'Bricoles', montant: 80 }, ligne: L('Cadeaux', 80, { cat: 'Bricoles', mois: 'Novembre 2026' }) });
     out.budget = await A('budget', { nom: 'Courses', budget: 320, suivi: 'Sans alerte' });
     out.catAdd = await A('cat-add', { nom: 'Santé', groupe: 'Vie courante', budget: 40, suivi: 'Mensuel' });
+    out.catRetrait = await A('cat-add', { nom: 'Retrait livret', groupe: 'Épargne', budget: 0, suivi: 'Sans alerte' });
     out.catEdit = await A('cat-edit', { ancien: 'Sorties', nom: 'Sorties & ciné', groupe: 'Loisirs' });
     out.catDelUtilisee = await A('cat-del', { nom: 'Restaurants' });
     out.catDel = await A('cat-del', { nom: 'Restaurants', cible: 'Sorties & ciné' });
@@ -72,6 +73,13 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
     out.apresPanne = (await M2.appel({ action: 'data', key: 'k' })).data.journal.filter(l => l.lib === 'Panne').length;
     out.reessai = await M2.appel({ action: 'add', key: 'k', ligne: L('Panne', 9, { uid: 'p1' }) });
     out.final = (await M2.appel({ action: 'data', key: 'k' })).data.journal.filter(l => l.lib === 'Panne').length;
+    // liste de mois trop courte (s'arrête en juin 2026) : le moteur la prolonge jusqu'à décembre de l'an prochain
+    const court = JSON.parse(JSON.stringify(src)); court.mois = court.mois.slice(0, 6); court.journal = court.journal.filter(l => /2026/.test(l.mois) && ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'].some(m => l.mois.startsWith(m))); court.avenir = [];
+    const M3 = new MoteurTelephone('court.'); await M3.importer(court, 'k');
+    const d5 = (await M3.appel({ action: 'data', key: 'k' })).data;
+    out.moisCourt = { premier: d5.mois[0], dernier: d5.mois[d5.mois.length - 1], n: d5.mois.length };
+    out.ajoutFutur = await M3.appel({ action: 'add', key: 'k', ligne: L('Plus tard', 5, { mois: 'Mars 2027' }) });
+    out.soldeAnSuivant = await M3.appel({ action: 'solde-dep', key: 'k', annee: new Date().getFullYear() + 1, valeur: 10 });
     // autre appli (préfixe différent) : rien
     out.autre = await new MoteurTelephone('autre.').appel({ action: 'data', key: 'k' });
     return out;
@@ -81,7 +89,8 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   const sans = d => { const x = JSON.parse(JSON.stringify(d)); delete x.lu; delete x.url; delete x.anomalies; return x; };
   const attendu = sans(Object.assign({}, src, { url: '' }));
   const d0 = sans(res.d0);
-  ['categories', 'mois', 'soldes', 'debut', 'echeancier', 'journal', 'libres', 'controle', 'avenir', 'defis', 'prefs', 'apiVersion'].forEach(k =>
+  ok('A_mois', src.mois.every((m, i) => d0.mois[i] === m) && d0.mois[d0.mois.length - 1] === 'Décembre ' + (new Date().getFullYear() + 1), d0.mois.slice(-3));
+  ['categories', 'soldes', 'debut', 'echeancier', 'journal', 'libres', 'controle', 'avenir', 'defis', 'prefs', 'apiVersion'].forEach(k =>
     ok('A_' + k, JSON.stringify(d0[k]) === JSON.stringify(attendu[k]), { recu: JSON.stringify(d0[k]).slice(0, 300), attendu: JSON.stringify(attendu[k]).slice(0, 300) }));
   ok('A_cle', res.cleFausse.ok === false && res.cleFausse.error === 'CLE', res.cleFausse);
   // B : écritures
@@ -97,7 +106,7 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   ok('B_avenir', res.av.ok && res.avPaye.ok && d3.avenir.some(a => a.lib === 'Vélo' && a.mois === 'Janvier 2027' && a.jour === 5) && d3.avenir.some(a => a.lib === 'Cadeaux' && a.fait === true) && d3.journal.some(l => l.lib === 'Cadeaux'), d3.avenir);
   const cat = n => d3.categories.find(c => c.nom === n);
   ok('B_budget', cat('Courses').budget === 320 && cat('Courses').suivi === 'Sans alerte', cat('Courses'));
-  ok('B_catAdd', res.catAdd.ok && cat('Santé') && cat('Santé').type === 'Dépense' && cat('Santé').budget === 40 && d3.libres === src.libres - 1 + 1, { r: res.catAdd, c: cat('Santé'), libres: d3.libres });
+  ok('B_catAdd', res.catAdd.ok && cat('Santé') && cat('Santé').type === 'Dépense' && cat('Santé').budget === 40 && d3.libres === src.libres - 1 - 1 + 1, { r: res.catAdd, c: cat('Santé'), libres: d3.libres });
   ok('B_catEdit', res.catEdit.ok && cat('Sorties & ciné') && !cat('Sorties') && d3.journal.filter(l => l.cat === 'Sorties').length === 0 && d3.journal.some(l => l.cat === 'Sorties & ciné'), res.catEdit);
   ok('B_catDel', res.catDelUtilisee.error === 'UTILISEE' && res.catDel.ok && !cat('Restaurants') && d3.journal.filter(l => l.cat === 'Restaurants').length === 0 && d3.defis['2026-11'].cat === 'Sorties & ciné', { u: res.catDelUtilisee, d: res.catDel, defis: d3.defis });
   ok('B_soldes', d3.controle.mois === 'Novembre' && d3.controle.solde === 1500 && d3.controle.especes === 30 && d3.soldes['2027'] === 2000 && d3.soldes['2026'] === 1000, { c: d3.controle, s: d3.soldes });
@@ -105,6 +114,9 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   ok('B_prefs', JSON.stringify(d3.prefs.tirelires) === '[{"n":"Voyage","m":50}]' && res.prefTrop.ok === false && JSON.stringify(d3.prefs.jeu) === '{"a":1}', { p: d3.prefs, t: res.prefTrop });
   ok('B_lot', res.lot.ok && res.lot.res.length === 3 && res.lot.res[0].ok && !res.lot.res[1].ok && res.lot.res[2].ok, res.lot);
   ok('B_especesEnLigne', d3.journal.some(l => l.lib === 'Restaurants' && l.especes) && d3.journal.some(l => l.lib === 'Sorties' && l.cat === 'Sorties & ciné' && l.enLigne), null);
+  const fin = new Date().getFullYear() + 1;
+  ok('B_typesRetrait', cat('Remboursements prêts') && cat('Remboursements prêts').type === 'Retrait' && cat('Retrait livret') && cat('Retrait livret').type === 'Retrait' && cat('Livret A').type === 'Épargne', [cat('Remboursements prêts'), cat('Retrait livret'), cat('Livret A')]);
+  ok('B_moisProlonges', res.moisCourt.premier === 'Janvier 2026' && res.moisCourt.dernier === 'Décembre ' + fin && res.ajoutFutur.ok && res.soldeAnSuivant.ok, { m: res.moisCourt, a: res.ajoutFutur, s: res.soldeAnSuivant });
   // C : rechargement
   ok('C_recharge', JSON.stringify(sans(res.d4)) === JSON.stringify(sans(d3)) && res.rev2 === res.rev && res.rev > 1, { rev: [res.rev, res.rev2] });
   // D : panne

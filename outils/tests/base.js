@@ -43,4 +43,42 @@ function journal(debut, fin, casse, extra) {
   (extra || []).forEach(([k, cat, montant, o]) => { const [y, m] = k.split('-').map(Number); J.push(Object.assign({ row: row++, mois: MOIS[m - 1] + ' ' + y, lib: cat, cat, montant, date: k }, o || {})); });
   return J;
 }
-module.exports = { page, journal, iso, MOIS, CATS };
+// ---------- Faux Google ----------
+const GIS = `window.google = { accounts: { oauth2: { initTokenClient: c => ({ requestAccessToken: o => { window.__gis = (window.__gis || []).concat([o]); setTimeout(() => c.callback({ access_token: 'jeton', expires_in: 3600 }), 20); } }) } } };`;
+// Faux Google (connexion, Drive, Sheets) pour les tests du mode téléphone. G : état partagé { fichiers, sheets, appels, expire, panne }.
+async function fauxGoogle(page, G) {
+  G = G || { fichiers: {}, sheets: {}, appels: [], expire: false, panne: null }; G.fichiers = G.fichiers || {}; G.sheets = G.sheets || {}; G.appels = G.appels || [];
+  await page.route('https://accounts.google.com/**', r => r.fulfill({ status: 200, contentType: 'text/javascript', body: GIS }));
+  const rep = (r, o, st) => r.fulfill({ status: st || 200, contentType: 'application/json', body: JSON.stringify(o || {}) });
+  await page.route(/googleapis\.com/, async r => {
+    const q = r.request(), u = new URL(q.url()), m = q.method(), corps = q.postData() || '';
+    G.appels.push(m + ' ' + u.pathname);
+    if (G.expire) { G.expire = false; return rep(r, { error: { message: 'expiré' } }, 401); }
+    if (G.panne && G.panne.test(m + ' ' + u.pathname)) { G.panne = null; return rep(r, { error: { message: 'panne' } }, 500); }
+    if (u.pathname === '/upload/drive/v3/files' && m === 'POST') { // création multipart
+      const parts = corps.split(/\r\n--[^\r\n]+/); const json = parts.map(p => p.split('\r\n\r\n')[1]).filter(Boolean);
+      G.n = (G.n || 0) + 1; const id = 'f' + G.n; G.fichiers[id] = { meta: JSON.parse(json[0]), contenu: json[1] }; return rep(r, { id });
+    }
+    let x = /^\/upload\/drive\/v3\/files\/(\w+)$/.exec(u.pathname);
+    if (x && m === 'PATCH') { if (!G.fichiers[x[1]]) return rep(r, { error: { message: 'absent' } }, 404); G.fichiers[x[1]].contenu = corps; return rep(r, { id: x[1] }); }
+    if (u.pathname === '/drive/v3/files' && m === 'GET') { const v = /value='(\w+)'/.exec(u.searchParams.get('q') || ''); const L = Object.keys(G.fichiers).filter(k => G.fichiers[k].meta.appProperties && G.fichiers[k].meta.appProperties.jauge === (v ? v[1] : 'sauvegarde')).reverse(); return rep(r, { files: L.map(id => ({ id, modifiedTime: '2026-11-20T18:00:00Z' })) }); }
+    x = /^\/drive\/v3\/files\/(\w+)$/.exec(u.pathname);
+    if (x && m === 'DELETE') { delete G.fichiers[x[1]]; return r.fulfill({ status: 204, body: '' }); }
+    if (x && u.searchParams.get('alt') === 'media') return r.fulfill({ status: 200, contentType: 'application/json', body: G.fichiers[x[1]].contenu });
+    if (u.pathname === '/v4/spreadsheets' && m === 'POST') {
+      const d = JSON.parse(corps), id = 's' + (Object.keys(G.sheets).length + 1);
+      G.sheets[id] = { titre: d.properties.title, onglets: {} }; d.sheets.forEach(s => { G.sheets[id].onglets[s.properties.title] = []; });
+      return rep(r, { spreadsheetId: id, spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/' + id, sheets: d.sheets.map((s, i) => ({ properties: { title: s.properties.title, sheetId: 100 + i, gridProperties: { rowCount: 1000 } } })) });
+    }
+    x = /^\/v4\/spreadsheets\/(\w+)(:batchUpdate|\/values:batchClear|\/values:batchUpdate)?$/.exec(u.pathname);
+    if (x) {
+      const S = G.sheets[x[1]]; if (!S) return rep(r, { error: { message: 'absent' } }, 404);
+      if (x[2] === '/values:batchClear') { JSON.parse(corps).ranges.forEach(rg => { const k = /^'(.*)'(?:!A(\d+):Z)?$/.exec(rg); const o = k[1].replace(/''/g, "'"); S.onglets[o] = k[2] ? (S.onglets[o] || []).slice(0, +k[2] - 1) : []; }); return rep(r, {}); }
+      if (x[2] === '/values:batchUpdate') { JSON.parse(corps).data.forEach(d => { const o = d.range.replace(/^'(.*)'!A1$/, '$1').replace(/''/g, "'"); const old = S.onglets[o] || []; S.onglets[o] = d.values.concat(old.slice(d.values.length)); }); return rep(r, {}); }
+      return rep(r, { spreadsheetId: x[1] });
+    }
+    return rep(r, { error: { message: 'inconnu ' + u.pathname } }, 400);
+  });
+  return G;
+}
+module.exports = { page, journal, iso, MOIS, CATS, fauxGoogle };

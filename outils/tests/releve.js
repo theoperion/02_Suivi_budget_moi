@@ -39,6 +39,7 @@ const FENETRES = ['ouvrirReglages()', 'ouvrirSaisie(null)', "ouvrirCat('Courses'
   const { p, ctx, errs } = await B.page(b, '2026-11-20T18:30:00', journal, {}, {}, ech);
   const out = [];
   if (process.argv[4] === 'tel') {
+    await B.fauxGoogle(p);
     const t = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); return { mode: S.mode, err: (document.querySelector('#ferr') || {}).textContent || '' }; });
     if (t.mode !== 'tel') { console.log('PASSAGE EN MODE TÉLÉPHONE IMPOSSIBLE : ' + JSON.stringify(t)); process.exit(1); }
     await p.reload(); await p.waitForTimeout(2500); await p.evaluate(() => { try { fermer(); } catch (e) {} document.querySelectorAll('.lvlup,#gains,.story').forEach(x => x.remove()); });

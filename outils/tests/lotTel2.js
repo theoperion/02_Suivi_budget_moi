@@ -11,7 +11,7 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
 (async () => {
   const b = await chromium.launch();
   const journal = B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3'));
-  const { p, errs } = await B.page(b, '2026-11-20T18:30:00', journal, {}, {}, []);
+  const { p, errs } = await B.page(b, '2026-11-20T18:30:00', journal, {}, {}, []); await B.fauxGoogle(p);
   let reseau = true, appelsScript = 0;
   await p.route('https://script.google.com/**', r => { appelsScript++; return reseau ? r.fallback() : r.abort(); });
   const n0 = journal.length;
@@ -56,7 +56,7 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // H : saisie faite PENDANT la copie (fichier lent) → passage annulé, la saisie part bien au fichier
   {
     const { p: q, errs: e2, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
-    let lent = false;
+    let lent = false; await B.fauxGoogle(q);
     let envoisPendant = 0;
     await q.route('https://script.google.com/**', async r => { const pd = r.request().postData() || '{}', d = JSON.parse(pd); if (/Pendant/.test(pd) && d.action !== 'data') envoisPendant++; if (lent && d.action === 'data') await new Promise(x => setTimeout(x, 2000)); return r.fallback(); });
     lent = true;
@@ -74,7 +74,7 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // I : deux fenêtres de l'appli ouvertes en mode téléphone : aucune saisie n'efface l'autre
   {
     const { p: pa, errs: e3, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
-    await pa.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
+    await B.fauxGoogle(pa); await pa.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
     const fs = require('fs'); const servir = pg => pg.route('**/*', r => { const u = new URL(r.request().url()); if (u.host !== 'app.test') return r.fulfill({ status: 200, body: '' });
       const f = path.join(DIR, u.pathname === '/' ? 'index.html' : u.pathname.slice(1)); return r.fulfill({ status: 200, body: fs.readFileSync(f), contentType: f.endsWith('.js') ? 'text/javascript' : 'text/html' }); });
     const pb = await ctx.newPage(); await servir(pb); pb.on('pageerror', x => e3.push(x.message)); await pb.clock.setFixedTime(new Date('2026-11-20T18:30:00'));
@@ -89,11 +89,11 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // J : données du téléphone effacées → retour automatique au fichier, jamais bloqué
   {
     const { p: pj, errs: e4, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
-    await pj.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
+    await B.fauxGoogle(pj); await pj.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
     await pj.evaluate(() => new Promise(ok => { const q = indexedDB.deleteDatabase('jauge.telephone'); q.onsuccess = q.onerror = q.onblocked = () => ok(); }));
     await pj.reload(); await pj.waitForTimeout(3000);
     const j = await pj.evaluate(async () => { await rafraichir(true); return { mode: S.mode, lock: !document.querySelector('#lock').hidden, n: S.journal.length, toast: document.querySelector('#toastT').textContent }; });
-    ok('J_donneesEffacees', j.mode === 'fichier' && !j.lock && j.n > 0 && /effacées/.test(j.toast), j);
+    ok('J_donneesEffacees', j.mode === 'fichier' && !j.lock && j.n > 0 && /effacées/.test(j.toast) && /sauvegarde Drive/.test(j.toast), j);
     errs.push(...e4); await ctx.close();
   }
   console.log(JSON.stringify(R, null, 1));
