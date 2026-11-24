@@ -20,6 +20,14 @@ Ce fichier n'est **pas** lu automatiquement : seulement quand Théo le demande. 
 - Se faire connaître : vidéos d'écran sans visage, astuces budget, défis ; régularité ; communautés budget/épargne ; angle « pas développeur, je crée mes applis avec l'IA » et « budget en jeu ». Jamais de faux témoignages ni de « devenez riche ».
 - Concurrence : légale, ne rien copier (nom, logo, design) ; vérifier le nom à l'INPI.
 
+**Avis de Théo du 24/11/2026 : pas une bonne idée pour l'instant** (beaucoup d'applis de budget existent déjà, et c'est un gros chantier). Gardé pour mémoire.
+
+**Les trois façons de vendre sans Google Sheets** (bilan du 24/11, après l'essai du mode « données sur ce téléphone », construit en 9.44, voir `moteur.js` et `sauvegarde.js`) :
+1. **Appli web vendue avec un code d'accès** (comme aujourd'hui) : pas de store ni de commission ; données sur le téléphone ; sauvegarde dans le Drive de la personne, mais Google n'accorde l'accès qu'1 h : un toucher « Sauvegarder » de temps en temps (ou un export de fichier).
+2. **Play Store** (la même appli emballée en vraie application, type Capacitor) : Android sauvegarde tout seul les données de l'appli dans le compte Google de la personne, sans aucun toucher. Le plus confortable ; ~15 % de commission, démarches Google, nouveaux comptes : testeurs pendant 14 jours.
+3. **Serveur de synchronisation** (type Firebase) : sauvegarde invisible et plusieurs appareils, mais Théo hébergerait les données de ses clients (coût, responsabilité, vie privée).
+Avis donné : pour des inconnus, le Play Store (2) est la meilleure piste, sans être obligatoire.
+
 ## 2. Rapport de bugs à distance
 Diagnostic sans montants ni libellés envoyé à Théo pour corriger à distance (partir de l'onglet « Rapport de bugs » existant). Utile aussi pour Clément et Devlin après leur transfert, s'ils sont d'accord.
 
