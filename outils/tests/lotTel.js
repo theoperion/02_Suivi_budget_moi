@@ -80,6 +80,11 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
     out.moisCourt = { premier: d5.mois[0], dernier: d5.mois[d5.mois.length - 1], n: d5.mois.length };
     out.ajoutFutur = await M3.appel({ action: 'add', key: 'k', ligne: L('Plus tard', 5, { mois: 'Mars 2027' }) });
     out.soldeAnSuivant = await M3.appel({ action: 'solde-dep', key: 'k', annee: new Date().getFullYear() + 1, valeur: 10 });
+    // alertes : charge déjà dans l'Échéancier (assurance 47 € ce mois-ci, saisie à 46 €), doublon, ✓ qui valide
+    const Ma = new MoteurTelephone('anom.'); const sa = JSON.parse(JSON.stringify(src)); const mo = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][new Date().getMonth()] + ' ' + new Date().getFullYear();
+    sa.journal = [{ row: 5, mois: mo, lib: 'Assurance auto', cat: 'Transport', montant: 46, date: null }, { row: 6, mois: mo, lib: 'Pain', cat: 'Courses', montant: 1, date: null }, { row: 7, mois: mo, lib: 'Pain', cat: 'Courses', montant: 1, date: null }, { row: 8, mois: mo, lib: 'Assurance auto ✓', cat: 'Transport', montant: 45, date: null }];
+    sa.soldes = { [new Date().getFullYear()]: 1000 }; sa.avenir = [];
+    await Ma.importer(sa, 'k'); out.anom = (await Ma.appel({ action: 'data', key: 'k' })).data.anomalies;
     // autre appli (préfixe différent) : rien
     out.autre = await new MoteurTelephone('autre.').appel({ action: 'data', key: 'k' });
     return out;
@@ -117,6 +122,7 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   const fin = new Date().getFullYear() + 1;
   ok('B_typesRetrait', cat('Remboursements prêts') && cat('Remboursements prêts').type === 'Retrait' && cat('Retrait livret') && cat('Retrait livret').type === 'Retrait' && cat('Livret A').type === 'Épargne', [cat('Remboursements prêts'), cat('Retrait livret'), cat('Livret A')]);
   ok('B_moisProlonges', res.moisCourt.premier === 'Janvier 2026' && res.moisCourt.dernier === 'Décembre ' + fin && res.ajoutFutur.ok && res.soldeAnSuivant.ok, { m: res.moisCourt, a: res.ajoutFutur, s: res.soldeAnSuivant });
+  ok('B_anomalies', /3 ANOMALIE/.test(res.anom) && /Déjà dans l'Échéancier \?  —  Journal, ligne 5/.test(res.anom) && /Doublon possible  —  Journal, ligne 6/.test(res.anom) && /Doublon possible  —  Journal, ligne 7/.test(res.anom) && !/ligne 8/.test(res.anom), res.anom);
   // C : rechargement
   ok('C_recharge', JSON.stringify(sans(res.d4)) === JSON.stringify(sans(d3)) && res.rev2 === res.rev && res.rev > 1, { rev: [res.rev, res.rev2] });
   // D : panne
