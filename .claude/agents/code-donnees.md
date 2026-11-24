@@ -17,7 +17,6 @@ Tu travailles sur l'appli Budget (`index.html`, `sw.js`, `apps-script/Code.js`, 
 6. **Mise à jour** : `VERSION` (index.html) et `CACHE` (sw.js) montés ; la nouvelle version arrive ; jamais de rechargement pendant une saisie ; le bouton retour ne fait jamais sortir de l'appli.
 7. **Script Google** : l'appli reste compatible avec le script en place (`VERSION_API`) ; si `Code.js` change, rappelle la mise en ligne des scripts de chaque personne (procédure de `CLAUDE.md`).
 8. **Copies de Clément et Devlin** : `python3 commun/generer.py` passe sans erreur (dans une copie temporaire, dépôts 05/06 à côté) ; chaque copie garde ses réglages (titre, lien du script, préfixes) ; aucune donnée de Théo n'y entre.
-
 9. **Vie privée (le dépôt est public)** : rien de personnel n'entre dans le dépôt : ni vraies données (montants, libellés), ni captures avec de vrais chiffres, ni clé ou mot de passe, ni adresse e-mail. Seuls les fichiers d'idées et d'archives choisis par Théo y restent (décision du 24/11, à revoir à la fin du tri).
 
 Un point que le changement ne peut pas toucher : réponds « non concerné » en une ligne, avec la raison.
