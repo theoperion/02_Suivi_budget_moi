@@ -64,7 +64,7 @@ function monde() {
   vm.runInContext(src, ctx);
   props.APP_KEY = 'k';
   // Chaque appel = une nouvelle exécution Apps Script (variables globales remises à zéro).
-  const appel = req => { vm.runInContext('SS_ = null; UIDS_ = null; UIDS_SALE_ = false;', ctx); return JSON.parse(ctx.api(JSON.stringify(Object.assign({ key: 'k' }, req)))); };
+  const appel = req => { vm.runInContext('SS_ = null; UIDS_ = null; UIDS_SALE_ = false;', ctx); return JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(Object.assign({ key: 'k' }, req)) } })); }; // comme l'appli (doPost)
   return { appel, jou, ech, av, props, cache, ecrit };
 }
 const lignes = sh => sh.g.slice(4).filter(r => r.slice(0, 4).some(v => v !== '')).map(r => r[1] + ':' + r[3]).join(' | ');
@@ -83,11 +83,7 @@ const OK = {}, R = {};
   w.appel({ action: 'delete', row: 6, attendu: ligne('B', 2), uid: 'dB' });
   const r = w.appel({ action: 'add', ligne: ligne('C', 3, 'c') });
   R.addDecale = { journal: lignes(w.jou), r }; OK.addDecale = r.row === 6 && lignes(w.jou) === 'A:1 | C:3'; }
-// Ajout de l'ancienne version (mémoire CacheService d'avant 5.14) toujours reconnu.
-{ const w = monde();
-  w.appel({ action: 'add', ligne: ligne('Café', 3) }); w.cache['add_old'] = '5';
-  const r = w.appel({ action: 'add', ligne: ligne('Café', 3, 'old') });
-  OK.ancienCache = r.deja === true && lignes(w.jou) === 'Café:3'; }
+// (24/11/2026) La lecture de l'ancienne mémoire de 6 h (CacheService, avant 5.14) a été retirée du script : plus de cas à tester.
 // P1 : suppression renvoyée (uid) → la 2e ligne identique reste.
 { const w = monde();
   ['Café', 'Pain', 'Pain', 'Riz'].forEach((l, i) => w.appel({ action: 'add', ligne: ligne(l, l === 'Pain' ? 1.2 : 3, 'x' + i) }));

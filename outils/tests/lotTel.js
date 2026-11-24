@@ -95,7 +95,9 @@ const ok = (k, v, info) => { OK[k] = !!v; if (!v) R[k] = info; };
   const attendu = sans(Object.assign({}, src, { url: '' }));
   const d0 = sans(res.d0);
   ok('A_mois', src.mois.every((m, i) => d0.mois[i] === m) && d0.mois[d0.mois.length - 1] === 'Décembre ' + (new Date().getFullYear() + 1), d0.mois.slice(-3));
-  ['categories', 'soldes', 'debut', 'echeancier', 'journal', 'libres', 'controle', 'avenir', 'defis', 'prefs', 'apiVersion'].forEach(k =>
+  const vScript = (fs.readFileSync(path.join(DIR, 'apps-script', 'Code.js'), 'utf8').match(/const VERSION_API = '([^']+)'/) || [])[1];
+  ok('A_apiVersion', d0.apiVersion === vScript, { recu: d0.apiVersion, attendu: vScript }); // version du script embarqué dans le téléphone
+  ['categories', 'soldes', 'debut', 'echeancier', 'journal', 'libres', 'controle', 'avenir', 'defis', 'prefs'].forEach(k =>
     ok('A_' + k, JSON.stringify(d0[k]) === JSON.stringify(attendu[k]), { recu: JSON.stringify(d0[k]).slice(0, 300), attendu: JSON.stringify(attendu[k]).slice(0, 300) }));
   ok('A_cle', res.cleFausse.ok === false && res.cleFausse.error === 'CLE', res.cleFausse);
   // B : écritures
