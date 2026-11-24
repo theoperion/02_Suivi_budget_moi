@@ -2,3 +2,5 @@
 outils/tests/*/
 *.png
 !icon-*.png
+resultats/
+releve*.txt
