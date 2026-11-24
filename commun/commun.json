@@ -1,0 +1,17 @@
+{
+  "_note": "Appli commune (24/11/2026) : copie vierge et FIGÉE pour les personnes qui partent de zéro (cousines de Théo). Sans lien de script par défaut : chacune colle le sien et sa clé au premier lancement ; ses données restent dans SON fichier Google. Fabriquée à la main (generer.py --une commun/commun.json <dossier du dépôt Jauge>), jamais automatiquement : les mises à jour de Théo n'y arrivent pas (un script plus ancien chez elles ne doit jamais casser).",
+  "depot": "Jauge",
+  "titre": "Budget",
+  "nom_appli": "Jauge · mon budget",
+  "nom_court": "Jauge",
+  "lien_script": "",
+  "prefixe_stockage": "jauge-commun.",
+  "prefixe_cache": "jauge-commun-v",
+  "jd_defaut": [],
+  "jd_retires": [],
+  "heures_semaine": 35,
+  "nom_script": "du budget",
+  "id_fichier": "",
+  "commentaire_fichier": "fichier de la personne",
+  "script_id": ""
+}

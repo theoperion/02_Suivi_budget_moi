@@ -22,6 +22,8 @@ Ce fichier n'est **pas** lu automatiquement : seulement quand Théo le demande. 
 
 **Avis de Théo du 24/11/2026 : pas une bonne idée pour l'instant** (beaucoup d'applis de budget existent déjà, et c'est un gros chantier). Gardé pour mémoire.
 
+**Pistes de Théo du 24/11 (après le modèle vierge)** : (a) envoyer d'abord **gratuitement** le kit (modèle vierge + appli commune + guide) à des proches, pour avoir leur avis (pas une vente : rien à déclarer) ; (b) vendre **seulement le Google Sheet**, sans l'appli (plus simple à installer, mais reste une vente : conditions INRAE et micro-entreprise ; beaucoup de modèles de budget déjà vendus quelques euros, ex. Etsy). Avis de l'avocat du diable : un kit payant va contre la condition 1 ci-dessus (installation Google Sheets) ; d'abord le test des 2 cousines (chronométré, blocages notés), puis éventuellement 2-3 proches gratuitement.
+
 **Les trois façons de vendre sans Google Sheets** (bilan du 24/11, après l'essai du mode « données sur ce téléphone », construit en 9.44, voir `moteur.js` et `sauvegarde.js`) :
 1. **Appli web vendue avec un code d'accès** (comme aujourd'hui) : pas de store ni de commission ; données sur le téléphone ; sauvegarde dans le Drive de la personne, mais Google n'accorde l'accès qu'1 h : un toucher « Sauvegarder » de temps en temps (ou un export de fichier).
 2. **Play Store** (la même appli emballée en vraie application, type Capacitor) : Android sauvegarde tout seul les données de l'appli dans le compte Google de la personne, sans aucun toucher. Le plus confortable ; ~15 % de commission, démarches Google, nouveaux comptes : testeurs pendant 14 jours.
