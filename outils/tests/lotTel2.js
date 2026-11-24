@@ -50,11 +50,15 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   const e = await p.evaluate(async () => { ouvrirReglages(); const r = document.querySelector('#sheetIn').innerText; S.form = { mode: 'donnees' }; rendreForm(); await new Promise(x => setTimeout(x, 300)); return { r, d: document.querySelector('#sheetIn').innerText }; });
   ok('E_reglages', /Où sont mes données/.test(e.r) && /sur ce téléphone/.test(e.r) && !/Lien de mon script/.test(e.r) && /changement/.test(e.d), { r: e.r.slice(-300), d: e.d });
   if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'tel-donnees.png') });
+  // F2 : retour demandé SANS réseau → refusé, on reste sur le téléphone, rien ne change
+  reseau = false;
+  const f2 = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100)); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 2500)); return { mode: S.mode, ls: LS.get('mode', ''), err: ($('#ferr') || {}).textContent || '', q: S.queue.length }; });
+  ok('F2_retourSansReseau', f2.mode === 'tel' && f2.ls === 'tel' && /Retour pas fait/.test(f2.err) && f2.q === 0, f2);
   // F : retour au fichier (réseau revenu) : on retrouve le fichier tel quel
   reseau = true;
   const f = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100)); const arme = document.querySelector('#sheetIn').innerText; document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 2500)); return { arme, mode: S.mode, n: S.journal.length, boul: S.journal.some(x => /Boulangerie/.test(x.lib || '')), toast: document.querySelector('#toastT').textContent }; });
   f.renvoyees = renvoyees; // la dépense saisie sur le téléphone repart vers le fichier (le faux serveur ne la garde pas)
-  ok('F_retourFichier', f.mode === 'fichier' && /TOUCHE ENCORE/.test(f.arme) && renvoyees >= 1 && /renvoyée/.test(f.toast || ''), f);
+  ok('F_retourFichier', f.mode === 'fichier' && /TOUCHE ENCORE/.test(f.arme) && renvoyees === 1 && /1 dépense saisie sur le téléphone y est renvoyée/.test(f.toast || '') && /À vérifier dans ton fichier/.test(f.toast || '') && /Bus 2,00/.test(f.toast || ''), f);
   // H : saisie faite PENDANT la copie (fichier lent) → passage annulé, la saisie part bien au fichier
   {
     const { p: q, errs: e2, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
