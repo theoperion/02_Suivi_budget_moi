@@ -32,7 +32,7 @@ def fabriquer(p):
     html = lire('index.html')
     html = remplacer(html, '<title>Budget</title>', f'<title>{p["titre"]}</title>')
     html = remplacer(html, r"const API_DEFAUT = '[^']*';", f"const API_DEFAUT = '{p['lien_script']}';", regex=True)
-    html = remplacer(html, "'jauge.' + k", f"'{p['prefixe_stockage']}' + k", n=3)
+    html = remplacer(html, "'jauge.' + k", f"'{p['prefixe_stockage']}' + k", n=4)
     html = remplacer(html, r'const HEURES_SEMAINE_DEFAUT = [0-9.]+;', f'const HEURES_SEMAINE_DEFAUT = {p.get("heures_semaine", 35)};', regex=True)
     jd = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p['jd_defaut']) + ']'   # jours avec dépenses non saisies (voyage)
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
@@ -45,7 +45,7 @@ def fabriquer(p):
     gs = remplacer(gs, ' * BUDGET · API du budget (Apps Script)', f' * BUDGET · API {p["nom_script"]} (Apps Script)')
     gs = remplacer(gs, "const ID_FICHIER = '';", f"const ID_FICHIER = '{p['id_fichier']}'; // {p['commentaire_fichier']}")
     clasp = remplacer(lire('apps-script/.clasp.json'), r'"scriptId": "[^"]*"', f'"scriptId": "{p["script_id"]}"', regex=True)
-    return {'index.html': html, 'sw.js': sw, 'manifest.json': man, 'apps-script/Code.js': gs,
+    return {'index.html': html, 'sw.js': sw, 'moteur.js': lire('moteur.js'), 'manifest.json': man, 'apps-script/Code.js': gs,
             'apps-script/appsscript.json': lire('apps-script/appsscript.json'), 'apps-script/.clasp.json': clasp}
 
 # Valeurs propres à Théo qui ne doivent JAMAIS rester dans une copie

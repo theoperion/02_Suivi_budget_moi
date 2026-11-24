@@ -17,7 +17,8 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 ## Où est quoi
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli. `const VERSION = '9.42'` |
+| `index.html` | toute l'appli. `const VERSION = '9.43'` |
+| `moteur.js` | (phase 2) mode « données sur ce téléphone » : `Code.js` tel quel exécuté dans le téléphone sur une imitation du tableur (IndexedDB `<préfixe>telephone`), chargé seulement en mode téléphone. Colonne C des catégories déduite du groupe. Écriture confirmée seulement une fois enregistrée (sinon OCCUPE, rien d'appliqué) |
 | `sw.js` | hors connexion. `const CACHE = PREFIXE + 'NN'` : +1 à chaque version |
 | `apps-script/Code.js` | le script Google (`VERSION_API` 5.14), `.clasp.json` = script de Théo |
 | `commun/personnes.json`, `commun/generer.py` | réglages et fabrication des copies 05/06 (remplacements exacts, s'arrête si un motif manque). `generer.py --une <reglages.json> <dossier>` : une seule copie (utilisé par le robot) |
@@ -37,12 +38,14 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 - `node outils/tests/<lot>.js <dossier de l'appli> [captures]` (Playwright global, pas de npm). lotX1 chiffres, lotX2/X4/X5 jeu, lotX3 envois, `codeX3.js` Code.js dans Node, `g3ui.js` interface (« TOUT VERT »), `jeu*.js` prennent le chemin d'`index.html`.
 - Attendu : « VERDICT: OK » et **« ERREURS JS: aucune »**. Jamais contre le vrai serveur (bloqué dans le cloud).
 - **Tout d'un coup** (24/11) : `bash outils/tests/tout.sh <appli> <dossier résultats>` lance tous les lots + `releve.js` (texte de 19 écrans, 16 fenêtres, calculs des 12 mois). Pour un changement qui ne doit rien changer à l'écran : lancer sur l'ancienne version (`git archive HEAD | tar -x -C …`) et la nouvelle, puis `diff -r` (seuls des identifiants aléatoires de lotG2-h2 peuvent différer). Les captures des tests (sous-dossiers de `outils/tests/`) sont ignorées par `.gitignore` : ne jamais les mettre dans le dépôt (public).
+- Mode téléphone : `lotTel.js` (moteur seul : aller-retour, 16 écritures, rechargement, panne d'enregistrement), `lotTel2.js` (dans l'appli : passage, saisie sans réseau, réouverture, retour au fichier), `node outils/tests/releve.js index.html <sortie> tel` doit donner le même relevé que sans `tel` (seule la page Réglages diffère).
 - Copies 05/06 : remplacer le préfixe `jauge.` par `jauge-clem.` / `jauge-devlin.` dans une copie des tests.
 
 ## Notions du code
 - `calc(y, m)` : bilan d'un mois (Journal + Échéancier) ; `bilan(y, m)` ajoute la fin prévue (`resteBudgets`, budgets des jours restants) ; `budgets(y, m)` (annuel suivi sur l'année, « Sans alerte » = essentiel).
 - Épargne : nette = versements − retraits (`estRetraitEp` reconnaît aussi un revenu « retrait … épargne/livret/LEP »). Catégories « prêt » : pas de l'épargne, mais dans le solde.
 - Préférences synchronisées (clés `PREFS_OK_`, ~8 000 caractères max) : tirelires, voyages, escalier, semaines, objectifs, jeu, especes, envies (`pn`/`px` = prénoms de « Payé pour d'autres »).
+- Mode téléphone : `S.mode` ('fichier' | 'tel', LS `mode`), `api()` va vers `moteurTel()` ; Réglages › « Où sont mes données » (visible si `TEL_DISPO` ou déjà en mode téléphone), passage refusé s'il reste des envois, copie vérifiée par `resumeDonnees` avant de basculer ; retour au fichier = fichier tel qu'au jour du passage. `TEL_DISPO = false` tant que la sauvegarde Drive n'est pas prête.
 - Journal : colonne M « Saisi le », N « Payé en » (Espèces).
 - Mises à jour : le service worker prend les fichiers frais, l'appli se recharge seule au retour au premier plan, jamais pendant une saisie. Bouton retour : ne fait jamais sortir de l'appli.
 - Jeu : 100 niveaux, 10 rangs, récompense à chaque niveau ; succès = la réalité. Carte « Nouveau mois » du 1er au 7.
