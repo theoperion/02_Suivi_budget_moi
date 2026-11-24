@@ -38,7 +38,6 @@ def fabriquer(p):
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
     jr = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p.get('jd_retires', [])) + ']'   # périodes à retirer une seule fois de la préférence
     html = remplacer(html, "const JD_RETIRES = [];", f'const JD_RETIRES = {jr};')
-    html = remplacer(html, 'const TEL_DISPO = true;', 'const TEL_DISPO = false;')   # mode téléphone : seulement Théo pour l'instant (24/11)
     sw = remplacer(lire('sw.js'), "const PREFIXE = 'jauge-v';", f"const PREFIXE = '{p['prefixe_cache']}';")
     man = remplacer(lire('manifest.json'), '"name": "Jauge · mon budget"', f'"name": "{p["nom_appli"]}"')
     man = remplacer(man, '"short_name": "Jauge",', f'"short_name": "{p["nom_court"]}",')
