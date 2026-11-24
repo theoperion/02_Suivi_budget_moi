@@ -32,7 +32,7 @@ let echecs = 0; const ok = (c, m, v) => { if (!c) echecs++; console.log((c ? 'OK
   const clic = async sel => { await p.click(sel); await p.waitForTimeout(250); };
   const txt = () => p.evaluate(() => document.querySelector('#sheetIn').innerText);
   // fonctionnalités : tout disponible et actif, même avec l'ancienne préférence « off » et sans accès anticipé
-  const f = await p.evaluate(() => ({ anticipe: ACCES_ANTICIPE, dispo: FEAT.map(x => dispo(x[0])), on: ['jeu','defi','series','bilan','alertes','saison','semaine','resume','objectif','pj','avances'].every(on), ouvert: ['saison','semaine','resume','objectif','alertes','cosmetiques'].every(ouvert), progres: progresVisible() }));
+  const f = await p.evaluate(() => ({ dispo: FEAT.map(x => dispo(x[0])), on: ['jeu','defi','series','bilan','alertes','saison','semaine','resume','objectif','pj','avances'].every(on), ouvert: ['saison','semaine','resume','objectif','alertes','cosmetiques'].every(ouvert), progres: progresVisible() }));
   ok(f.dispo.every(Boolean) && f.on && f.ouvert && f.progres, 'tout est disponible et actif', f);
   const ext = await p.evaluate(() => { const L = typeof listeCos === 'function' ? listeCos() : null; return { mascotte: typeof mascotte === 'function', cosEtendu: dispo('cosmetiques') }; });
   ok(ext.cosEtendu, 'collection étendue disponible', ext);

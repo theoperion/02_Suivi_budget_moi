@@ -1,0 +1,4 @@
+# Captures écrites par les tests (jamais dans le dépôt public)
+outils/tests/*/
+*.png
+!icon-*.png

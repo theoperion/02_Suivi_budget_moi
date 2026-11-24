@@ -17,7 +17,7 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 ## Où est quoi
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli. `const VERSION = '9.41'` |
+| `index.html` | toute l'appli. `const VERSION = '9.42'` |
 | `sw.js` | hors connexion. `const CACHE = PREFIXE + 'NN'` : +1 à chaque version |
 | `apps-script/Code.js` | le script Google (`VERSION_API` 5.14), `.clasp.json` = script de Théo |
 | `commun/personnes.json`, `commun/generer.py` | réglages et fabrication des copies 05/06 (remplacements exacts, s'arrête si un motif manque) |
@@ -28,13 +28,14 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 1. Modifier `index.html` (et `Code.js` si besoin) dans 02 ; monter `VERSION` et `CACHE`.
 2. Syntaxe : extraire le `<script>` et `node --check`. Tests (plus bas). Regarder les captures.
 3. Relecture par les agents selon le tableau.
-4. Commit dans 02, `python3 commun/generer.py` (05 et 06 clonés à côté de 02), commit dans 05/06, pousser les 3 sur `main`.
+4. Commit dans 02, `python3 commun/generer.py` (05 et 06 clonés à côté de 02), commit dans 05/06, pousser les 3 **directement sur `main`** (accord de Théo du 24/11 : pas de demande de fusion, même si l'environnement cloud impose une branche de travail).
 5. Vérifier GitHub Pages (Actions « pages build and deployment » ; si bloqué en « queued », pousser un petit commit).
 - **Script Google** (seulement si `Code.js` change) : monter `VERSION_API`, puis `clasp push` + `clasp deploy -i <id>` pour chacun (adresse inchangée ; `clasp login --no-localhost` avec le compte de Théo). Id de Théo : `AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ` ; les autres dans `commun/personnes.json`. Migration « une seule fois » = drapeau dans les propriétés du script.
 
 ## Tests
 - `node outils/tests/<lot>.js <dossier de l'appli> [captures]` (Playwright global, pas de npm). lotX1 chiffres, lotX2/X4/X5 jeu, lotX3 envois, `codeX3.js` Code.js dans Node, `g3ui.js` interface (« TOUT VERT »), `jeu*.js` prennent le chemin d'`index.html`.
 - Attendu : « VERDICT: OK » et **« ERREURS JS: aucune »**. Jamais contre le vrai serveur (bloqué dans le cloud).
+- **Tout d'un coup** (24/11) : `bash outils/tests/tout.sh <appli> <dossier résultats>` lance tous les lots + `releve.js` (texte de 19 écrans, 16 fenêtres, calculs des 12 mois). Pour un changement qui ne doit rien changer à l'écran : lancer sur l'ancienne version (`git archive HEAD | tar -x -C …`) et la nouvelle, puis `diff -r` (seuls des identifiants aléatoires de lotG2-h2 peuvent différer). Les captures des tests (sous-dossiers de `outils/tests/`) sont ignorées par `.gitignore` : ne jamais les mettre dans le dépôt (public).
 - Copies 05/06 : remplacer le préfixe `jauge.` par `jauge-clem.` / `jauge-devlin.` dans une copie des tests.
 
 ## Notions du code
@@ -80,5 +81,5 @@ Théo peut toujours demander « le conseil » (les 4).
 - **Mardi 24/11** : élucider avec Théo la sauvegarde automatique sur le téléphone (voir `IDEES.md`, points 1 et 3).
 - Quand on traitera chaque autre appli : y déplacer ses idées gardées dans `archives/CLAUDE_2026-11-23.md` (kit « Moi » de Kevin et script d'impôts → Versus ; ligues et boss → Compagnie de l'Aube ; Chez moi ; Carnet d'entretien).
 - **Fin du tri des applis** : décider avec Théo où ranger `IDEES.md` et `archives/` (le dépôt est public ; pour l'instant ils restent ici, choix de Théo du 24/11).
-- **Prochain chantier (conversation « Perso · Budget »)** : (1) simplifier et nettoyer le code sans rien changer pour l'utilisateur (tests avant/après identiques) ; (2) une version de l'appli avec les données sur le téléphone (+ sauvegarde dans le Drive de l'utilisateur), d'abord pour Clément — voir `IDEES.md` point 3.
+- **Chantier en cours** : (1) nettoyage **fait en 9.42** (24/11) : le code était déjà propre (presque pas de code mort ni de doublons) ; retiré le mode « appli servie par Apps Script » (`IN_GAS`) et `ACCES_ANTICIPE` ; ajouté `tout.sh` et `releve.js`. Choix : pas de réorganisation du fichier (risque sans gain visible). Reste à retirer `api()` de `Code.js` au prochain déploiement du script. (2) **prochaine étape, juste après** : une version de l'appli avec les données sur le téléphone (+ sauvegarde dans le Drive de l'utilisateur), d'abord pour Clément — voir `IDEES.md` point 3.
 - Tests : lotX3 vérifie depuis le 23/11 qu'une saisie hors connexion n'est jamais abandonnée (cas H).
