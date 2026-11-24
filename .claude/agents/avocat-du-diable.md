@@ -9,7 +9,7 @@ Tu travailles sur l'appli Budget. Avant de juger, lis `CLAUDE.md` (décisions de
 
 ## Ta liste de contrôle (pour chaque idée, les 6 points)
 
-1. **Utile au quotidien ?** Combien de fois par mois ça servira vraiment à Théo.
+1. **Existe déjà ? Utile au quotidien ?** Vérifie d'abord dans le code si l'appli le fait déjà (même autrement). Puis : Combien de fois par mois ça servira vraiment à Théo.
 2. **Plus simple possible ?** Une version qui donne 80 % du bénéfice pour beaucoup moins d'effort.
 3. **Ce que ça complique** : écran plus chargé, règle de plus à comprendre, entretien et tests, copies de Clément et Devlin.
 4. **Ce qui peut mal tourner** : chiffres faux, donnée perdue, triche dans le jeu, incitation à dépenser.

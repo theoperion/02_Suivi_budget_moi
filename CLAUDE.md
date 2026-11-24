@@ -62,7 +62,7 @@ Méthode de création (la même pour tous les dépôts) : besoin réel → rôle
 | `comptable` | chaque montant juste et partout pareil, le jeu suit les règles | ✅ essai réussi (23/11) |
 | `code-donnees` | rien ne casse, aucune saisie perdue, copies 05/06 bonnes | ✅ essai réussi (23/11) |
 | `utilisateur` | Théo au téléphone comprend tout du premier coup (captures clair + sombre) | ✅ essai réussi (24/11) |
-| avocat du diable | conteste les gros changements | à définir avec Théo (remplacera `conseil-avocat-du-diable`) |
+| `avocat-du-diable` | conteste chaque idée ou gros changement (avant construction, et toute liste d'idées avant de la présenter à Théo) | ✅ essai réussi (24/11) |
 
 | Changement | Qui relit |
 |---|---|
@@ -76,7 +76,6 @@ Théo peut toujours demander « le conseil » (les 4).
 
 ## En cours / à faire
 - **Transfert de l'appli de Clément, mercredi 25/11/2026** : Clément suit lui-même les étapes sur son compte (fiche de transfert déjà remise à Théo) ; noter tout ce qui bloque. Ensuite retirer Clément de `commun/personnes.json` et adapter `generer.py`. Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
-- Définir avec Théo l'agent « avocat du diable », puis supprimer `conseil-avocat-du-diable`.
 - Vidéo tuto du Budget : terminée (nuit du 23/11).
 - **Mardi 24/11** : élucider avec Théo la sauvegarde automatique sur le téléphone (voir `IDEES.md`, points 1 et 3).
 - Quand on traitera chaque autre appli : y déplacer ses idées gardées dans `archives/CLAUDE_2026-11-23.md` (kit « Moi » de Kevin et script d'impôts → Versus ; ligues et boss → Compagnie de l'Aube ; Chez moi ; Carnet d'entretien).
