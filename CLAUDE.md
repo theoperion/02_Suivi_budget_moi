@@ -17,7 +17,7 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 ## Où est quoi
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli. `const VERSION = '9.43'` |
+| `index.html` | toute l'appli. `const VERSION = '9.44'` |
 | `moteur.js` | (phase 2) mode « données sur ce téléphone » : `Code.js` tel quel exécuté dans le téléphone sur une imitation du tableur (IndexedDB `<préfixe>telephone`), chargé seulement en mode téléphone. Colonne C des catégories déduite du groupe. Écriture confirmée seulement une fois enregistrée (sinon OCCUPE, rien d'appliqué) |
 | `sw.js` | hors connexion. `const CACHE = PREFIXE + 'NN'` : +1 à chaque version |
 | `apps-script/Code.js` | le script Google (`VERSION_API` 5.14), `.clasp.json` = script de Théo |

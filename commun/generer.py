@@ -38,6 +38,7 @@ def fabriquer(p):
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
     jr = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p.get('jd_retires', [])) + ']'   # périodes à retirer une seule fois de la préférence
     html = remplacer(html, "const JD_RETIRES = [];", f'const JD_RETIRES = {jr};')
+    html = remplacer(html, 'const TEL_DISPO = true;', 'const TEL_DISPO = false;')   # mode téléphone : seulement Théo pour l'instant (24/11)
     sw = remplacer(lire('sw.js'), "const PREFIXE = 'jauge-v';", f"const PREFIXE = '{p['prefixe_cache']}';")
     man = remplacer(lire('manifest.json'), '"name": "Jauge · mon budget"', f'"name": "{p["nom_appli"]}"')
     man = remplacer(man, '"short_name": "Jauge",', f'"short_name": "{p["nom_court"]}",')
@@ -45,7 +46,7 @@ def fabriquer(p):
     gs = remplacer(gs, ' * BUDGET · API du budget (Apps Script)', f' * BUDGET · API {p["nom_script"]} (Apps Script)')
     gs = remplacer(gs, "const ID_FICHIER = '';", f"const ID_FICHIER = '{p['id_fichier']}'; // {p['commentaire_fichier']}")
     clasp = remplacer(lire('apps-script/.clasp.json'), r'"scriptId": "[^"]*"', f'"scriptId": "{p["script_id"]}"', regex=True)
-    return {'index.html': html, 'sw.js': sw, 'moteur.js': lire('moteur.js'), 'manifest.json': man, 'apps-script/Code.js': gs,
+    return {'index.html': html, 'sw.js': sw, 'moteur.js': lire('moteur.js'), 'sauvegarde.js': lire('sauvegarde.js'), 'manifest.json': man, 'apps-script/Code.js': gs,
             'apps-script/appsscript.json': lire('apps-script/appsscript.json'), 'apps-script/.clasp.json': clasp}
 
 # Valeurs propres à Théo qui ne doivent JAMAIS rester dans une copie

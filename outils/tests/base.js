@@ -24,7 +24,7 @@ async function page(b, date, journal, prefs, ls, ech) {
   await p.route('**/*', async r => { const u = r.request().url();
     if (u.startsWith('https://script.google.com')) { const q = JSON.parse(r.request().postData()); if (q.action === 'pref-set') PRF[q.cle] = q.valeur;
       return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(q.action === 'data' ? { ok: true, data: donnees(journal, JSON.parse(JSON.stringify(PRF)), ech) } : { ok: true }) }); }
-    if (/^http:\/\/app\.test\/(moteur\.js|apps-script\/Code\.js)/.test(u)) return r.fulfill({ status: 200, contentType: 'text/javascript', body: fs.readFileSync(require('path').join(require('path').dirname(FILE), new URL(u).pathname.slice(1))) }); // mode téléphone (phase 2)
+    if (/^http:\/\/app\.test\/(moteur\.js|sauvegarde\.js|apps-script\/Code\.js)/.test(u)) return r.fulfill({ status: 200, contentType: 'text/javascript', body: fs.readFileSync(require('path').join(require('path').dirname(FILE), new URL(u).pathname.slice(1))) }); // mode téléphone (phase 2)
     if (u.startsWith('http://app.test/')) return r.fulfill({ status: 200, contentType: 'text/html', body: html });
     return r.fulfill({ status: 200, body: '' }); });
   await p.addInitScript(([api, ls]) => { if (!sessionStorage.getItem('init')) { sessionStorage.setItem('init', '1'); const set = (k, v) => localStorage.setItem('jauge.' + k, JSON.stringify(v));
