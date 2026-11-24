@@ -63,6 +63,6 @@ function donnees() {
     R[nom] = await p.evaluate(() => { const c = document.querySelector('.pbas'); return c ? c.innerText.replace(/\s+/g, ' ').slice(0, 140) : null; });
     const c = await p.$('.pbas'); if (c) { await c.scrollIntoViewIfNeeded(); await c.screenshot({ path: path.join(SHOTS, 'pbas-' + nom + '.png') }); }
   }
-  R.check = await p.evaluate(() => { const P = courbeSoldeMois(2026, 10); return { fin: Math.round(P[P.length - 1].s), attendu: Math.round(soldeCalcule(2026, 10)), n: P.length }; });
+  R.check = await p.evaluate(() => { const P = courbeSoldeMois(2026, 10) || []; return P.length ? { fin: Math.round(P[P.length - 1].s), attendu: Math.round(soldeCalcule(2026, 10)), n: P.length } : { n: 0, note: 'mois passé : pas de courbe depuis 9.38 (voulu)' }; });
   console.log(JSON.stringify(R, null, 1)); console.log('ERREURS JS:', errs.length ? errs : 'aucune'); await b.close();
 })();

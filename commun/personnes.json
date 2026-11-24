@@ -8,7 +8,6 @@
     "lien_script": "https://script.google.com/macros/s/AKfycbxW02G2fTsST3lRgajwU3HcoYOIf7BkFmstNVtfJ5st-q4U5Nj3JgHH5BwFIMx315E_qg/exec",
     "prefixe_stockage": "jauge-clem.",
     "prefixe_cache": "jauge-clement-v",
-    "acces_anticipe": false,
     "jd_defaut": [["2026-11-07", "2026-11-15"]],
     "jd_retires": [],
     "nom_script": "du budget de Clément",
@@ -25,7 +24,6 @@
     "lien_script": "https://script.google.com/macros/s/AKfycbyq1DoL_nP5dOMlHvWdxubnv2gW63MWgHeZ3wo_ZYZuXotnNHjrIjnXrTmSt5BQYAv90Q/exec",
     "prefixe_stockage": "jauge-devlin.",
     "prefixe_cache": "jauge-devlin-v",
-    "acces_anticipe": false,
     "jd_defaut": [
       [
         "2026-11-07",

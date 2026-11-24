@@ -26,7 +26,6 @@ def fabriquer(p):
     html = remplacer(html, r"const API_DEFAUT = '[^']*';", f"const API_DEFAUT = '{p['lien_script']}';", regex=True)
     html = remplacer(html, "'jauge.' + k", f"'{p['prefixe_stockage']}' + k", n=3)
     html = remplacer(html, r'const HEURES_SEMAINE_DEFAUT = [0-9.]+;', f'const HEURES_SEMAINE_DEFAUT = {p.get("heures_semaine", 35)};', regex=True)
-    html = remplacer(html, 'const ACCES_ANTICIPE = true;', f'const ACCES_ANTICIPE = {"true" if p["acces_anticipe"] else "false"};')
     jd = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p['jd_defaut']) + ']'   # jours avec dépenses non saisies (voyage)
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
     jr = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p.get('jd_retires', [])) + ']'   # périodes à retirer une seule fois de la préférence
