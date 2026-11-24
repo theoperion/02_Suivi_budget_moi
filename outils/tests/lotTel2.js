@@ -14,7 +14,9 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   const { p, errs } = await B.page(b, '2026-11-20T18:30:00', journal, {}, {}, []); await B.fauxGoogle(p);
   let reseau = true, appelsScript = 0;
   let renvoyees = 0;
-  await p.route('https://script.google.com/**', r => { appelsScript++; if (/Boulangerie modifi/.test(r.request().postData() || '')) renvoyees++; return reseau ? r.fallback() : r.abort(); });
+  let lentData = false, renvoisPendant = 0;
+  await p.route('https://script.google.com/**', async r => { appelsScript++; const pd = r.request().postData() || ''; if (/Boulangerie modifi/.test(pd)) renvoyees++; if (/Pendant retour/.test(pd)) renvoisPendant++;
+    if (lentData && /"action":"data"/.test(pd)) await new Promise(x => setTimeout(x, 2500)); return reseau ? r.fallback() : r.abort(); });
   const n0 = journal.length;
   // G : envoi en attente → passage refusé, rien ne change
   const g = await p.evaluate(async () => { S.queue.push({ action: 'add', u: 'x', ligne: {} }); S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); const r = { mode: S.mode, err: $('#ferr').textContent }; S.queue = []; sauver(); fermer(); return r; });
@@ -54,11 +56,23 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   reseau = false;
   const f2 = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100)); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 2500)); return { mode: S.mode, ls: LS.get('mode', ''), err: ($('#ferr') || {}).textContent || '', q: S.queue.length }; });
   ok('F2_retourSansReseau', f2.mode === 'tel' && f2.ls === 'tel' && /Retour pas fait/.test(f2.err) && f2.q === 0, f2);
+  // F3 : une dépense saisie PENDANT la lecture du retour → retour annulé, la dépense reste sur le téléphone
+  reseau = true; lentData = true;
+  const f3 = await p.evaluate(async () => {
+    S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100));
+    document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 500));
+    fermer(); ouvrirSaisie(null); S.form.montant = '9,90'; S.form.cat = 'Courses'; S.form.lib = 'Pendant retour'; S._saveT = 0; enregistrer();
+    await new Promise(x => setTimeout(x, 3500));
+    const m = await moteurTel(); const d = (await m.appel({ action: 'data', key: S.key })).data;
+    return { mode: S.mode, ls: LS.get('mode', ''), surTel: d.journal.some(l => l.lib === 'Pendant retour'), q: S.queue.length };
+  });
+  lentData = false;
+  ok('F3_saisiePendantRetour', f3.mode === 'tel' && f3.ls === 'tel' && f3.surTel && f3.q === 0, f3);
   // F : retour au fichier (réseau revenu) : on retrouve le fichier tel quel
-  reseau = true;
   const f = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100)); const arme = document.querySelector('#sheetIn').innerText; document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 2500)); return { arme, mode: S.mode, n: S.journal.length, boul: S.journal.some(x => /Boulangerie/.test(x.lib || '')), toast: document.querySelector('#toastT').textContent }; });
   f.renvoyees = renvoyees; // la dépense saisie sur le téléphone repart vers le fichier (le faux serveur ne la garde pas)
-  ok('F_retourFichier', f.mode === 'fichier' && /TOUCHE ENCORE/.test(f.arme) && renvoyees === 1 && /1 dépense saisie sur le téléphone y est renvoyée/.test(f.toast || '') && /À vérifier dans ton fichier/.test(f.toast || '') && /Bus 2,00/.test(f.toast || ''), f);
+  f.renvoisPendant = renvoisPendant;
+  ok('F_retourFichier', f.mode === 'fichier' && /TOUCHE ENCORE/.test(f.arme) && renvoyees === 1 && renvoisPendant === 1 && /2 dépenses saisies sur le téléphone y sont renvoyées/.test(f.toast || '') && /À vérifier dans ton fichier/.test(f.toast || '') && /Bus 2,00/.test(f.toast || ''), f);
   // H : saisie faite PENDANT la copie (fichier lent) → passage annulé, la saisie part bien au fichier
   {
     const { p: q, errs: e2, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
