@@ -53,6 +53,49 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   reseau = true;
   const f = await p.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 100)); const arme = document.querySelector('#sheetIn').innerText; document.querySelector('[data-act="donnees-fichier"]').click(); await new Promise(x => setTimeout(x, 2500)); return { arme, mode: S.mode, n: S.journal.length, boul: S.journal.some(x => /Boulangerie/.test(x.lib || '')) }; });
   ok('F_retourFichier', f.mode === 'fichier' && f.n === n0 && !f.boul && /TOUCHE ENCORE/.test(f.arme), f);
+  // H : saisie faite PENDANT la copie (fichier lent) → passage annulé, la saisie part bien au fichier
+  {
+    const { p: q, errs: e2, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
+    let lent = false;
+    let envoisPendant = 0;
+    await q.route('https://script.google.com/**', async r => { const pd = r.request().postData() || '{}', d = JSON.parse(pd); if (/Pendant/.test(pd) && d.action !== 'data') envoisPendant++; if (lent && d.action === 'data') await new Promise(x => setTimeout(x, 2000)); return r.fallback(); });
+    lent = true;
+    const h = await q.evaluate(async () => {
+      S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet();
+      const pr = passerTelephone();
+      await new Promise(x => setTimeout(x, 300)); fermer(); ouvrirSaisie(null); S.form.montant = '7'; S.form.cat = 'Courses'; S.form.lib = 'Pendant'; enregistrer();
+      await pr; await new Promise(x => setTimeout(x, 2500));
+      return { mode: S.mode, q: S.queue.length, rejets: (LS.get('rejets', []) || []).length, err: ($('#ferr') || {}).textContent };
+    }).catch(err => ({ err: err.message }));
+    h.envoisAuFichier = envoisPendant; // le faux serveur ne garde pas les ajouts : on vérifie l'envoi lui-même
+    ok('H_saisiePendantCopie', h.mode === 'fichier' && h.q === 0 && h.rejets === 0 && envoisPendant === 1, h);
+    errs.push(...e2); await ctx.close();
+  }
+  // I : deux fenêtres de l'appli ouvertes en mode téléphone : aucune saisie n'efface l'autre
+  {
+    const { p: pa, errs: e3, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
+    await pa.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
+    const fs = require('fs'); const servir = pg => pg.route('**/*', r => { const u = new URL(r.request().url()); if (u.host !== 'app.test') return r.fulfill({ status: 200, body: '' });
+      const f = path.join(DIR, u.pathname === '/' ? 'index.html' : u.pathname.slice(1)); return r.fulfill({ status: 200, body: fs.readFileSync(f), contentType: f.endsWith('.js') ? 'text/javascript' : 'text/html' }); });
+    const pb = await ctx.newPage(); await servir(pb); pb.on('pageerror', x => e3.push(x.message)); await pb.clock.setFixedTime(new Date('2026-11-20T18:30:00'));
+    await pb.goto('http://app.test/index.html'); await pb.waitForTimeout(2500);
+    const ajoute = (pg, lib) => pg.evaluate(async lib => { await rafraichir(true); fermer(); ouvrirSaisie(null); S.form.montant = '3'; S.form.cat = 'Courses'; S.form.lib = lib; S._saveT = 0; enregistrer(); await new Promise(x => setTimeout(x, 1500)); }, lib);
+    await ajoute(pa, 'FenetreA'); await ajoute(pb, 'FenetreB');
+    const pc = await ctx.newPage(); await servir(pc); await pc.clock.setFixedTime(new Date('2026-11-20T18:30:00')); await pc.goto('http://app.test/index.html'); await pc.waitForTimeout(2500);
+    const i = await pc.evaluate(async () => { await rafraichir(true); const L = S.journal.filter(x => /^Fenetre/.test(x.lib || '')); return { mode: S.mode, libs: L.map(x => x.lib + '@' + x.row) }; });
+    ok('I_deuxFenetres', i.mode === 'tel' && i.libs.length === 2 && new Set(i.libs.map(x => x.split('@')[1])).size === 2, i);
+    errs.push(...e3); await ctx.close();
+  }
+  // J : données du téléphone effacées → retour automatique au fichier, jamais bloqué
+  {
+    const { p: pj, errs: e4, ctx } = await B.page(b, '2026-11-20T18:30:00', B.journal('2026-10-01', '2026-11-20', k => k.endsWith('3')), {}, {}, []);
+    await pj.evaluate(async () => { S.form = { mode: 'donnees' }; rendreForm(); ouvrirSheet(); await passerTelephone(); });
+    await pj.evaluate(() => new Promise(ok => { const q = indexedDB.deleteDatabase('jauge.telephone'); q.onsuccess = q.onerror = q.onblocked = () => ok(); }));
+    await pj.reload(); await pj.waitForTimeout(3000);
+    const j = await pj.evaluate(async () => { await rafraichir(true); return { mode: S.mode, lock: !document.querySelector('#lock').hidden, n: S.journal.length, toast: document.querySelector('#toastT').textContent }; });
+    ok('J_donneesEffacees', j.mode === 'fichier' && !j.lock && j.n > 0 && /effacées/.test(j.toast), j);
+    errs.push(...e4); await ctx.close();
+  }
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
