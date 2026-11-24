@@ -1,6 +1,6 @@
 {
-  "_note": "Appli commune (24/11/2026) : copie vierge et FIGÉE pour les personnes qui partent de zéro (cousines de Théo). Sans lien de script par défaut : chacune colle le sien et sa clé au premier lancement ; ses données restent dans SON fichier Google. Fabriquée à la main (generer.py --une commun/commun.json <dossier du dépôt Jauge>), jamais automatiquement : les mises à jour de Théo n'y arrivent pas (un script plus ancien chez elles ne doit jamais casser).",
-  "depot": "Jauge",
+  "_note": "Appli commune (24/11/2026) : copie vierge et FIGÉE pour les personnes qui partent de zéro (cousines de Théo). Sans lien de script par défaut : chacune colle le sien et sa clé au premier lancement ; ses données restent dans SON fichier Google. Fabriquée à la main (generer.py --une commun/commun.json <dossier du dépôt 10_Budget_Template>), jamais automatiquement : les mises à jour de Théo n'y arrivent pas (un script plus ancien chez elles ne doit jamais casser).",
+  "depot": "10_Budget_Template",
   "titre": "Budget",
   "nom_appli": "Jauge · mon budget",
   "nom_court": "Jauge",
