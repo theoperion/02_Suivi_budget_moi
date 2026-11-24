@@ -78,7 +78,7 @@ Théo peut toujours demander « le conseil » (les 4).
 - **Transfert de l'appli de Clément, mercredi 25/11/2026** : Clément suit lui-même les étapes sur son compte (fiche de transfert déjà remise à Théo) ; noter tout ce qui bloque. Ensuite retirer Clément de `commun/personnes.json` et adapter `generer.py`. Même chose pour Devlin plus tard. Théo n'hébergera plus leurs applis.
 - Vidéo tuto du Budget : terminée (nuit du 23/11).
 - **Mardi 24/11** : élucider avec Théo la sauvegarde automatique sur le téléphone (voir `IDEES.md`, points 1 et 3).
-- Quand on traitera chaque autre appli : y déplacer ses idées gardées dans `archives/CLAUDE_2026-11-23.md` (kit « Moi » de Kevin et script d'impôts → Versus ; ligues et boss → Compagnie de l'Aube ; Chez moi ; Carnet d'entretien).
+- Quand on traitera chaque autre appli : y déplacer ses idées gardées dans `archives/CLAUDE_2026-11-23.md` (Versus : fait le 24/11 ; ligues et boss → Compagnie de l'Aube ; Chez moi ; Carnet d'entretien).
 - **Fin du tri des applis** : décider avec Théo où ranger `IDEES.md` et `archives/` (le dépôt est public ; pour l'instant ils restent ici, choix de Théo du 24/11).
 - **Prochain chantier (conversation « Perso · Budget »)** : (1) simplifier et nettoyer le code sans rien changer pour l'utilisateur (tests avant/après identiques) ; (2) une version de l'appli avec les données sur le téléphone (+ sauvegarde dans le Drive de l'utilisateur), d'abord pour Clément — voir `IDEES.md` point 3.
 - Tests : lotX3 vérifie depuis le 23/11 qu'une saisie hors connexion n'est jamais abandonnée (cas H).
