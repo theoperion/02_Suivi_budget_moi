@@ -1,0 +1,37 @@
+# Mise à jour automatique d'une appli Budget hébergée par son propriétaire (Clément, puis Devlin).
+# Chaque nuit (et sur demande : onglet Actions › « Mise à jour automatique » › Run workflow), prend la dernière
+# version publiée par Théo, fabrique l'appli avec les réglages de ce dépôt (reglages.json) et la met en ligne
+# s'il y a du nouveau. Si quoi que ce soit ne colle pas, l'outil s'arrête sans rien écrire : l'appli reste telle quelle.
+# Modèle : 02_Suivi_budget_moi/commun/mise-a-jour.yml (à copier dans .github/workflows/ du dépôt de la personne).
+name: Mise à jour automatique
+on:
+  schedule:
+    - cron: '17 3 * * *'   # chaque nuit, vers 4 h 17 (heure de Paris en hiver)
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: mise-a-jour
+  cancel-in-progress: false
+jobs:
+  maj:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupérer la dernière version de Théo
+        run: git clone --depth 1 https://github.com/theoperion/02_Suivi_budget_moi.git "$RUNNER_TEMP/modele"
+      - name: Fabriquer l'appli avec les réglages de ce dépôt
+        run: python3 "$RUNNER_TEMP/modele/commun/generer.py" --une reglages.json .
+      - name: Mettre en ligne s'il y a du nouveau
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A
+          if git diff --cached --quiet; then echo "Déjà à jour, rien à faire."; exit 0; fi
+          V=$(grep -oP "const VERSION = '\K[^']+" index.html || echo '?')
+          git config user.name "Mise à jour automatique"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Mise à jour automatique : version $V"
+          git push
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" > /dev/null && echo "Version $V : mise en ligne demandée." || echo "Version $V poussée (la mise en ligne démarrera d'elle-même)."

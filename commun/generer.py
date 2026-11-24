@@ -2,6 +2,9 @@
 """Fabrique les applis de Clément et Devlin à partir de l'appli de Théo (le modèle).
 
 Usage : python3 commun/generer.py [chemin_du_dossier_des_depots]
+   ou : python3 commun/generer.py --une <reglages.json> <dossier_de_sortie>
+        (une seule copie, réglages lus dans un fichier : utilisé par la mise à jour automatique
+         du dépôt d'une personne qui héberge elle-même son appli, voir commun/mise-a-jour.yml)
 Chaque remplacement doit trouver exactement le nombre attendu d'occurrences, sinon rien n'est écrit.
 Les deux copies sont fabriquées en mémoire et contrôlées (plus aucune trace des réglages de Théo)
 avant d'écrire le moindre fichier : si l'une échoue, aucune n'est écrite.
@@ -10,8 +13,13 @@ import json, os, re, sys
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 MODELE = os.path.dirname(ICI)                       # dépôt de Théo
-RACINE = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(MODELE)
-P = json.load(open(os.path.join(ICI, 'personnes.json'), encoding='utf-8'))
+UNE = len(sys.argv) == 4 and sys.argv[1] == '--une'
+if UNE:   # une seule personne : ses réglages, écrits directement dans le dossier de sortie
+    P = {'une': json.load(open(sys.argv[2], encoding='utf-8'))}
+    RACINE = None
+else:
+    RACINE = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(MODELE)
+    P = json.load(open(os.path.join(ICI, 'personnes.json'), encoding='utf-8'))
 
 def lire(nom): return open(os.path.join(MODELE, nom), encoding='utf-8').read()
 
@@ -61,7 +69,7 @@ for cle, p in P.items():
     COPIES.append((cle, p, fichiers))
 # Tout est vérifié pour les deux copies : on peut écrire.
 for cle, p, fichiers in COPIES:
-    dest = os.path.join(RACINE, p['depot'])
+    dest = os.path.abspath(sys.argv[3]) if UNE else os.path.join(RACINE, p['depot'])
     for nom, txt in fichiers.items():
         chemin = os.path.join(dest, nom); os.makedirs(os.path.dirname(chemin), exist_ok=True)
         open(chemin, 'w', encoding='utf-8').write(txt)
