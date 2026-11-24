@@ -21,7 +21,7 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 | `sw.js` | hors connexion. `const CACHE = PREFIXE + 'NN'` : +1 à chaque version |
 | `apps-script/Code.js` | le script Google (`VERSION_API` 5.14), `.clasp.json` = script de Théo |
 | `commun/personnes.json`, `commun/generer.py` | réglages et fabrication des copies 05/06 (remplacements exacts, s'arrête si un motif manque). `generer.py --une <reglages.json> <dossier>` : une seule copie (utilisé par le robot) |
-| `commun/mise-a-jour.yml` | robot GitHub copié dans le dépôt d'une personne qui héberge son appli : chaque nuit, prend `main` de 02 et fabrique sa copie avec son `reglages.json`. **Tout nouveau fichier de l'appli doit être ajouté à `fabriquer()` de `generer.py`**, sinon les copies ne le reçoivent pas |
+| `commun/mise-a-jour.yml` | robot GitHub copié dans le dépôt d'une personne qui héberge son appli : chaque nuit, prend `main` de 02 et fabrique sa copie avec son `reglages.json`. **Tout nouveau fichier de l'appli (icônes comprises) doit être ajouté à `fabriquer()` de `generer.py`**, sinon les copies ne le reçoivent pas. Ne jamais casser `--une` (test : `outils/tests/generer.sh`, lancé par `tout.sh`). Tout nouveau réglage lu avec une valeur par défaut (`p.get(…, défaut)`) : on ne peut plus modifier le `reglages.json` d'une personne transférée, une clé manquante bloquerait ses mises à jour |
 | `outils/tests/*.js` | tests Playwright avec faux serveur |
 | `.claude/agents/` | les agents de relecture (voir plus bas) |
 
@@ -31,7 +31,7 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 3. Relecture par les agents selon le tableau.
 4. Commit dans 02, `python3 commun/generer.py` (05 et 06 clonés à côté de 02), commit dans 05/06, pousser les 3 **directement sur `main`** (accord de Théo du 24/11 : pas de demande de fusion, même si l'environnement cloud impose une branche de travail).
 5. Vérifier GitHub Pages (Actions « pages build and deployment » ; si bloqué en « queued », pousser un petit commit).
-- **Script Google** (seulement si `Code.js` change) : monter `VERSION_API`, puis `clasp push` + `clasp deploy -i <id>` pour chacun (adresse inchangée ; `clasp login --no-localhost` avec le compte de Théo). Id de Théo : `AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ` ; les autres dans `commun/personnes.json`. Migration « une seule fois » = drapeau dans les propriétés du script.
+- **Script Google** (seulement si `Code.js` change) : pour une personne transférée (Clément), personne ne redéploie son script : monter `API_ATTENDUE` dans `index.html` pour que son appli affiche « Apps Script pas à jour », et prévenir Théo pour qu'il la prévienne (marche à suivre dans le README de son dépôt). Sinon : monter `VERSION_API`, puis `clasp push` + `clasp deploy -i <id>` pour chacun (adresse inchangée ; `clasp login --no-localhost` avec le compte de Théo). Id de Théo : `AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ` ; les autres dans `commun/personnes.json`. Migration « une seule fois » = drapeau dans les propriétés du script.
 
 ## Tests
 - `node outils/tests/<lot>.js <dossier de l'appli> [captures]` (Playwright global, pas de npm). lotX1 chiffres, lotX2/X4/X5 jeu, lotX3 envois, `codeX3.js` Code.js dans Node, `g3ui.js` interface (« TOUT VERT »), `jeu*.js` prennent le chemin d'`index.html`.

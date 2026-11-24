@@ -9,4 +9,5 @@ ls "$T"/*.js | grep -v -e '/base.js$' -e '/releve.js$' | xargs -P 4 -I{} bash -c
   cd "$0" && timeout 900 node "$f" "$a" > "$1/$n.txt" 2>&1; code=$?
   v=$(grep -h -e "VERDICT" -e "TOUT VERT" "$1/$n.txt" | tail -1); e=$(grep -h -e "ERREURS JS" -e "^ERREURS:" "$1/$n.txt" | tail -1)
   echo "$n · sortie $code · ${v:-—} · ${e:-—}"' "$APP" "$OUT" | sort
+bash "$T/generer.sh" "$APP/.." > "$OUT/generer.txt" 2>&1; echo "generer · $(tail -1 "$OUT/generer.txt")"
 node "$T/releve.js" "$APP/index.html" "$OUT/releve.txt" > /dev/null 2>&1 && echo "releve · écrit"

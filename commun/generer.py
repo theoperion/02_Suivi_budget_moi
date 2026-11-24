@@ -51,7 +51,9 @@ def fabriquer(p):
 # Valeurs propres à Théo qui ne doivent JAMAIS rester dans une copie
 TRACES = [(r"""['"]jauge\.""", "préfixe de stockage de Théo (jauge.)"),
           (r'38\.67', "heures par semaine de Théo (38.67)"),
-          (re.escape('AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ'), "id de déploiement du script de Théo")]
+          (re.escape('AKfycbzdbw1TzpRU16ftWHzSf04CE_Y6lfvfH08uuHF1na_uz97gCLdYr5fylt8F_QvUQBwRzQ'), "id de déploiement du script de Théo"),
+          (r"'jauge-v'", "préfixe de cache de Théo (jauge-v)"),
+          (re.escape('1yoZbbWBADnowe6eiwLnk_D5wMIkyAEFNrRtombhPq8qKs5PKRv1CQaGl'), "scriptId du script de Théo")]
 
 def controler(cle, fichiers):
     for nom, txt in fichiers.items():

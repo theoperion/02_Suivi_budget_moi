@@ -34,4 +34,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -q -m "Mise à jour automatique : version $V"
           git push
-          gh api -X POST "repos/${{ github.repository }}/pages/builds" > /dev/null && echo "Version $V : mise en ligne demandée." || echo "Version $V poussée (la mise en ligne démarrera d'elle-même)."
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" > /dev/null && echo "Version $V : mise en ligne demandée." || { echo "Version $V poussée, mais la mise en ligne n'a pas pu être demandée : relancer ce robot ou prévenir Théo."; exit 1; }
