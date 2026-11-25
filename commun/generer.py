@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fabrique les applis de Clément et Devlin à partir de l'appli de Théo (le modèle).
+"""Fabrique l’appli de Devlin (Clément a été retiré le 25/11/2026 : son appli n’est plus touchée) à partir de l'appli de Théo (le modèle).
 
 Usage : python3 commun/generer.py [chemin_du_dossier_des_depots]
    ou : python3 commun/generer.py --une <reglages.json> <dossier_de_sortie>

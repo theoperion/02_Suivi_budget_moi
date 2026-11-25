@@ -1,21 +1,5 @@
 {
   "_note": "Réglages propres à chaque appli. Tout le reste vient de l'appli de Théo (dossier racine de ce dépôt), qui sert de modèle. « jd_defaut » : périodes de jours avec dépenses non saisies proposées au départ (le voyage du 7 au 15 novembre 2026 : Clément et Devlin en étaient). « jd_retires » : périodes à retirer une seule fois de la préférence déjà enregistrée (vide ; le retrait fait par erreur chez Clément en 9.33 est annulé en 9.34 : jdMig 1 → 2, voyage remis).",
-  "clement": {
-    "depot": "05_Suivi_budget_Clement",
-    "titre": "Budget · Clément",
-    "nom_appli": "Jauge · Clément",
-    "nom_court": "Jauge Clém",
-    "lien_script": "https://script.google.com/macros/s/AKfycbxW02G2fTsST3lRgajwU3HcoYOIf7BkFmstNVtfJ5st-q4U5Nj3JgHH5BwFIMx315E_qg/exec",
-    "prefixe_stockage": "jauge-clem.",
-    "prefixe_cache": "jauge-clement-v",
-    "jd_defaut": [["2026-11-07", "2026-11-15"]],
-    "jd_retires": [],
-    "nom_script": "du budget de Clément",
-    "id_fichier": "1-KW7FXImyYXkgsRFlB0O894FG9E0luqf7KD9-eFdsCs",
-    "commentaire_fichier": "fichier budget de Clément",
-    "script_id": "15NRPaFPGeApaP_9qSKBSb-ATts4ORo_amSMJmwo28Cfq4pgdnOLbxsel",
-    "deploiement": "AKfycbxW02G2fTsST3lRgajwU3HcoYOIf7BkFmstNVtfJ5st-q4U5Nj3JgHH5BwFIMx315E_qg"
-  },
   "devlin": {
     "depot": "06_Suivi_budget_Devlin",
     "titre": "Budget · Devlin",

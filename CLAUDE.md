@@ -3,7 +3,7 @@
 Fiche courte, lue automatiquement. Elle ne parle **que** de l'appli Budget. Ancienne fiche (jusqu'au 23/11/2026) : `archives/CLAUDE_2026-11-23.md`, à ne lire que si Théo le demande.
 
 ## But
-L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son** Google Sheet par **son** script Apps Script. Deux copies générées automatiquement : Clément (`05_Suivi_budget_Clement`, jusqu'à son transfert) et Devlin (`06_Suivi_budget_Devlin`). Hébergement : GitHub Pages (`main`).
+L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son** Google Sheet par **son** script Apps Script. Une copie générée automatiquement : Devlin (`06_Suivi_budget_Devlin`). **Clément a été retiré de `commun/personnes.json` le 25/11/2026** (son fichier Google est chez lui) : ne plus toucher au dépôt `05_Suivi_budget_Clement` ni à son appli (décision de Théo). Hébergement : GitHub Pages (`main`).
 
 ## Règles de travail
 - Théo est **non technique** : Claude fait tout, lui parle en français simple, sans jargon, ne lui demande aucune manipulation technique.
