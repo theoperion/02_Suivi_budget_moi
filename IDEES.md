@@ -37,3 +37,5 @@ Diagnostic sans montants ni libellés envoyé à Théo pour corriger à distance
 
 ## 3. Une autre solution que Google Sheets pour Clément et Devlin (idée de Théo, 23/11)
 Leur laisser le choix : Google Sheet ou un autre stockage (ex. Firebase). Points francs à trancher avant : avec Firebase, c'est Théo qui héberge la base (coût, entretien, et il pourrait techniquement voir leurs montants), alors qu'il a décidé de ne plus héberger leurs applis. Alternative plus cohérente : données sur leur téléphone + sauvegarde dans **leur** Google Drive (la même piste que pour la vente, au point 1). C'est un chantier ponctuel, pas un agent.
+
+**Avant toute vente du kit (Théo, 25/11)** : figer une version terminée de l'appli commune (Cloudflare) ; faire d'abord un curage en profondeur (petits bugs, textes) ; mettre le `Code.js` propre directement dans le script lié du modèle vierge pour ne rien envoyer au client. Pas maintenant. Détail : prix, capacité Cloudflare, test avant l'INRAE → outils/vente/PRIX_KIT.md (brouillon local).
