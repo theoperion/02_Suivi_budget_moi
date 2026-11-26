@@ -67,10 +67,15 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
     add(160, 'Livret A · Rome'); suiviTirelires(); r.t1 = toasts.slice();
     const xp0 = etatJeu().rec.find(x => /Tirelires remplies/.test(x[0]))[3];
     add(150, 'Livret A · Rome'); suiviTirelires(); r.t2 = toasts.slice(); r.a = tirelires().find(t => t.n === 'Rome').a;
-    S._etat = null; memo = new Map(); r.xp = [xp0, etatJeu().rec.find(x => /Tirelires remplies/.test(x[0]))[3]];
-    suiviTirelires(); r.t3 = toasts.length; window.toast = T0;
-    r.lig = ligneTirelire(tirelires().find(t => t.n === 'Rome')).includes('✈️'); return r; });
-  ok('H_image_paliers_xp', h.e === '✈️' && h.pal0 === 0 && /moitié/.test(h.t1.join()) && /objectif atteint/.test(h.t2.join()) && h.a === '2027-01-15' && h.xp[0] === 0 && h.xp[1] === 1 && h.t3 === h.t2.length && h.lig, h);
+    const xpN = () => etatJeu().rec.find(x => /Tirelires remplies/.test(x[0]))[3]; r.xp = [xp0, xpN()];
+    // même mois : une 2e tirelire remplie ne rapporte pas plus (une récompense par mois)
+    setPref('tirelires', getPref('tirelires').concat({ n: 'Lyon', o: 200, d: null, c: '2026-12', f: false, e: '🐷' })); add(200, 'Livret A · Lyon'); suiviTirelires(); r.xpMois = xpN();
+    // supprimer une tirelire récompensée : l'XP reste
+    fermer(); S.form = { mode: 'tirdetail', n: 'Rome' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="tir-del"]').click(); document.querySelector('[data-act="tir-del"]').click();
+    S._etat = null; memo = new Map(); r.xpSuppr = xpN(); r.visibles = tirelires().map(t => t.n);
+    suiviTirelires(); r.t3 = toasts.filter(m => /Rome : objectif atteint/.test(m)).length; window.toast = T0;
+    r.lig = ligneTirelire(tirelires(true).find(t => t.n === 'Rome')).includes('✈️'); return r; });
+  ok('H_image_paliers_xp', h.e === '✈️' && h.pal0 === 0 && /moitié/.test(h.t1.join()) && /objectif atteint/.test(h.t2.join()) && h.a === '2027-01-15' && h.xp[0] === 0 && h.xp[1] === 1 && h.xpMois === 1 && h.xpSuppr === 1 && !h.visibles.includes('Rome') && h.t3 === 1 && h.lig, h);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');

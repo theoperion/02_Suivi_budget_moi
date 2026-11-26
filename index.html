@@ -2211,7 +2211,7 @@ function sectionsModeEmploi() {
       ['📊', 'ANNÉE ET MOIS', "En haut de l'onglet Stats : la vue de l'année (mois par mois, ton épargne, la comparaison des années) ou celle du mois (le détail par catégorie). Pratique pour voir où part l'argent. <b>Astuce</b> : glisse le doigt de droite à gauche (ou l'inverse) au milieu de l'écran pour passer d'une vue à l'autre (et, dans Progrès, de Bilans à Défis, Succès, Style). Sur l'accueil et dans le Journal, le même geste change de mois ; dans Prévu, il passe de « Ce mois-ci » à « Tout l'échéancier »."]]],
     ['progres', '🏆', 'PROGRÈS ET DÉFIS', 'Dans Stats › PROGRÈS : bilans, défis, succès et collection. Pour rendre le budget un peu plus amusant.', [
       ['📜', 'BILANS', "Le récap de chaque mois (du 1er au 5) et l'historique."],
-      ['🐷', 'MES TIRELIRES', "Une tirelire par projet (ex. « Japon », 2 000 € pour juin) : crée-la dans Stats › Progrès › Défis › MES TIRELIRES › + NOUVELLE (objectif et date facultatifs), ou depuis + › ÉPARGNE. Ensuite, quand tu mets de côté (ou retires), touche <b>🐷 Japon</b> sous « POUR UN PROJET ? ». Sur l'accueil : ce qu'elle contient, ce qu'il manque et combien mettre par mois. C'est une <b>partie</b> de ton épargne, pas de l'argent en plus. Un message t'encourage à 25, 50 et 75 %. Objectif de 200 € ou plus atteint (au plus tôt le mois suivant sa création) : <b>+60 XP</b>, une fois par tirelire. Projet fini : ouvre-la › TERMINER."],
+      ['🐷', 'MES TIRELIRES', "Une tirelire par projet (ex. « Japon », 2 000 € pour juin) : crée-la dans Stats › Progrès › Défis › MES TIRELIRES › + NOUVELLE (objectif et date facultatifs), ou depuis + › ÉPARGNE. Ensuite, quand tu mets de côté (ou retires), touche <b>🐷 Japon</b> sous « POUR UN PROJET ? ». Sur l'accueil : ce qu'elle contient, ce qu'il manque et combien mettre par mois. C'est une <b>partie</b> de ton épargne, pas de l'argent en plus. Un message t'encourage à 25, 50 et 75 %. Objectif de 200 € ou plus atteint (au plus tôt le mois suivant sa création) : <b>+60 XP</b>, une fois par tirelire et une par mois au plus, si tu as plus versé que retiré ce mois-là. Projet fini : ouvre-la › TERMINER."],
       ['🎯', 'DÉFIS', "Stats › Progrès › Défis : tes séries, le défi du mois, le défi de la semaine, la mission et les événements en cours (détail juste en dessous)."],
       ['🏁', 'DÉFI DU MOIS', "C'est toi qui le choisis (Stats › Progrès › Défis) : un budget et un plafond plus serré que d'habitude, <b>au moins 10 % sous le budget</b> (Loisirs 100 € → 90 € au plus). Il se lance <b>du 1er au 5 du mois</b> ; jusqu'au 5 tu peux tout changer ; après le 5, tu peux seulement <b>baisser</b> le plafond (pas le relever, ni changer de budget, ni l'abandonner), et un défi qui n'a pas été lancé attend le mois suivant. Exemple : Loisirs 100 €, défi à 80 € ; le 12, tu peux passer à 70 €, pas à 90 €. Verdict le 1er du mois suivant, seulement si tu as saisi tes dépenses du mois."],
       ['📅', 'DÉFI DE LA SEMAINE', FEAT_DETAIL.semaine],
@@ -3472,7 +3472,7 @@ function etatJeu() {
     ...SAISONS_EV.map(d => [d.lib || d.nom, { commune: 'facile', rare: 'moyen', epique: 'difficile', legendaire: 'extreme' }[d.rar], d.xp, f.saisonsOk.filter(x => x.d.id === d.id).length]), // une fois par an et par saison
     ["Calendrier de l'avent", 'difficile', 250, f.aventOk], ["Objectifs d'épargne annuels atteints", 'difficile', 200, f.objOk]];
   try { rec.push(["Envies abandonnées (liste d'envies)", 'facile', 10, enviesStats().xpRen]); } catch (e) {}
-  try { rec.push(['Tirelires remplies (objectif de 200 € ou plus)', 'difficile', 60, tirelires().filter(tirRecompensee).length]); } catch (e) {} // (9.49) // lot G2 : +10 XP par envie abandonnée (lot L2 : mûre, 2 par semaine au plus)
+  try { rec.push(['Tirelires remplies (objectif de 200 € ou plus)', 'difficile', 60, nbTirRecompenses()]); } catch (e) {} // (9.49) // lot G2 : +10 XP par envie abandonnée (lot L2 : mûre, 2 par semaine au plus)
   const xp = rec.reduce((t, r) => t + r[2] * r[3], 0) + succes.filter(s => s.ok).reduce((t, s) => t + DIFF[s.d].xp, 0);
   const v = Object.assign({ f, succes, rec, xp }, niveauDe(xp)); S._etat = { f, v }; return v;
 }
@@ -4621,7 +4621,7 @@ function jaugeObjectif(f) {
 // Préférence synchronisée « tirelires » : [{ n: nom, o: objectif €|null, d: 'AAAA-MM'|null, c: 'AAAA-MM' (création), f: terminée }].
 // Rattachement : DERNIER morceau du libellé après « · », comparé au nom exact sans majuscules ni accents. Pas de renommage (l'historique tient au nom).
 const normTir = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-function tirelires() { const v = getPref('tirelires', []); return (Array.isArray(v) ? v : []).filter(t => t && typeof t.n === 'string' && t.n.trim()).map(t => Object.assign({}, t, { c: /^\d{4}-\d\d$/.test(t.c || '') ? t.c : '2000-01' })); }
+function tirelires(avecSuppr) { const v = getPref('tirelires', []); return (Array.isArray(v) ? v : []).filter(t => t && typeof t.n === 'string' && t.n.trim() && (avecSuppr || !t.x)).map(t => Object.assign({}, t, { c: /^\d{4}-\d\d$/.test(t.c || '') ? t.c : '2000-01' })); }
 const morceauxLib = lib => String(lib || '').split(/\s*·\s*/).map(x => x.trim()).filter(Boolean);
 function tirelireDe(lib, L) { const P = morceauxLib(lib); if (!P.length) return null; const k = normTir(P[P.length - 1]); return (L || tirelires()).find(t => normTir(t.n) === k) || null; }
 function libAvecTirelire(lib, n) { const P = morceauxLib(lib); if (P.length && tirelireDe(lib)) P.pop(); if (P.length === 1 && /^retrait livret$/i.test(P[0]) && n) P.pop(); if (n) P.push(n); return P.join(' · '); }
@@ -4637,13 +4637,16 @@ const EMOJIS_TIR = ['🐷', '✈️', '🏝️', '🗾', '🏔️', '🏰', '�
 const icoTir = t => EMOJIS_TIR.includes(t && t.e) ? t.e : '🐷';
 // (9.49) Récompense : tirelire d'au moins 200 € remplie au plus tôt le mois suivant sa création → +60 XP, une seule fois (date « a » gardée).
 const tirRecompensee = t => !!t.a && +t.o >= 200 && String(t.a).slice(0, 7) > t.c;
+// XP : une récompense par mois au plus, et seulement si l'épargne nette de ce mois est positive (déplacer 200 € d'une tirelire à l'autre ne rapporte rien).
+// Une tirelire récompensée puis supprimée reste comptée (gardée cachée : x).
+function nbTirRecompenses() { const M = new Set(tirelires(true).filter(tirRecompensee).map(t => String(t.a).slice(0, 7))); return [...M].filter(k => epNetMois(+k.slice(0, 4), +k.slice(5, 7)) > 0).length; }
 function majTirPref(n, ch) { setPref('tirelires', (getPref('tirelires', []) || []).map(t => t && t.n === n ? Object.assign({}, t, ch) : t)); }
 // Après chaque affichage : objectif atteint → date gardée (récompense) ; paliers 25 / 50 / 75 / 100 % annoncés une fois (mémoire du téléphone).
 function suiviTirelires() {
   if (!prefsServeur()) return;
   const P = LS.get('tirPal', {}), msg = [];
   tirelires().filter(t => !t.f && +t.o > 0).forEach(t => { const e = etatTirelire(t), pal = Math.min(4, Math.floor(e.frac * 4 + 1e-9)), k = normTir(t.n);
-    if (e.atteint && !t.a) majTirPref(t.n, { a: auj() });
+    if (e.atteint && !t.a) { majTirPref(t.n, { a: auj() }); S._etat = null; memo = new Map(); } // le jeu relit tout de suite (carte « +60 XP » maintenant)
     if (!(k in P)) { P[k] = pal; return; } // première fois : pas d'annonce pour ce qui était déjà là
     if (pal > P[k]) msg.push(icoTir(t) + ' ' + t.n + ' : ' + ['', 'un quart est là !', 'la moitié est là !', 'les trois quarts sont là !', 'objectif atteint, bravo !'][pal] + ' (' + e0(e.total) + ' sur ' + e0(e.o) + ')');
     P[k] = pal; });
@@ -5901,7 +5904,7 @@ document.addEventListener('click', ev => {
     case 'tir-new': S.form = { mode: 'tiredit' }; rendreForm(); ouvrirSheet(); setTimeout(() => { const i = $('#tirn'); if (i) i.focus(); }, 50); break;
     case 'tir-ok': { const f = S.form, n = String(f.n || '').replace(/·/g, ' ').replace(/\s+/g, ' ').trim(), o = numTxt(String(f.o || '')), T = tirelires();
       if (!n) { $('#ferr').textContent = 'Donne un nom à ta tirelire'; break; }
-      if (T.some(t => normTir(t.n) === normTir(n))) { $('#ferr').textContent = 'Tu as déjà une tirelire « ' + n + ' »'; break; }
+      if (tirelires(true).some(t => normTir(t.n) === normTir(n))) { $('#ferr').textContent = 'Tu as déjà une tirelire « ' + n + ' »'; break; }
       if (livretDe(n) || normTir(n) === 'retrait livret') { $('#ferr').textContent = 'Choisis un nom de projet (pas un nom de livret)'; break; }
       const c = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
       setPref('tirelires', (getPref('tirelires', []) || []).concat({ n, o: o > 0 ? Math.round(o) : null, d: /^\d{4}-\d\d$/.test(f.d || '') ? f.d : null, c, f: false, e: EMOJIS_TIR.includes(f.e) ? f.e : '🐷' }));
@@ -5914,7 +5917,7 @@ document.addEventListener('click', ev => {
     case 'tir-ligne': { const e = trouver(el.dataset.id); if (e) ouvrirSaisie(e); break; }
     case 'tir-finies': S.tirFinies = !S.tirFinies; rendre(true); break;
     case 'tir-fin': { const n = S.form.n, L = (getPref('tirelires', []) || []).map(t => t && t.n === n ? Object.assign({}, t, { f: !t.f }) : t); setPref('tirelires', L); const t = L.find(x => x && x.n === n); rendreForm(); rendre(true); toast(t && t.f ? 'Tirelire terminée · elle ne s\'affiche plus dans la saisie' : 'Tirelire remise en cours'); break; }
-    case 'tir-del': { if (!S.form.arm) { S.form.arm = true; rendreForm(); break; } const n = S.form.n; setPref('tirelires', (getPref('tirelires', []) || []).filter(t => !(t && t.n === n))); fermer(); rendre(true); toast('Tirelire supprimée · tes lignes du Journal n\'ont pas changé'); break; }
+    case 'tir-del': { if (!S.form.arm) { S.form.arm = true; rendreForm(); break; } const n = S.form.n; setPref('tirelires', (getPref('tirelires', []) || []).flatMap(t => !(t && t.n === n) ? [t] : t.a ? [Object.assign({}, t, { x: true, f: true })] : [])); fermer(); rendre(true); toast('Tirelire supprimée · tes lignes du Journal n\'ont pas changé'); break; } // tirelire récompensée : gardée cachée (XP acquise)
     case 'livret': { const f = S.form, n = el.dataset.n, r = libSansLivret(f.lib); f.lib = n ? n + (r ? ' · ' + r : '') : (livretDe(f.lib) ? r : f.lib); rendreForm(); break; }
     case 'retrait-rev': { const f = S.form, R = catsDuType('Épargne', 'retrait'); if (R.length) { f.type = 'Épargne'; f.sens = 'retrait'; f.cat = R[0].nom; } else { f.type = 'Revenu'; f.cat = catAutreRevenu(); } if (!f.lib) f.lib = 'Retrait livret'; rendreForm(); break; } // (9.20) vers la catégorie de retrait d'épargne quand elle existe
     case 'skin': LS.set('skin', el.dataset.id); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
