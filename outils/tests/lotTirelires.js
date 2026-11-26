@@ -76,6 +76,10 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
     suiviTirelires(); r.t3 = toasts.filter(m => /Rome : objectif atteint/.test(m)).length; window.toast = T0;
     r.lig = ligneTirelire(tirelires(true).find(t => t.n === 'Rome')).includes('✈️'); return r; });
   ok('H_image_paliers_xp', h.e === '✈️' && h.pal0 === 0 && /moitié/.test(h.t1.join()) && /objectif atteint/.test(h.t2.join()) && h.a === '2027-01-15' && h.xp[0] === 0 && h.xp[1] === 1 && h.xpMois === 1 && h.xpSuppr === 1 && !h.visibles.includes('Rome') && h.t3 === 1 && h.lig, h);
+  // I : barème selon l'objectif, la plus grosse par mois (nov. 2026 : 2 000 € et 600 € → 150 seulement ; déc. : 600 € → 60)
+  const i = await p.evaluate(() => { const T = getPref('tirelires'); setPref('tirelires', T.concat([{ n: 'A1', o: 2000, c: '2026-10', a: '2026-11-20' }, { n: 'A2', o: 600, c: '2026-10', a: '2026-11-25' }, { n: 'A3', o: 600, c: '2026-11', a: '2026-12-03' }]));
+    const N = nbTirRecompenses(); setPref('tirelires', T); S._etat = null; return N; });
+  ok('I_bareme', JSON.stringify(i) === '[1,1,1]', i); // Rome (300 €, janv. 2027) + A3 (déc.) + A1 (nov.)
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
