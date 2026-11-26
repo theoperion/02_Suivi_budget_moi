@@ -41,3 +41,5 @@ Leur laisser le choix : Google Sheet ou un autre stockage (ex. Firebase). Points
 **Avant toute vente du kit (Théo, 25/11)** : figer une version terminée de l'appli commune (Cloudflare) ; faire d'abord un curage en profondeur (petits bugs, textes) ; mettre le `Code.js` propre directement dans le script lié du modèle vierge pour ne rien envoyer au client. Pas maintenant. Détail : prix, capacité Cloudflare, test avant l'INRAE → outils/vente/PRIX_KIT.md (brouillon local).
 
 - **26/11/2026** : Johanna (copine du frère de Théo) veut le Budget, installation prévue lundi 30/11 avec le guide « Installer ton appli Budget ». Premier test hors famille proche : la laisser faire seule, chronométrer, noter chaque hésitation. Ensuite, si ça plaît : tester l'intérêt sur Internet avant toute idée de vente.
+
+- **Tirelires (9.49), pistes pour plus tard** (26/11, après quelques semaines d'usage) : message aux paliers 25/50/75 % ; récompense du jeu quand une tirelire atteint son objectif (règles à valider par Théo) ; emoji ou photo par tirelire.
