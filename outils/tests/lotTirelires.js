@@ -80,6 +80,12 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   const i = await p.evaluate(() => { const T = getPref('tirelires'); setPref('tirelires', T.concat([{ n: 'A1', o: 2000, c: '2026-10', a: '2026-11-20' }, { n: 'A2', o: 600, c: '2026-10', a: '2026-11-25' }, { n: 'A3', o: 600, c: '2026-11', a: '2026-12-03' }]));
     const N = nbTirRecompenses(); setPref('tirelires', T); S._etat = null; return N; });
   ok('I_bareme', JSON.stringify(i) === '[1,1,1]', i); // Rome (300 €, janv. 2027) + A3 (déc.) + A1 (nov.)
+  // J : anciennes valeurs de la préférence (ancienne fonction) gardées quand on crée une tirelire
+  const j = await p.evaluate(async () => { const r = {}, T = getPref('tirelires');
+    for (const [k, v] of [['liste', [{ n: 'Voyage', m: 50 }]], ['objet', { Voyage: 50 }], ['texte', 'x']]) { setPref('tirelires', v); fermer();
+      S.form = { mode: 'tiredit', n: 'Rome2' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="tir-ok"]').click(); r[k] = JSON.stringify(getPref('tirelires').map(t => [t.n, t.m == null ? null : t.m])); }
+    setPref('tirelires', T); return r; });
+  ok('J_ancienneValeur', j.liste === '[["Voyage",50],["Rome2",null]]' && j.objet === '[["Voyage",50],["Rome2",null]]' && j.texte === '[["Rome2",null]]', j);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');

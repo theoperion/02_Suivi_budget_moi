@@ -4621,7 +4621,10 @@ function jaugeObjectif(f) {
 // Préférence synchronisée « tirelires » : [{ n: nom, o: objectif €|null, d: 'AAAA-MM'|null, c: 'AAAA-MM' (création), f: terminée }].
 // Rattachement : DERNIER morceau du libellé après « · », comparé au nom exact sans majuscules ni accents. Pas de renommage (l'historique tient au nom).
 const normTir = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-function tirelires(avecSuppr) { const v = getPref('tirelires', []); return (Array.isArray(v) ? v : []).filter(t => t && typeof t.n === 'string' && t.n.trim() && (avecSuppr || !t.x)).map(t => Object.assign({}, t, { c: /^\d{4}-\d\d$/.test(t.c || '') ? t.c : '2000-01' })); }
+// Valeur brute de la préférence, toujours en liste : une ancienne valeur (ancienne fonction « tirelires ») est gardée — liste telle quelle,
+// objet { nom: montant } converti en [{ n, m }] ; autre chose (illisible) : liste vide.
+function tirBrut() { const v = getPref('tirelires', []); if (Array.isArray(v)) return v; if (v && typeof v === 'object') return Object.keys(v).map(k => ({ n: k, m: v[k] })); return []; }
+function tirelires(avecSuppr) { const v = tirBrut(); return (Array.isArray(v) ? v : []).filter(t => t && typeof t.n === 'string' && t.n.trim() && (avecSuppr || !t.x)).map(t => Object.assign({}, t, { c: /^\d{4}-\d\d$/.test(t.c || '') ? t.c : '2000-01' })); }
 const morceauxLib = lib => String(lib || '').split(/\s*·\s*/).map(x => x.trim()).filter(Boolean);
 function tirelireDe(lib, L) { const P = morceauxLib(lib); if (!P.length) return null; const k = normTir(P[P.length - 1]); return (L || tirelires()).find(t => normTir(t.n) === k) || null; }
 function libAvecTirelire(lib, n) { const P = morceauxLib(lib); if (P.length && tirelireDe(lib)) P.pop(); if (P.length === 1 && /^retrait livret$/i.test(P[0]) && n) P.pop(); if (n) P.push(n); return P.join(' · '); }
@@ -4644,7 +4647,7 @@ const palierTir = o => +o >= 1500 ? 2 : +o >= 500 ? 1 : 0;
 const XP_TIR = [['moyen', 25, '200 à 499 €'], ['difficile', 60, '500 à 1 499 €'], ['extreme', 150, '1 500 € et plus']];
 function nbTirRecompenses() { const M = {}; tirelires(true).filter(tirRecompensee).forEach(t => { const k = String(t.a).slice(0, 7); M[k] = Math.max(M[k] == null ? -1 : M[k], palierTir(t.o)); });
   const N = [0, 0, 0]; Object.keys(M).filter(k => epNetMois(+k.slice(0, 4), +k.slice(5, 7)) > 0).forEach(k => N[M[k]]++); return N; }
-function majTirPref(n, ch) { setPref('tirelires', (getPref('tirelires', []) || []).map(t => t && t.n === n ? Object.assign({}, t, ch) : t)); }
+function majTirPref(n, ch) { setPref('tirelires', tirBrut().map(t => t && t.n === n ? Object.assign({}, t, ch) : t)); }
 // Après chaque affichage : objectif atteint → date gardée (récompense) ; paliers 25 / 50 / 75 / 100 % annoncés une fois (mémoire du téléphone).
 function suiviTirelires() {
   if (!prefsServeur()) return;
@@ -5911,7 +5914,7 @@ document.addEventListener('click', ev => {
       if (tirelires(true).some(t => normTir(t.n) === normTir(n))) { $('#ferr').textContent = 'Tu as déjà une tirelire « ' + n + ' »'; break; }
       if (livretDe(n) || normTir(n) === 'retrait livret') { $('#ferr').textContent = 'Choisis un nom de projet (pas un nom de livret)'; break; }
       const c = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-      setPref('tirelires', (getPref('tirelires', []) || []).concat({ n, o: o > 0 ? Math.round(o) : null, d: /^\d{4}-\d\d$/.test(f.d || '') ? f.d : null, c, f: false, e: EMOJIS_TIR.includes(f.e) ? f.e : '🐷' }));
+      setPref('tirelires', tirBrut().concat({ n, o: o > 0 ? Math.round(o) : null, d: /^\d{4}-\d\d$/.test(f.d || '') ? f.d : null, c, f: false, e: EMOJIS_TIR.includes(f.e) ? f.e : '🐷' }));
       if (f.saisie) { S.form = f.saisie; S.form.lib = libAvecTirelire(S.form.lib, n); rendreForm(); toast('Tirelire « ' + n + ' » créée et choisie ✓'); break; } // créée depuis la saisie : on y revient, tirelire choisie
       fermer(); rendre(true); toast('Tirelire « ' + n + ' » créée · choisis-la sous « POUR UN PROJET ? » quand tu mets de côté'); break; }
     case 'tir-new-saisie': S.form = { mode: 'tiredit', saisie: S.form }; rendreForm(); setTimeout(() => { const i = $('#tirn'); if (i) i.focus(); }, 50); break;
@@ -5920,8 +5923,8 @@ document.addEventListener('click', ev => {
     case 'tir-voir': S.form = { mode: 'tirdetail', n: el.dataset.n }; rendreForm(); ouvrirSheet(); break;
     case 'tir-ligne': { const e = trouver(el.dataset.id); if (e) ouvrirSaisie(e); break; }
     case 'tir-finies': S.tirFinies = !S.tirFinies; rendre(true); break;
-    case 'tir-fin': { const n = S.form.n, L = (getPref('tirelires', []) || []).map(t => t && t.n === n ? Object.assign({}, t, { f: !t.f }) : t); setPref('tirelires', L); const t = L.find(x => x && x.n === n); rendreForm(); rendre(true); toast(t && t.f ? 'Tirelire terminée · elle ne s\'affiche plus dans la saisie' : 'Tirelire remise en cours'); break; }
-    case 'tir-del': { if (!S.form.arm) { S.form.arm = true; rendreForm(); break; } const n = S.form.n; setPref('tirelires', (getPref('tirelires', []) || []).flatMap(t => !(t && t.n === n) ? [t] : t.a ? [Object.assign({}, t, { x: true, f: true })] : [])); fermer(); rendre(true); toast('Tirelire supprimée · tes lignes du Journal n\'ont pas changé'); break; } // tirelire récompensée : gardée cachée (XP acquise)
+    case 'tir-fin': { const n = S.form.n, L = tirBrut().map(t => t && t.n === n ? Object.assign({}, t, { f: !t.f }) : t); setPref('tirelires', L); const t = L.find(x => x && x.n === n); rendreForm(); rendre(true); toast(t && t.f ? 'Tirelire terminée · elle ne s\'affiche plus dans la saisie' : 'Tirelire remise en cours'); break; }
+    case 'tir-del': { if (!S.form.arm) { S.form.arm = true; rendreForm(); break; } const n = S.form.n; setPref('tirelires', tirBrut().flatMap(t => !(t && t.n === n) ? [t] : t.a ? [Object.assign({}, t, { x: true, f: true })] : [])); fermer(); rendre(true); toast('Tirelire supprimée · tes lignes du Journal n\'ont pas changé'); break; } // tirelire récompensée : gardée cachée (XP acquise)
     case 'livret': { const f = S.form, n = el.dataset.n, r = libSansLivret(f.lib); f.lib = n ? n + (r ? ' · ' + r : '') : (livretDe(f.lib) ? r : f.lib); rendreForm(); break; }
     case 'retrait-rev': { const f = S.form, R = catsDuType('Épargne', 'retrait'); if (R.length) { f.type = 'Épargne'; f.sens = 'retrait'; f.cat = R[0].nom; } else { f.type = 'Revenu'; f.cat = catAutreRevenu(); } if (!f.lib) f.lib = 'Retrait livret'; rendreForm(); break; } // (9.20) vers la catégorie de retrait d'épargne quand elle existe
     case 'skin': LS.set('skin', el.dataset.id); rendre(true); toast('Jauge « ' + (SKINS.find(o => o.id === el.dataset.id) || {}).nom + ' » activée'); break;
