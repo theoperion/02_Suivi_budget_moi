@@ -33,6 +33,7 @@ def fabriquer(p):
     html = remplacer(html, '<title>Budget</title>', f'<title>{p["titre"]}</title>')
     html = remplacer(html, r"const API_DEFAUT = '[^']*';", f"const API_DEFAUT = '{p['lien_script']}';", regex=True)
     html = remplacer(html, "'jauge.' + k", f"'{p['prefixe_stockage']}' + k", n=4)
+    html = remplacer(html, 'const LIVRETS_LIES = true;', f'const LIVRETS_LIES = {"true" if p.get("livrets_lies", False) else "false"};')   # lien livrets → Portefeuille : Théo seulement
     html = remplacer(html, r'const HEURES_SEMAINE_DEFAUT = [0-9.]+;', f'const HEURES_SEMAINE_DEFAUT = {p.get("heures_semaine", 35)};', regex=True)
     jd = '[' + ', '.join(f"['{a}', '{b}']" for a, b in p['jd_defaut']) + ']'   # jours avec dépenses non saisies (voyage)
     html = remplacer(html, "const JD_DEFAUT = [['2026-11-07', '2026-11-15']];", f'const JD_DEFAUT = {jd};')
