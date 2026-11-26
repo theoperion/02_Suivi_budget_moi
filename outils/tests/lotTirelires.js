@@ -55,6 +55,22 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // G : sans tirelire, pas de ligne « POUR UN PROJET ? »
   const g = await p.evaluate(() => { fermer(); ouvrirSaisie(null); S.form.type = 'Épargne'; S.form.cat = 'Livret A'; rendreForm(); return /POUR UN PROJET/.test(document.querySelector('#sheetIn').innerText); });
   ok('G_pasDeProjetActif', !g, g);
+  // H : image à la création, paliers annoncés une fois, objectif atteint → date gardée → +60 XP (une fois, au plus tôt le mois suivant)
+  const h = await p.evaluate(async () => { const r = {}; fermer();
+    S.form = { mode: 'tiredit' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="tir-e"][data-e="✈️"]').click(); S.form.n = 'Rome'; S.form.o = '300'; document.querySelector('[data-act="tir-ok"]').click();
+    const t0 = tirelires().find(t => t.n === 'Rome'); r.e = t0.e; r.c = t0.c;
+    // créée en décembre 2026 (pour la récompense), remplie en janvier 2027
+    setPref('tirelires', getPref('tirelires').map(t => t.n === 'Rome' ? Object.assign({}, t, { c: '2026-12' }) : t));
+    LS.set('tirPal', {}); suiviTirelires(); r.pal0 = LS.get('tirPal', {}).rome;
+    const toasts = []; const T0 = window.toast; window.toast = m => toasts.push(m);
+    const add = (v, lib) => { ouvrirSaisie(null); S.form.type = 'Épargne'; S.form.sens = 'verser'; S.form.cat = 'Livret A'; S.form.lib = lib; S.form.montant = String(v); S._saveT = 0; enregistrer(); };
+    add(160, 'Livret A · Rome'); suiviTirelires(); r.t1 = toasts.slice();
+    const xp0 = etatJeu().rec.find(x => /Tirelires remplies/.test(x[0]))[3];
+    add(150, 'Livret A · Rome'); suiviTirelires(); r.t2 = toasts.slice(); r.a = tirelires().find(t => t.n === 'Rome').a;
+    S._etat = null; memo = new Map(); r.xp = [xp0, etatJeu().rec.find(x => /Tirelires remplies/.test(x[0]))[3]];
+    suiviTirelires(); r.t3 = toasts.length; window.toast = T0;
+    r.lig = ligneTirelire(tirelires().find(t => t.n === 'Rome')).includes('✈️'); return r; });
+  ok('H_image_paliers_xp', h.e === '✈️' && h.pal0 === 0 && /moitié/.test(h.t1.join()) && /objectif atteint/.test(h.t2.join()) && h.a === '2027-01-15' && h.xp[0] === 0 && h.xp[1] === 1 && h.t3 === h.t2.length && h.lig, h);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
