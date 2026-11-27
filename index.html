@@ -2273,12 +2273,17 @@ function montantNum() { const n = parseFloat(String(S.form.montant).replace(',',
 function echDeSaisie(f) { if (!f || f.mode !== 'add' || !(f.type === 'Revenu' || f.type === 'Dépense') || !f.cat) return []; return ((S.data && S.data.echeancier) || []).filter(x => x.cat === f.cat && echMontant(x, f.y, f.m)).slice(0, 2); } // un mois à venir aussi (montant connu à l'avance)
 function blocReelSaisie(f) {
   return echDeSaisie(f).map(x => `<div class="note" style="display:block;margin:2px 0 8px">📅 <b>${esc(x.lib || x.cat)}</b> prévu en ${esc(MOIS[f.m - 1].toLowerCase())} : <b>${e2(echMontant(x, f.y, f.m))} €</b> ${qi('reel')}
-    <div style="display:flex;gap:6px;margin-top:6px"><input class="libin reelsai" data-id="${esc(x.id)}" inputmode="decimal" placeholder="Montant réel ${f.type === 'Revenu' ? 'reçu' : 'payé'} s'il est différent" style="margin:0"><button class="chip" data-act="reel-saisie" data-id="${esc(x.id)}" style="height:42px;white-space:nowrap">OK</button></div><div class="reelh" data-id="${esc(x.id)}" style="margin-top:4px"></div></div>`).join('');
+    <div style="display:flex;gap:6px;margin-top:6px"><input class="libin reelsai" data-id="${esc(x.id)}" inputmode="decimal" placeholder="Montant réel ${f.type === 'Revenu' ? 'reçu' : 'payé'} s'il est différent" style="margin:0"><button class="chip" data-act="reel-saisie" data-id="${esc(x.id)}" style="height:42px;white-space:nowrap">NOTER L'ÉCART</button></div><div class="reelh" data-id="${esc(x.id)}" style="margin-top:4px"></div></div>`).join('');
 }
 function majReelSaisie(inp) {
   const f = S.form, x = trouverEch(inp.dataset.id), z = document.querySelector(`.reelh[data-id="${CSS.escape(inp.dataset.id)}"]`), r = numTxt(inp.value); if (!x || !z) return;
-  if (isNaN(r)) { z.innerHTML = ''; return; } const d = Math.round((r - x.montant) * 100) / 100;
-  z.innerHTML = Math.abs(d) < 0.005 ? 'Même montant que prévu : rien à faire' : `Écart de <b>${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €</b> noté en ${MOIS[f.m - 1].toLowerCase()} ${f.y}`;
+  // Le gros bouton du bas suit : « NOTER L'ÉCART DE +37,88 € » tant que le champ est rempli (sinon il reprend son rôle)
+  const go = document.querySelector('#sheetIn .go[data-act="save"], #sheetIn .go[data-ecart]');
+  if (go && go.dataset.orig == null) go.dataset.orig = go.textContent;
+  if (isNaN(r)) { z.innerHTML = ''; if (go) { go.textContent = go.dataset.orig; go.dataset.act = 'save'; delete go.dataset.ecart; } return; }
+  const dj = dejaEcart(x, f.y, f.m), d = Math.round((r - x.montant - dj) * 100) / 100;
+  z.innerHTML = Math.abs(d) < 0.005 ? (dj ? 'Déjà noté pour ce mois : rien à faire' : 'Même montant que prévu : rien à faire') : `Écart de <b>${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €</b> ajouté au Journal de ${MOIS[f.m - 1].toLowerCase()} ${f.y}${txtDeja(dj)} (pas une nouvelle ligne)`;
+  if (go) { go.dataset.act = 'reel-saisie'; go.dataset.id = inp.dataset.id; go.dataset.ecart = '1'; go.textContent = Math.abs(d) < 0.005 ? 'RIEN À NOTER' : `NOTER L'ÉCART DE ${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €`; }
 }
 function rendreForm() {
   const f = S.form; if (!f) return;
@@ -2894,17 +2899,20 @@ function rendreEch() {
     ${x ? `<button class="danger ${f.arm ? 'armed' : ''}" data-act="ech-del">${f.arm ? 'TOUCHE ENCORE POUR SUPPRIMER' : 'SUPPRIMER LA LIGNE'}</button>` : ''}`;
   lierChamps(); majEchApercu(); majReel();
 }
+// (9.57) Écarts déjà notés ce mois-là pour cette catégorie (lignes « Écart … ») : noter deux fois le même montant réel ne double rien.
+function dejaEcart(x, y, m) { return Math.round(S.journal.filter(e => !e.deleted && e.y === y && e.m === m && e.cat === x.cat && /^[ée]carts?\b/i.test(String(e.lib || '').trim())).reduce((t, e) => t + (+e.montant || 0), 0) * 100) / 100; }
+const txtDeja = v => Math.abs(v) < 0.005 ? '' : ` (déjà noté ce mois-ci : ${v > 0 ? '+' : '−'}${e2(Math.abs(v))} €)`;
 function majReel() {
   const z = $('#reelh'), f = S.form; if (!z) return;
   const x = trouverEch(f.id), r = numTxt(f.reel); if (!x || isNaN(r)) { z.innerHTML = ''; return; }
-  const d = Math.round((r - x.montant) * 100) / 100;
-  z.innerHTML = Math.abs(d) < 0.005 ? 'Pas d\'écart' : `Écart de <b>${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €</b> enregistré dans le Journal de ${MOIS[f.ctx.m - 1]}`;
+  const dj = dejaEcart(x, f.ctx.y, f.ctx.m), d = Math.round((r - x.montant - dj) * 100) / 100;
+  z.innerHTML = Math.abs(d) < 0.005 ? (dj ? 'Déjà noté : rien à faire' : 'Pas d\'écart') : `Écart de <b>${d > 0 ? '+' : '−'}${e2(Math.abs(d))} €</b> enregistré dans le Journal de ${MOIS[f.ctx.m - 1]}${txtDeja(dj)}`;
 }
 function ecartReel() {
   const f = S.form, x = trouverEch(f.id), r = numTxt(f.reel);
   if (!x || isNaN(r) || !(r >= 0)) { $('#ferr').textContent = 'Tape le montant réel'; return; }
-  const d = Math.round((r - x.montant) * 100) / 100;
-  if (Math.abs(d) < 0.005) { toast('Même montant que prévu : rien à faire'); return; }
+  const dj = dejaEcart(x, f.ctx.y, f.ctx.m), d = Math.round((r - x.montant - dj) * 100) / 100;
+  if (Math.abs(d) < 0.005) { toast(dj ? 'Déjà noté pour ce mois : rien à faire' : 'Même montant que prévu : rien à faire'); return; }
   const { y, m } = f.ctx, mois = moisLabel(y, m);
   const e = { id: uid(), row: null, mois, lib: 'Écart ' + x.lib + ' ' + MC[m - 1], cat: x.cat, montant: d, date: y + '-' + pad2(m) + '-' + pad2(Math.min(x.jour || 1, dim(y, m))), y, m, srv: null, pending: true, nw: true }; // (9.52) même jour que la ligne de l'Échéancier
   S.journal.push(e); fermer(); rendre(true);
