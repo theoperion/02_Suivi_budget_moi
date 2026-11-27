@@ -45,3 +45,8 @@ Leur laisser le choix : Google Sheet ou un autre stockage (ex. Firebase). Points
 - **Tirelires (9.49), pistes pour plus tard** (26/11, après quelques semaines d'usage) : message aux paliers 25/50/75 % ; récompense du jeu quand une tirelire atteint son objectif (règles à valider par Théo) ; emoji ou photo par tirelire.
 
 - **Lien livrets → Patrimoine pour Devlin et Clément** (27/11, écarté pour l'instant par Théo : pas nécessaire, trop complexe, source de bugs). Si un jour ils le demandent : réglage « Relier mes livrets à mon fichier Patrimoine » dans l'appli (éteint par défaut, aussi dans l'appli commune) + recopie installée dans LEUR fichier Patrimoine, script à leur nom (Clément possède ses 2 fichiers ; Devlin après son transfert), noms de leurs livrets à adapter. Jamais via un partage de leur Budget à Théo (il verrait leurs chiffres). D'abord faire tourner le lien chez Théo 2–3 semaines.
+
+- **À faire la semaine prochaine (demande de Théo, 27/11)** :
+  1. **Pastille « nouveautés » sur l'accueil** quand de nouveaux objets / cosmétiques sont débloqués dans Stats › Progrès › Style, avec un lien direct vers cette page. Point de départ : l'appli sait déjà lesquels sont nouveaux (`cosmVus`, ~ligne 5151) ; vérifier ce qui s'affiche aujourd'hui avant de construire.
+  2. **Animation de passage de niveau à l'ouverture de l'appli.** Il existe déjà une carte animée `lvlup` (~ligne 5210) : vérifier quand elle se déclenche (à l'ouverture ? seulement après une saisie ?) et si Théo la voit vraiment, puis l'améliorer plutôt que d'en refaire une.
+  Relecture prévue : utilisateur (affichage) + code-donnees (mémoire « déjà vu »).
