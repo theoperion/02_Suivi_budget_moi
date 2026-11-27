@@ -1,0 +1,39 @@
+// (9.57) Saisie REVENU/DÉPENSE : « montant réel » d'une ligne de l'Échéancier → écart automatique (+ ou −), au jour de la ligne, mois de la saisie.
+// Usage : node outils/tests/lotReel.js <dossier de l'appli> [captures]
+const path = require('path'); const DIR = path.resolve(process.argv[2] || '.'); const SHOTS = process.argv[3];
+process.argv[2] = path.join(DIR, 'index.html'); const B = require('./base.js');
+const { chromium } = require('playwright');
+const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
+(async () => {
+  const b = await chromium.launch();
+  const ech = [{ ligne: 5, lib: 'Salaire INRAE', cat: 'Salaire', montant: 1757.6, freq: 'Mensuel', jour: 1, f: 1, g: 12, h: null, i: null, pause: false },
+    { ligne: 6, lib: 'Netflix', cat: 'Streaming', montant: 13.49, freq: 'Mensuel', jour: 14, f: 1, g: 12, h: null, i: null, pause: false }];
+  const { p, errs } = await B.page(b, '2026-11-27T13:30:00', B.journal('2026-11-01', '2026-11-27', () => false), {}, {}, ech);
+  // A : REVENU › Salaire en décembre : la ligne apparaît ; aperçu de l'écart ; OK crée +37,88 € le 1er décembre
+  const a = await p.evaluate(() => { ouvrirSaisie(null); S.form.type = 'Revenu'; S.form.cat = 'Salaire'; S.form.y = 2026; S.form.m = 12; rendreForm(); return document.querySelector('#sheetIn').innerText; });
+  ok('A_ligne', /Salaire INRAE prévu en décembre : 1\s?757,60/.test(a) && /Montant réel reçu/.test(a.replace(/\n/g, ' ')) || /Salaire INRAE/.test(a), a.slice(a.indexOf('Salaire INRAE') - 5, a.indexOf('Salaire INRAE') + 80));
+  if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'reel-revenu.png') });
+  await p.fill('.reelsai', '1795,48');
+  const ap = await p.evaluate(() => document.querySelector('.reelh').innerText);
+  if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'reel-apercu.png') });
+  await p.click('[data-act="reel-saisie"]');
+  const e = await p.evaluate(() => { const x = S.journal[S.journal.length - 1]; return [x.lib, x.cat, x.montant, x.date, x.y, x.m, !!S.form]; });
+  ok('B_ecartPositif', /\+37,88/.test(ap) && e[1] === 'Salaire' && Math.abs(e[2] - 37.88) < 0.001 && e[3] === '2026-12-01' && e[5] === 12 && /^Écart Salaire INRAE/.test(e[0]), { ap, e });
+  // C : DÉPENSE › Streaming en novembre, payé 15,99 → +2,50 le 14 ; payé 10 → −3,49
+  const c = await p.evaluate(async () => { const r = [];
+    for (const v of ['15,99', '10']) { ouvrirSaisie(null); S.form.type = 'Dépense'; S.form.cat = 'Streaming'; rendreForm(); document.querySelector('.reelsai').value = v; document.querySelector('[data-act="reel-saisie"]').click(); const x = S.journal[S.journal.length - 1]; r.push([x.montant, x.date]); }
+    return r; });
+  ok('C_depense', JSON.stringify(c) === '[[2.5,"2026-11-14"],[-3.49,"2026-11-14"]]', c);
+  // D : rien si la catégorie n'a pas de ligne d'Échéancier, ou en ÉPARGNE, ou montant vide (pas de ligne créée)
+  const d = await p.evaluate(() => { ouvrirSaisie(null); S.form.type = 'Dépense'; S.form.cat = 'Courses'; rendreForm(); const r = [!!document.querySelector('.reelsai')];
+    S.form.type = 'Revenu'; S.form.cat = 'Salaire'; rendreForm(); const n = S.journal.length; document.querySelector('[data-act="reel-saisie"]').click(); r.push(S.journal.length === n); return r; });
+  ok('D_pasDeLigne', d[0] === false && d[1] === true, d);
+  // E : l'aide « ? » s'ouvre et ramène à la saisie
+  const ee = await p.evaluate(() => { document.querySelector('[data-act="info"][data-k="reel"]').click(); const t = document.querySelector('#sheetIn').innerText; document.querySelector('[data-act="info-retour"]').click(); return [/MONTANT RÉEL/.test(t), S.form.mode, S.form.cat]; });
+  ok('E_aide', ee[0] && ee[1] === 'add' && ee[2] === 'Salaire', ee);
+  console.log(JSON.stringify(R, null, 1));
+  Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
+  console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
+  console.log('ERREURS JS:', errs.length ? errs : 'aucune');
+  await b.close();
+})();
