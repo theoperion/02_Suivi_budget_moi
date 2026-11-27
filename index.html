@@ -3313,7 +3313,7 @@ function joursJeuCalc() {
 const finSerie = arr => { let c = 0; for (let i = arr.length - 1; i >= 0; i--) { if (arr[i] === null) continue; if (!arr[i]) break; c++; } return c; };
 const maxSerie = arr => { let b = 0, c = 0; arr.forEach(v => { c = v === null ? c : v ? c + 1 : 0; b = Math.max(b, c); }); return b; };
 // (lot L2) Un mois ne peut gagner un sceau (vert, sans faute, 10 %/25 % non dépensés, défi, mois bouclé…) que s'il contient des dépenses saisies.
-function moisSaisi(y, m) { const cm = catMap(); return S.journal.some(e => !e.deleted && e.y === y && e.m === m && e.montant > 0 && cm[e.cat] && cm[e.cat].type === 'Dépense'); }
+function moisSaisi(y, m) { const cm = catMap(); return S.journal.some(e => !e.deleted && e.y === y && e.m === m && e.montant > 0 && cm[e.cat] && cm[e.cat].type === 'Dépense' && !estEcart(e.lib)); } // (9.58) un écart seul ne prouve pas que le mois est tenu à jour
 // (lot L2) Bilan du mois SANS les retraits d'épargne (catégorie Retrait, ou revenu reconnu par estRetraitEp) :
 // retirer 1 500 € de son livret ne rend pas un mois « vert » et ne gonfle pas le « non dépensé ».
 // Calculé directement depuis les lignes (c.par) : juste quelle que soit la façon dont calc() range ces retraits.
