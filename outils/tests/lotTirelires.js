@@ -53,8 +53,8 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
     r.reste = tirelires().map(t => t.n); r.lignes = S.journal.filter(x => /Japon/.test(x.lib || '')).length; return r; });
   ok('F_detail_fin_suppr', /555/.test(f.det) && /Japonais/.test(f.det) === false && f.fin === true && !f.chip && JSON.stringify(f.reste) === '["Japon"]' && f.lignes === 5, { fin: f.fin, chip: f.chip, reste: f.reste, lignes: f.lignes, det: f.det.slice(0, 300) });
   // G : sans tirelire, pas de ligne « POUR UN PROJET ? »
-  const g = await p.evaluate(() => { fermer(); ouvrirSaisie(null); S.form.type = 'Épargne'; S.form.cat = 'Livret A'; rendreForm(); return /POUR UN PROJET/.test(document.querySelector('#sheetIn').innerText); });
-  ok('G_pasDeProjetActif', !g, g);
+  const g = await p.evaluate(() => { fermer(); ouvrirSaisie(null); S.form.type = 'Épargne'; S.form.cat = 'Livret A'; rendreForm(); const x = document.querySelector('#sheetIn').innerText; return { projet: /POUR UN PROJET/.test(x), lien: /CRÉER UNE TIRELIRE/.test(x) }; });
+  ok('G_pasDeProjetActif', !g.projet && g.lien, g); // toutes terminées : plus de choix, mais le lien de création revient
   // H : image à la création, paliers annoncés une fois, objectif atteint → date gardée → +60 XP (une fois, au plus tôt le mois suivant)
   const h = await p.evaluate(async () => { const r = {}; fermer();
     S.form = { mode: 'tiredit' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="tir-e"][data-e="✈️"]').click(); S.form.n = 'Rome'; S.form.o = '300'; document.querySelector('[data-act="tir-ok"]').click();
