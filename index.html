@@ -4675,7 +4675,7 @@ function cochonTir(f, nom, o) {
     <rect x="62" y="112" width="15" height="25" rx="5" fill="#E98FA6"/><rect x="123" y="112" width="15" height="25" rx="5" fill="#E98FA6"/>
     <path d="M70 46 L77 20 L93 42 Z" fill="#F4A9BB" stroke="#C96F88" stroke-width="2"/>
     <ellipse class="tircorps" cx="100" cy="84" rx="60" ry="44" fill="#F4A9BB" opacity=".35"/>
-    <g clip-path="url(#cl${id})"><g ${monte ? `class="tirmonte" style="--d:${monte}px"` : baisse ? `class="tirmonte" style="--d:-${baisse}px"` : ''}>${pc}</g>${o.marques ? [0.25, 0.5, 0.75].map(k => `<line x1="44" x2="58" y1="${130 - 90 * k}" y2="${130 - 90 * k}" stroke="#fff" stroke-width="2" opacity=".75"/><text x="61" y="${134 - 90 * k}" font-size="9" fill="#fff" opacity=".85" font-family="IBM Plex Mono,monospace">${k * 100}</text>`).join('') : ''}</g>
+    <g clip-path="url(#cl${id})"><g ${monte ? `class="tirmonte" style="--d:${monte}px"` : baisse ? `class="tirmonte" style="--d:-${baisse}px"` : ''}>${pc}</g>${o.marques ? [0.25, 0.5, 0.75].map(k => `<line x1="44" x2="56" y1="${130 - 90 * k}" y2="${130 - 90 * k}" stroke="#7a3d50" stroke-width="2" opacity=".6"/><text x="59" y="${133.5 - 90 * k}" font-size="10" font-weight="700" fill="#7a3d50" opacity=".75" font-family="IBM Plex Mono,monospace">${k * 100}</text>`).join('') : ''}</g>
     <ellipse cx="100" cy="84" rx="60" ry="44" fill="#F4A9BB" opacity=".12"/><ellipse cx="100" cy="84" rx="60" ry="44" fill="none" stroke="#E07C99" stroke-width="3.5"/>
     <path d="M62 62 q18 -20 50 -22" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>
     <rect x="86" y="38" width="28" height="5" rx="2.5" fill="#7a3d50"/>
