@@ -17,7 +17,7 @@ L'appli de budget de Théo (PWA, un seul fichier `index.html`), reliée à **son
 ## Où est quoi
 | Fichier | Rôle |
 |---|---|
-| `index.html` | toute l'appli. `const VERSION = '9.49'` |
+| `index.html` | toute l'appli. `const VERSION = '9.50'` |
 | `moteur.js` | (phase 2) mode « données sur ce téléphone » : `Code.js` tel quel exécuté dans le téléphone sur une imitation du tableur (IndexedDB `<préfixe>telephone`), chargé seulement en mode téléphone. Colonne C des catégories déduite du groupe. Écriture confirmée seulement une fois enregistrée (sinon OCCUPE, rien d'appliqué) |
 | `sauvegarde.js` | (phase 2) sauvegarde dans le Drive de la personne (Google Identity Services, accès `drive.file`, ID client `GOOGLE_CLIENT_ID` du projet Google Cloud « Jauge budget » de Théo, en mode test) : fichier technique JSON (reprise complète) + copie datée par jour (7 gardées) + Google Sheet « Jauge · sauvegarde » (mêmes onglets, valeurs seulement ; écrire puis effacer ce qui dépasse). Accès Google 1 h : automatique pendant 1 h après un geste, sinon bouton + rappel (12 h) |
 | `sw.js` | hors connexion. `const CACHE = PREFIXE + 'NN'` : +1 à chaque version |
