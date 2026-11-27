@@ -95,6 +95,14 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // L : écart « montant réel » au même jour que la ligne de l'Échéancier (Virement · Japon, le 2)
   const l = await p.evaluate(() => { const x = S.data.echeancier[0]; S.form = { mode: 'ech', id: x.id, ctx: { y: 2027, m: 1 }, reel: '40' }; ecartReel(); const e = S.journal[S.journal.length - 1]; return [e.lib, e.date, e.montant]; });
   ok('L_ecartJour', l[1] === '2027-01-02' && Math.abs(l[2] - 15) < 0.01, l);
+  // M : image perso (emoji tapé), « Aucune », lettres refusées ; pourcentage qui monte (de → à) ; son coupable
+  const m = await p.evaluate(async () => { const r = {}; fermer(); S.form = { mode: 'tirdetail', n: 'Japon' }; rendreForm(); ouvrirSheet();
+    $('#tirperso').value = '🦄'; document.querySelector('[data-act="tir-emoji-perso"]').click(); r.perso = tirelires().find(t => t.n === 'Japon').e;
+    $('#tirperso').value = 'abc'; document.querySelector('[data-act="tir-emoji-perso"]').click(); r.refus = tirelires().find(t => t.n === 'Japon').e;
+    document.querySelector('[data-act="tir-emoji"][data-e=""]').click(); const t = tirelires().find(t => t.n === 'Japon'); r.aucune = t.e; r.titre = document.querySelector('#sheetIn .shead').innerText.trim().startsWith('JAPON');
+    const e = etatTirelire(t); LS.set('tirVu', { japon: e.total - 200 }); r.pct = /class="tirpct" data-de="\d+" data-a="\d+"/.test(ligneTirelire(t));
+    document.querySelector('[data-act="tir-son"]').click(); r.son = LS.get('sonTir', true); LS.set('sonTir', true); return r; });
+  ok('M_image_pct_son', m.perso === '🦄' && m.refus === '🦄' && m.aucune === '' && m.titre && m.pct && m.son === false, m);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
