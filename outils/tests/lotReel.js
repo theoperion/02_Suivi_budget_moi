@@ -39,6 +39,12 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   const ff = await p.evaluate(() => [casseSerie('Courses', [], 'Écart Navigo nov.'), casseSerie('Courses', [], 'ecart courses'), casseSerie('Loyer', [], 'Écart loyer'), casseSerie('Courses', [], 'Pain'), casseSerie('Loyer', [], 'Loyer'),
     estDepenseSaisie({ cat: 'Courses', date: '2026-11-20', montant: 4, lib: 'Écart Navigo' }), estDepenseSaisie({ cat: 'Courses', date: '2026-11-20', montant: 4, lib: 'Pain' })]);
   ok('F_ecartNeCassePas', JSON.stringify(ff) === '[false,false,false,true,true,false,true]', ff);
+  // G (9.60) : toucher la catégorie (sans autre geste) fait apparaître / disparaître l'encadré
+  const g = await p.evaluate(() => { ouvrirSaisie(null); S.form.type = 'Dépense'; S.form.cat = 'Courses'; rendreForm(); const r = [!!document.querySelector('.reelsai')];
+    const st = document.querySelector('#sheetIn [data-act="cat"][data-cat="Streaming"]') || (() => { S.form.all = false; return null; })();
+    const clic = n => { const b = document.querySelector(`#sheetIn [data-act="cat"][data-cat="${n}"]`); if (b) b.click(); else { S.form.cat = n; majReelBox(); } };
+    clic('Streaming'); r.push(!!document.querySelector('.reelsai')); clic('Courses'); r.push(!!document.querySelector('.reelsai')); return r; });
+  ok('G_categorieDirecte', JSON.stringify(g) === '[false,true,false]', g);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
