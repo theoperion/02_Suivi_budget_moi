@@ -112,6 +112,19 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
     r.total = etatTirelire(tirelires().find(t => t.n === 'Japon')).total - t0;
     document.querySelector('[data-act="tir-retirer"]').click(); r.ret = [S.form.type, S.form.sens, S.form.cat, S.form.lib].join('|'); fermer(); r.retour = S.form && S.form.mode; return r; });
   ok('N_boutonsDetail', nn.icone && nn.form === "add|Épargne|verser|Livret A|Japon" && nn.apres === 'tirdetail' && nn.piece && Math.abs(nn.total - 125) < 0.01 && nn.ret === "Épargne|retrait|Retraits d'épargne|Japon" && nn.retour === 'tirdetail', nn);
+  // O : rythme (en avance / il manque), rejouer, baisse au retrait, marques, carte « Nouveau mois », fête à 100 %
+  const oo = await p.evaluate(async () => { const r = {}; fermer();
+    // Rythme : objectif 1 200 €, de nov. 2026 à avril 2027 (6 mois) ; le 15 janv. 2027 : 2 mois + 14/31 écoulés sur 6 → attendu ≈ 490,32 €
+    setPref('tirelires', getPref('tirelires').concat({ n: 'Rythme', o: 1200, d: '2027-04', c: '2026-11', e: '🚲' }));
+    const t = tirelires().find(x => x.n === 'Rythme'), e = etatTirelire(t); r.avance = Math.round(e.avance * 100) / 100;
+    S.form = { mode: 'tirdetail', n: 'Rythme' }; rendreForm(); ouvrirSheet(); r.txt = /Il manque 490/.test(document.querySelector('#sheetIn').innerText); r.marques = /<line x1="44"/.test(document.querySelector('#sheetIn').innerHTML);
+    LS.set('tirVu', { rythme: 0 }); document.querySelector('[data-act="tir-rejouer"]').click(); r.rejoue = !!document.querySelector('#sheetIn .cochon.tirbalance') && !!document.querySelector('#sheetIn .tirpiece');
+    LS.set('tirVu', { japon: 9999 }); const tj = tirelires().find(x => x.n === 'Japon'); r.baisse = /--d:-\d+px/.test(ligneTirelire(tj)) && !/tirpiece/.test(ligneTirelire(tj));
+    LS.set('debMoisVu', 0); const N0 = now; now = new Date(2027, 0, 5, 10); memo = new Map(); const E = etatDebutMois(); r.carte = E && E.tir ? E.tir.map(x => [x.t.n, x.besoin, x.ok]) : null;
+    S.form = null; fermer(); r.html = /Rythme : mets/.test(carteBilanMois()); now = N0; memo = new Map();
+    let fete = 0; const C0 = window.celebrer; window.celebrer = () => fete++; LS.set('tirPal', { rythme: 3 }); setPref('tirelires', getPref('tirelires').map(x => x.n === 'Rythme' ? Object.assign({}, x, { o: 1 }) : x)); suiviTirelires(); await new Promise(z => setTimeout(z, 1400)); window.celebrer = C0; r.fete = fete;
+    setPref('tirelires', getPref('tirelires').filter(x => x.n !== 'Rythme')); return r; });
+  ok('O_animationsUtiles', oo.avance === -490.32 && oo.txt && oo.marques && oo.rejoue && oo.baisse && oo.carte && oo.carte.some(x => x[0] === 'Rythme' && x[1] === 300 && !x[2]) && oo.html && oo.fete >= 1, oo);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
