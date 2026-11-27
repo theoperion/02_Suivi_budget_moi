@@ -35,6 +35,10 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
   // E : l'aide « ? » s'ouvre et ramène à la saisie
   const ee = await p.evaluate(() => { document.querySelector('[data-act="info"][data-k="reel"]').click(); const t = document.querySelector('#sheetIn').innerText; document.querySelector('[data-act="info-retour"]').click(); return [/MONTANT RÉEL/.test(t), S.form.mode, S.form.cat]; });
   ok('E_aide', ee[0] && ee[1] === 'add' && ee[2] === 'Salaire', ee);
+  // F (9.58) : un écart ne casse jamais un jour sans dépense, quelle que soit la catégorie (courante ou charge fixe), et n'est pas une preuve de saisie
+  const ff = await p.evaluate(() => [casseSerie('Courses', [], 'Écart Navigo nov.'), casseSerie('Courses', [], 'ecart courses'), casseSerie('Loyer', [], 'Écart loyer'), casseSerie('Courses', [], 'Pain'), casseSerie('Loyer', [], 'Loyer'),
+    estDepenseSaisie({ cat: 'Courses', date: '2026-11-20', montant: 4, lib: 'Écart Navigo' }), estDepenseSaisie({ cat: 'Courses', date: '2026-11-20', montant: 4, lib: 'Pain' })]);
+  ok('F_ecartNeCassePas', JSON.stringify(ff) === '[false,false,false,true,true,false,true]', ff);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
