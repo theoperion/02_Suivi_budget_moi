@@ -86,6 +86,15 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
       S.form = { mode: 'tiredit', n: 'Rome2' }; rendreForm(); ouvrirSheet(); document.querySelector('[data-act="tir-ok"]').click(); r[k] = JSON.stringify(getPref('tirelires').map(t => [t.n, t.m == null ? null : t.m])); }
     setPref('tirelires', T); return r; });
   ok('J_ancienneValeur', j.liste === '[["Voyage",50],["Rome2",null]]' && j.objet === '[["Voyage",50],["Rome2",null]]' && j.texte === '[["Rome2",null]]', j);
+  // K : cochon dessiné, pièce qui tombe seulement si la tirelire a grossi depuis le dernier affichage
+  const k = await p.evaluate(async () => { const r = {}, t = tirelires().find(x => x.n === 'Japon'), e = etatTirelire(t);
+    LS.set('tirVu', {}); r.sansMemo = monteTir(t, e); LS.set('tirVu', { japon: e.total - 100 }); r.apres = monteTir(t, e) > 0;
+    r.svg = /class="tirpiece"/.test(ligneTirelire(t)) && /class="cochon"/.test(ligneTirelire(t));
+    suiviTirelires(); r.vu = monteTir(t, e); r.plein = /tirhalo/.test(cochonTir(1, 'x')) && !/tirhalo/.test(cochonTir(0.5, 'x')); return r; });
+  ok('K_cochon', k.sansMemo === 0 && k.apres && k.svg && k.vu === 0 && k.plein, k);
+  // L : écart « montant réel » au même jour que la ligne de l'Échéancier (Virement · Japon, le 2)
+  const l = await p.evaluate(() => { const x = S.data.echeancier[0]; S.form = { mode: 'ech', id: x.id, ctx: { y: 2027, m: 1 }, reel: '40' }; ecartReel(); const e = S.journal[S.journal.length - 1]; return [e.lib, e.date, e.montant]; });
+  ok('L_ecartJour', l[1] === '2027-01-02' && Math.abs(l[2] - 15) < 0.01, l);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
