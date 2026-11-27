@@ -1751,8 +1751,8 @@ function etatDebutMois() {
   const sol = { ok: LS.get('ctrlFait', 0) === nowYM() };
   const obj = now.getMonth() === 0 ? { ok: +objectifs()[now.getFullYear()] > 0, y: now.getFullYear() } : null; // (9.16) janvier : fixer l'objectif d'épargne de l'année
   // (9.55) Tirelires avec objectif et date, pas encore pleines : combien mettre ce mois-ci (2 au plus) ; « fait » dès qu'un versement du mois l'atteint
-  const tir = tirelires().filter(t => !t.f).map(t => ({ t, e: etatTirelire(t) })).filter(x => x.e.parMois > 0.5 && !x.e.atteint).sort((a, b) => b.e.parMois - a.e.parMois).slice(0, 2)
-    .map(x => { const besoin = Math.ceil(x.e.parMois + x.e.ceMois); return { t: x.t, besoin, ok: x.e.ceMois >= besoin - 0.5 }; });
+  const tir = tirelires().filter(t => !t.f).map(t => ({ t, e: etatTirelire(t) })).filter(x => x.e.nm > 0 && (x.e.parMois > 0.5 || x.e.ceMois > 0) && (!x.e.atteint || x.e.ceMois > 0)).sort((a, b) => b.e.parMois - a.e.parMois).slice(0, 2)
+    .map(x => { const besoin = Math.round(Math.max(0, x.e.reste + x.e.ceMois) / x.e.nm); return { t: x.t, besoin, ok: x.e.ceMois >= besoin - 0.5 }; }); // (9.55) part du mois = reste au début du mois ÷ mois restants (net du mois compté une fois), même arrondi que le détail
   if ((!bil || bil.ok) && bud.ok && sol.ok && (!an || an.ok) && (!obj || obj.ok) && tir.every(x => x.ok)) return null;
   return { bil, bud, sol, an, obj, tir };
 }
@@ -4646,13 +4646,13 @@ function etatTirelire(t) {
   for (let y = Math.max(y0, Y - 30); y <= Y; y++) versementsEpargne(y).forEach(x => { if (!x.pret && (y > y0 || x.m >= m0) && normTir(morceauxLib(x.lib).pop()) === k) L.push(Object.assign({ y }, x)); });
   const verse = L.filter(x => !x.retrait).reduce((a, x) => a + x.v, 0), retire = L.filter(x => x.retrait).reduce((a, x) => a + x.v, 0), total = verse - retire;
   const o = +t.o > 0 ? +t.o : null, reste = o ? Math.max(0, o - total) : null;
-  let parMois = null; if (o && t.d && /^\d{4}-\d\d$/.test(t.d)) { const nm = (+t.d.slice(0, 4) - Y) * 12 + (+t.d.slice(5, 7)) - (now.getMonth() + 1) + 1; parMois = nm > 0 ? reste / nm : null; }
+  let parMois = null, nm = null; if (o && t.d && /^\d{4}-\d\d$/.test(t.d)) { nm = (+t.d.slice(0, 4) - Y) * 12 + (+t.d.slice(5, 7)) - (now.getMonth() + 1) + 1; parMois = nm > 0 ? reste / nm : null; }
   // (9.55) Rythme : où il faudrait en être aujourd'hui, à parts égales du début du mois de création à la fin du mois visé
   let avance = null; if (o && t.d && /^\d{4}-\d\d$/.test(t.d)) { const deb = y0 * 12 + m0, fin = +t.d.slice(0, 4) * 12 + (+t.d.slice(5, 7)), cur = Y * 12 + now.getMonth() + 1;
     const T = fin - deb + 1, ecoule = cur - deb + (now.getDate() - 1) / dim(Y, now.getMonth() + 1); if (T > 0) avance = total - o * Math.max(0, Math.min(1, ecoule / T)); }
   // Versé ce mois-ci (pour le rappel du début de mois)
-  const ceMois = L.filter(x => x.y === Y && x.m === now.getMonth() + 1 && !x.retrait).reduce((a, x) => a + x.v, 0);
-  return { L, verse, retire, total, o, reste, frac: o ? Math.max(0, Math.min(1, total / o)) : null, parMois, avance, ceMois, atteint: !!o && total >= o - 0.005 };
+  const ceMois = L.filter(x => x.y === Y && x.m === now.getMonth() + 1).reduce((a, x) => a + (x.retrait ? -x.v : x.v), 0); // net du mois (versé − retiré)
+  return { L, verse, retire, total, o, reste, frac: o ? Math.max(0, Math.min(1, total / o)) : null, parMois, nm, avance, ceMois, atteint: !!o && total >= o - 0.005 };
 }
 const EMOJIS_TIR = ['🐷', '✈️', '🏝️', '🗾', '🏔️', '🏰', '🚗', '🏠', '🎁', '🎓', '💍', '🎮'];
 // (9.52) Cochon rose en verre (choix de Théo, maquette D) : les pièces montent avec le pourcentage ; halo doré à 100 % ;
