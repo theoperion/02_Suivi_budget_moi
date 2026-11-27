@@ -103,6 +103,15 @@ const OK = {}, R = {}; const ok = (k, v, info) => { OK[k] = !!v; R[k] = info; };
     const e = etatTirelire(t); LS.set('tirVu', { japon: e.total - 200 }); r.pct = /class="tirpct" data-de="\d+" data-a="\d+"/.test(ligneTirelire(t));
     document.querySelector('[data-act="tir-son"]').click(); r.son = LS.get('sonTir', true); LS.set('sonTir', true); return r; });
   ok('M_image_pct_son', m.perso === '🦄' && m.refus === '🦄' && m.aucune === '' && m.titre && m.pct && m.son === false, m);
+  // N : boutons « Mettre de côté » / « Retirer » dans le détail : saisie déjà réglée, retour au détail, la pièce tombe
+  const nn = await p.evaluate(async () => { const r = {}; fermer(); setPref('tirelires', getPref('tirelires').map(t => t.n === 'Japon' ? Object.assign({}, t, { f: false, e: '🏯' }) : t));
+    S.form = { mode: 'tirdetail', n: 'Japon' }; rendreForm(); ouvrirSheet(); r.icone = /choisi 🏯 Japon/.test(document.querySelector('#sheetIn').innerText);
+    const t0 = etatTirelire(tirelires().find(t => t.n === 'Japon')).total; LS.set('tirVu', { japon: t0 });
+    document.querySelector('[data-act="tir-verser"]').click(); r.form = [S.form.mode, S.form.type, S.form.sens, S.form.cat, S.form.lib].join('|');
+    S.form.montant = '125'; S._saveT = 0; enregistrer(); r.apres = S.form && S.form.mode; r.piece = !!document.querySelector('#sheetIn .tirpiece');
+    r.total = etatTirelire(tirelires().find(t => t.n === 'Japon')).total - t0;
+    document.querySelector('[data-act="tir-retirer"]').click(); r.ret = [S.form.type, S.form.sens, S.form.cat, S.form.lib].join('|'); fermer(); r.retour = S.form && S.form.mode; return r; });
+  ok('N_boutonsDetail', nn.icone && nn.form === "add|Épargne|verser|Livret A|Japon" && nn.apres === 'tirdetail' && nn.piece && Math.abs(nn.total - 125) < 0.01 && nn.ret === "Épargne|retrait|Retraits d'épargne|Japon" && nn.retour === 'tirdetail', nn);
   console.log(JSON.stringify(R, null, 1));
   Object.keys(OK).forEach(k => console.log((OK[k] ? 'OK    · ' : 'ÉCHEC · ') + k));
   console.log('VERDICT:', Object.values(OK).every(Boolean) ? 'OK' : 'ÉCHEC');
